@@ -169,6 +169,9 @@ A function called when an object is garbage collected. Implemented via `__gc` me
 ### Flyweight Pattern
 A pattern that shares common data across many objects to reduce memory usage. See: [13-patterns.md](en/13-patterns.md)
 
+### Finite State Machine (FSM)
+A model of computation with states and transitions. Lua implements FSMs using tables and metatables. See: [12-advanced/state-machine/](lua-mastery-roadmap/12-advanced/state-machine/), [23-advanced/fsm-advanced/](lua-mastery-roadmap/23-advanced/fsm-advanced/)
+
 ## I (additional)
 
 ### Inspector Function
@@ -191,6 +194,12 @@ A variable that collects results during iteration. Common in reduce/fold operati
 
 ### Adapter Pattern
 A pattern that converts one interface to another, allowing incompatible interfaces to work together. See: [13-patterns.md](en/13-patterns.md)
+
+### Actor Model
+A concurrency model where actors communicate via message passing. Each actor has its own state and mailbox. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
+
+### Async/Await
+A pattern for writing asynchronous code that looks synchronous. In Lua, implemented using coroutines with yield/resume. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
 
 ### Assertion
 A runtime check that throws an error if a condition is false. Used for precondition validation and debugging. See: [07-error-handling.md](en/07-error-handling.md)
@@ -222,8 +231,17 @@ A pattern that encapsulates a request as an object, enabling undo/redo, queuing,
 ### Continuation
 A representation of the rest of a computation. Coroutines provide asymmetric continuations. See: [08-coroutines.md](en/08-coroutines.md)
 
+### CSP (Communicating Sequential Processes)
+A concurrency model where processes communicate through channels. Lua implements this using coroutines and buffered channels. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
+
+### Code Generation
+Creating code at runtime using string manipulation and load(). Used for DSLs and metaprogramming. See: [26-advanced/code-generation/](lua-mastery-roadmap/26-advanced/code-generation/)
+
 ### Deadlock
 A situation where two or more coroutines are waiting for each other, preventing progress. Lua coroutines are cooperative, so deadlocks require explicit yielding. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Data Pipeline
+A sequence of data processing steps (map, filter, reduce) that can be composed together. See: [24-advanced/data-pipeline/](lua-mastery-roadmap/24-advanced/data-pipeline/)
 
 ### Decorator Pattern
 A pattern that wraps an object to add behavior dynamically without modifying the original. See: [13-patterns.md](en/13-patterns.md)
@@ -267,6 +285,12 @@ The default table where global variables are stored. Named `_G` in Lua 5.1+, `_E
 ### Hash Table
 A data structure that maps keys to values using hash functions. Lua tables use hash tables for non-sequential keys. See: [04-tables.md](en/04-tables.md)
 
+### Hierarchical State Machine
+An FSM where states can contain sub-states, forming a tree structure. Enables complex behavior with clean separation. See: [23-advanced/fsm-advanced/](lua-mastery-roadmap/23-advanced/fsm-advanced/)
+
+### Hot Reload
+Replacing code or configuration in a running system without restarting. Lua's load() function enables this. See: [28-advanced/deployment-patterns/](lua-mastery-roadmap/28-advanced/deployment-patterns/)
+
 ### Hot Path
 A code section executed frequently, where performance optimizations have the most impact. See: [12-performance.md](en/12-performance.md)
 
@@ -297,6 +321,15 @@ A JIT-compiled implementation of Lua 5.1 with extensions. Offers FFI for C inter
 ### Macro
 A form of code transformation. Lua does not have C-style macros but uses `string.gsub` and load/eval for similar effects. See: [03-functions.md](en/03-functions.md)
 
+### Map/Filter/Reduce
+Functional programming operations: transform elements (map), select elements (filter), accumulate results (reduce). See: [24-advanced/data-pipeline/](lua-mastery-roadmap/24-advanced/data-pipeline/)
+
+### Memory Profiling
+Measuring and analyzing memory usage patterns to identify leaks and optimize allocation. See: [27-advanced/memory-management/](lua-mastery-roadmap/27-advanced/memory-management/)
+
+### Message Passing
+Communication between concurrent processes by sending and receiving messages. Core to actor model and CSP. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
+
 ### Memoization
 An optimization technique that caches function results to avoid redundant computation. See: [03-functions.md](en/03-functions.md)
 
@@ -308,6 +341,9 @@ Lua's representation of absence of value. Both `nil` and `false` are falsey; eve
 
 ### Object
 In Lua, any table can serve as an object. Objects gain behavior through metatables and methods. See: [05-metatables.md](en/05-metatables.md)
+
+### Object Pool
+A pattern that pre-allocates and reuses objects to avoid repeated allocation/deallocation overhead. See: [21-advanced/object-pool/](lua-mastery-roadmap/21-advanced/object-pool/)
 
 ### Operator Overloading
 Defining custom behavior for standard operators (+, -, *, etc.) through metamethods. See: [05-metatables.md](en/05-metatables.md)
@@ -326,6 +362,9 @@ A data structure where elements are dequeued by priority, not insertion order. S
 
 ### Promise
 A placeholder for a future value. Lua does not have native promises; coroutines and callbacks serve similar roles. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Publish/Subscribe
+A messaging pattern where publishers send messages to topics, and subscribers receive messages for topics they're interested in. See: [22-advanced/pub-sub-system/](lua-mastery-roadmap/22-advanced/pub-sub-system/)
 
 ### Proxy
 An intermediary that controls access to another object. Used for logging, validation, and read-only protection. See: [05-metatables.md](en/05-metatables.md)
@@ -359,6 +398,12 @@ In Lua, a coroutine (not an OS thread). Lua coroutines are cooperative and light
 
 ### Truthiness
 Lua's rules for boolean evaluation: only `false` and `nil` are falsey; `0`, `""`, `{}` are truthy. See: [01-basics.md](en/01-basics.md)
+
+### Transducer
+A composable transformation that combines mapping and filtering without creating intermediate collections. See: [24-advanced/data-pipeline/](lua-mastery-roadmap/24-advanced/data-pipeline/)
+
+### Transition Guard
+A condition that must be true for a state transition to occur in an FSM. See: [23-advanced/fsm-advanced/](lua-mastery-roadmap/23-advanced/fsm-advanced/)
 
 ### Type Checking
 Verifying that a value matches an expected type. Done via `type()` function or assert patterns. See: [01-basics.md](en/01-basics.md)
