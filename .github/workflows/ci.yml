@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lua-version: ['5.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua ${{ matrix.lua-version }}
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.lua-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4 luarocks
+          luarocks install luacheck || true
+
+      - name: Validate code snippets
+        run: make validate
+
+      - name: Check internal links
+        run: make check-links
+
+      - name: Check EN/ZH parity
+        run: make parity
+
+  test-examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lua-version: ['5.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua ${{ matrix.lua-version }}
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.lua-version }}
+
+      - name: Test examples
+        run: make test-examples
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.4
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.4'
+
+      - name: Install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          luarocks install luacheck || true
+
+      - name: Run linter
+        run: make lint
+        continue-on-error: true
+
+  build-c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua dev headers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liblua5.4-dev gcc
+
+      - name: Build Stage D C project
+        run: |
+          cd examples/projects
+          gcc -Wall -o embed_lua 05-embed-lua.c -llua -lm
+          ./embed_lua
+
+      - name: Build roadmap C project
+        run: |
+          cd lua-mastery-roadmap/04-advanced/embed-lua
+          gcc -Wall -o embed_lua 05-embed-lua.c -llua -lm
+          ./embed_lua
