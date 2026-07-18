@@ -46,7 +46,7 @@ lua-journey/
 │   ├── advanced/                14 advanced examples
 │   └── projects/                5 stage projects (runnable)
 ├── exercises/                   Graded exercises (beginner → advanced)
-├── references/                  Quick reference, version differences
+├── references/                  Quick reference, version differences, playground guide
 ├── scripts/                     Validation and testing tools
 ├── GLOSSARY.md                  107 technical terms
 ├── CONTRIBUTING.md              Contribution guidelines
