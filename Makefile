@@ -1,7 +1,7 @@
 # lua-journey Makefile
 # Common tasks for content development, validation, and testing
 
-.PHONY: help validate lint test-examples test-luajit parity check-links ci clean examples-dir extract-code toc watch version
+.PHONY: help validate lint test-examples test-roadmap-stages test-luajit parity check-links ci clean examples-dir extract-code toc watch version
 
 # Configuration
 LUA ?= lua5.4
@@ -17,17 +17,18 @@ help:
 	@echo "lua-journey - Makefile Targets"
 	@echo ""
 	@echo "Validation:"
-	@echo "  make validate        - Validate all code snippets (syntax check)"
-	@echo "  make lint            - Run style checks on Lua code"
-	@echo "  make test-examples   - Run all example code tests"
+	@echo "  make validate              - Validate all code snippets (syntax check)"
+	@echo "  make lint                  - Run style checks on Lua code"
+	@echo "  make test-examples         - Run all example code tests"
+	@echo "  make test-roadmap-stages   - Run all roadmap stage project tests"
 	@echo ""
 	@echo "Development:"
-	@echo "  make examples-dir    - Create examples directory structure"
-	@echo "  make extract-code    - Extract code blocks from markdown files"
-	@echo "  make check-links     - Validate internal links"
+	@echo "  make examples-dir          - Create examples directory structure"
+	@echo "  make extract-code          - Extract code blocks from markdown files"
+	@echo "  make check-links           - Validate internal links"
 	@echo ""
 	@echo "Cleanup:"
-	@echo "  make clean           - Remove generated files"
+	@echo "  make clean                 - Remove generated files"
 	@echo ""
 	@echo "Variables:"
 	@echo "  LUA=$(LUA)          - Lua interpreter to use"
@@ -60,6 +61,12 @@ test-examples:
 	@echo "==> Testing examples with $(LUA)..."
 	@$(LUA) $(SCRIPTS_DIR)/test-examples.lua --interpreter "$(LUA)" --runtime "$(LUA_RUNTIME)" --root "$(EXAMPLES_DIR)"
 	@echo "==> Example tests complete"
+
+# Test all roadmap stage projects
+test-roadmap-stages:
+	@echo "==> Testing roadmap stages with $(LUA)..."
+	@$(LUA) tests/test-roadmap-stages.lua --interpreter "$(LUA)" --root "lua-mastery-roadmap"
+	@echo "==> Roadmap stage tests complete"
 
 # Test with LuaJIT if available
 test-luajit:
@@ -107,7 +114,7 @@ toc:
 	@echo "==> TOC generated"
 
 # Run all validation and tests
-ci: validate lint check-links parity test-examples
+ci: validate lint check-links parity test-examples test-roadmap-stages
 	@echo "==> CI checks complete"
 
 # Clean generated files
