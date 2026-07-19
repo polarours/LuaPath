@@ -19,18 +19,18 @@ Design principles:
 
 | Category | Count |
 |----------|-------|
-| Documentation | 16 chapters × 2 languages (EN + ZH) |
+| Documentation | 20 chapters × 2 languages (EN + ZH) |
 | Pitfalls | 15 articles × 2 languages (EN + ZH) |
-| Examples | 43 runnable examples |
+| Examples | 44 runnable examples |
 | Glossary | 107 terms (EN + ZH) |
-| Roadmap stages | 28 (beginner → advanced) |
+| Roadmap stages | 36 (beginner → advanced) |
 
 ## Repository Layout
 
 ```
 lua-journey/
-├── en/                          16 English chapters (00–15)
-├── zh/                          16 Chinese chapters (mirrors /en)
+├── en/                          20 English chapters (00–18)
+├── zh/                          20 Chinese chapters (mirrors /en)
 ├── pitfalls/
 │   ├── en/                      15 English gotcha articles
 │   └── 中文版/                   15 Chinese gotcha articles
@@ -38,12 +38,12 @@ lua-journey/
 │   ├── 00-overview.md           Staged learning path
 │   ├── 01-beginner/             Stage 1 projects
 │   ├── 02-intermediate/         Stage 2 projects
-│   ├── ...                      Stages 3-27 projects
-│   └── 28-advanced/             Stage 28 projects
+│   ├── ...                      Stages 3-35 projects
+│   └── 36-advanced/             Stage 36 projects
 ├── examples/
 │   ├── beginner/                10 beginner examples
 │   ├── intermediate/            14 intermediate examples
-│   ├── advanced/                14 advanced examples
+│   ├── advanced/                15 advanced examples
 │   └── projects/                5 stage projects (runnable)
 ├── exercises/                   Graded exercises (beginner → advanced)
 ├── references/                  Quick reference, version differences, playground guide

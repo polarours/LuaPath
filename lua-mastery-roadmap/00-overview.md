@@ -237,6 +237,70 @@ Learn production deployment patterns for Lua: sandboxing, resource limits, and h
 - Topics: sandboxing, resource limits, hot reload, production hardening, version compatibility
 - Project: [Deployment Patterns](28-advanced/deployment-patterns/)
 
+### Stage 29: Circuit Breaker
+**Time**: 8–12 hours
+
+Implement the circuit breaker fault tolerance pattern to prevent cascading failures.
+
+- Topics: fault tolerance, state machines, failure counting, fallback strategies
+- Project: [Circuit Breaker](29-advanced/circuit-breaker/)
+
+### Stage 30: Active Record
+**Time**: 8–12 hours
+
+Build an ORM pattern where objects encapsulate persistence logic.
+
+- Topics: ORM, database abstraction, CRUD operations, validation
+- Project: [Active Record](30-advanced/active-record/)
+
+### Stage 31: Balking Pattern
+**Time**: 8–12 hours
+
+Implement the balking pattern that skips actions when preconditions aren't met.
+
+- Topics: precondition checking, guard clauses, state validation
+- Project: [Balking Pattern](31-advanced/balking/)
+
+### Stage 32: Double Buffer
+**Time**: 8–12 hours
+
+Build a double buffer for smooth data transitions between producers and consumers.
+
+- Topics: concurrent data access, smooth transitions, buffer swapping
+- Project: [Double Buffer](32-advanced/double-buffer/)
+
+### Stage 33: Lock-Free Queue
+**Time**: 8–12 hours
+
+Implement a lock-free queue using compare-and-swap operations.
+
+- Topics: atomic operations, CAS, concurrent data structures, wait-free algorithms
+- Project: [Lock-Free Queue](33-advanced/lock-free-queue/)
+
+### Stage 34: Middleware Pipeline
+**Time**: 8–12 hours
+
+Build a composable middleware pipeline for request processing.
+
+- Topics: middleware pattern, request/response flow, chaining, error handling
+- Project: [Middleware Pipeline](34-advanced/middleware-pipeline/)
+
+### Stage 35: Memory Pool
+**Time**: 8–12 hours
+
+Implement a memory pool for fast object allocation and reuse.
+
+- Topics: memory management, object reuse, pool sizing, allocation strategies
+- Project: [Memory Pool](35-advanced/memory-pool/)
+
+### Stage 36: Event Sourcing
+**Time**: 8–12 hours
+
+Build an event sourcing system with event store, commands, and projections.
+
+- Topics: event sourcing, CQRS, event store, projections, replay
+- Project: [Event Sourcing](36-advanced/event-sourcing/)
+
 ## Time Investment by Stage
 
 | Stage | Focus | Hours |
@@ -249,7 +313,8 @@ Learn production deployment patterns for Lua: sandboxing, resource limits, and h
 | 6–10 | Intermediate projects | 40–60 |
 | 11–20 | Advanced projects | 80–120 |
 | 21–28 | Expert projects | 64–96 |
-| **Total** | | **310–500** |
+| 29–36 | Master projects | 64–96 |
+| **Total** | | **374–596** |
 
 ## How to Use This Roadmap
 
