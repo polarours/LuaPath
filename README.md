@@ -23,7 +23,7 @@ Design principles:
 | Pitfalls | 15 articles × 2 languages (EN + ZH) |
 | Examples | 44 runnable examples |
 | Glossary | 107 terms (EN + ZH) |
-| Roadmap stages | 36 (beginner → advanced) |
+| Roadmap stages | 39 (beginner → advanced) |
 
 ## Repository Layout
 

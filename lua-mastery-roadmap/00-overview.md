@@ -301,6 +301,30 @@ Build an event sourcing system with event store, commands, and projections.
 - Topics: event sourcing, CQRS, event store, projections, replay
 - Project: [Event Sourcing](36-advanced/event-sourcing/)
 
+### Stage 37: Error Patterns
+**Time**: 8–12 hours
+
+Implement type-safe error handling patterns including Result types and Expected patterns.
+
+- Topics: Result types, error propagation, monadic operations, structured error codes
+- Project: [Error Patterns](37-advanced/error-patterns/)
+
+### Stage 38: Testing Patterns
+**Time**: 8–12 hours
+
+Implement testing patterns including mock objects, parameterized tests, and test fixtures.
+
+- Topics: mock objects, test doubles, parameterized testing, test fixtures
+- Project: [Testing Patterns](38-advanced/testing-patterns/)
+
+### Stage 40: Modern Patterns
+**Time**: 8–12 hours
+
+Implement modern Lua patterns including string formatting, iterator composition, and functional programming.
+
+- Topics: advanced string.format, custom iterators, function composition, fluent APIs
+- Project: [Modern Patterns](40-advanced/modern-patterns/)
+
 ## Time Investment by Stage
 
 | Stage | Focus | Hours |
@@ -314,7 +338,8 @@ Build an event sourcing system with event store, commands, and projections.
 | 11–20 | Advanced projects | 80–120 |
 | 21–28 | Expert projects | 64–96 |
 | 29–36 | Master projects | 64–96 |
-| **Total** | | **374–596** |
+| 37–40 | Expert projects | 32–48 |
+| **Total** | | **406–644** |
 
 ## How to Use This Roadmap
 
