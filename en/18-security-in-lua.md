@@ -406,6 +406,28 @@ error("Service unavailable")
 
 ---
 
+## Exercises
+
+### Beginner (30–60 min)
+
+1. **Input Validator**: Create a `validate_email(email)` function that checks for valid email format and returns `true` or `false`.
+
+2. **Path Checker**: Write a `safe_path(filename, allowed_dirs)` function that prevents path traversal attacks.
+
+### Intermediate (1–2 hours)
+
+3. **Permission System**: Implement a simple permission system that grants/revokes permissions to plugins and checks them before API access.
+
+4. **Secure Plugin Loader**: Build a plugin loader that sandboxes code execution and limits available APIs based on permissions.
+
+### Advanced (2–4 hours)
+
+5. **Security Scanner**: Create a tool that scans Lua code for potential security issues (file access, network calls, etc.) and reports findings.
+
+6. **Rate Limiter**: Implement a rate limiter that prevents abuse by limiting API calls per time window.
+
+---
+
 ## Further Reading
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)

@@ -276,6 +276,28 @@ end
 
 ---
 
+## 练习
+
+### 初级（30–60 分钟）
+
+1. **包搜索**：使用 LuaRocks 搜索并安装一个 JSON 库。编写一个使用它解析 JSON 字符串的小脚本。
+
+2. **代码检查**：对一个 Lua 文件运行 luacheck，修复它报告的所有警告。
+
+### 中级（1–2 小时）
+
+3. **编写 Busted 测试**：使用 Busted 的 describe/it/assert 语法为一个简单函数创建测试文件。使用 `busted` 运行它。
+
+4. **创建 Rockspec**：为你编写的一个小 Lua 模块编写 `.rockspec` 文件。使用 `luarocks lint` 测试它。
+
+### 高级（2–4 小时）
+
+5. **CI/CD 流水线**：设置一个 GitHub Actions 工作流，在每次推送时运行 luacheck 和 busted 测试。
+
+6. **版本兼容性包装器**：创建一个兼容层，在 Lua 5.1、5.3 和 5.4 之间提供一致的 API。
+
+---
+
 ## 延伸阅读
 
 - [LuaRocks 文档](https://luarocks.org/)

@@ -282,6 +282,28 @@ setmetatable(t, {
 
 ---
 
+## Exercises
+
+### Beginner (30–60 min)
+
+1. **Dynamic Function Generator**: Write a function `make_multiplier(n)` that uses `load()` to generate and return a function that multiplies its argument by `n`.
+
+2. **Safe Code Loader**: Create a `safe_load(code)` function that loads code in a restricted environment with only `print`, `math`, and `string` libraries.
+
+### Intermediate (1–2 hours)
+
+3. **Simple DSL**: Build a small DSL for defining database queries using Lua tables and metamethods. Example: `Query("users"):where("age > 18"):order_by("name")`.
+
+4. **Code Generator**: Write a function that generates multiple similar functions from a template. For example, generate `get_name()`, `get_age()`, `get_email()` from a list of field names.
+
+### Advanced (2–4 hours)
+
+5. **Macro System**: Implement a simple macro system where `@macro(name, args)` is expanded at load time. Support at least one built-in macro.
+
+6. **Performance Benchmark**: Compare the performance of static code vs. metaprogramming-generated code for a computationally intensive task. Document the overhead.
+
+---
+
 ## Further Reading
 
 - [Lua 5.4 Reference Manual — Section 6](https://www.lua.org/manual/5.4/manual.html#6)

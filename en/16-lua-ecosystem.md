@@ -276,6 +276,28 @@ end
 
 ---
 
+## Exercises
+
+### Beginner (30–60 min)
+
+1. **Package Search**: Use LuaRocks to search for and install a JSON library. Write a small script that uses it to parse a JSON string.
+
+2. **Lint Your Code**: Run luacheck on a Lua file and fix any warnings it reports.
+
+### Intermediate (1–2 hours)
+
+3. **Write a Busted Test**: Create a test file for a simple function using Busted's describe/it/assert syntax. Run it with `busted`.
+
+4. **Create a Rockspec**: Write a `.rockspec` file for a small Lua module you've written. Test it with `luarocks lint`.
+
+### Advanced (2–4 hours)
+
+5. **CI/CD Pipeline**: Set up a GitHub Actions workflow that runs luacheck and busted tests on every push.
+
+6. **Version Compatibility Wrapper**: Create a compatibility layer that provides consistent APIs across Lua 5.1, 5.3, and 5.4.
+
+---
+
 ## Further Reading
 
 - [LuaRocks Documentation](https://luarocks.org/)

@@ -351,6 +351,28 @@ return M
 
 ---
 
+## Exercises
+
+### Beginner (30–60 min)
+
+1. **Basic Sandbox**: Create a sandbox function that restricts Lua code to only `print`, `math`, and `string` libraries. Test it with code that tries to access `os.execute`.
+
+2. **Plugin Loader**: Build a simple plugin loader that discovers and loads Lua files from a directory.
+
+### Intermediate (1–2 hours)
+
+3. **Resource Limiter**: Implement a function that executes Lua code with time and memory limits. Use `debug.sethook` for time checking.
+
+4. **Event Bridge**: Create a bidirectional communication system between a host and embedded Lua scripts using event queues.
+
+### Advanced (2–4 hours)
+
+5. **Full Plugin System**: Build a complete plugin system with lifecycle hooks (init, start, stop, destroy), dependency management, and configuration.
+
+6. **Security Audit Tool**: Create a tool that scans Lua code for potential security issues (file access, network calls, etc.).
+
+---
+
 ## Further Reading
 
 - [Lua 5.4 Reference Manual — Section 4](https://www.lua.org/manual/5.4/manual.html#4)
