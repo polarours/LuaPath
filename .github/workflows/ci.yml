@@ -51,6 +51,22 @@ jobs:
       - name: Test examples
         run: make test-examples
 
+  test-roadmap-stages:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lua-version: ['5.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua ${{ matrix.lua-version }}
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: ${{ matrix.lua-version }}
+
+      - name: Test roadmap stages
+        run: make test-roadmap-stages
+
   lint:
     runs-on: ubuntu-latest
     steps:
