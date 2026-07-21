@@ -141,7 +141,7 @@ end
 local errors = 0
 local common = {}
 
-print("lua-journey EN/ZH Parity Checker")
+print("LuaPath EN/ZH Parity Checker")
 print("================================")
 print()
 

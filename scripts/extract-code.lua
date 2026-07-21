@@ -117,7 +117,7 @@ local function get_markdown_files(dir)
 end
 
 -- Main execution
-print("lua-journey Code Extractor")
+print("LuaPath Code Extractor")
 print("==========================")
 print()
 

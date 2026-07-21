@@ -1,6 +1,6 @@
-# Contributing to lua-journey
+# Contributing to LuaPath
 
-Thank you for investing time in improving `lua-journey`. This document outlines how to contribute effectively.
+Thank you for investing time in improving `LuaPath`. This document outlines how to contribute effectively.
 
 ## Quick Links
 
@@ -53,8 +53,8 @@ This allows maintainers to provide guidance and avoid duplicate work.
 ### 2. Fork and Branch
 
 ```bash
-git clone https://github.com/yourusername/lua-journey.git
-cd lua-journey
+git clone https://github.com/yourusername/LuaPath.git
+cd LuaPath
 git checkout -b descriptive-branch-name
 ```
 

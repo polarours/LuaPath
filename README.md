@@ -1,4 +1,4 @@
-# lua-journey
+# LuaPath
 
 Lua learning roadmap for practitioners who build real systems: tools, engines, firmware scripts, and language runtimes.
 
@@ -6,7 +6,7 @@ Lua learning roadmap for practitioners who build real systems: tools, engines, f
 
 ## Philosophy
 
-`lua-journey` treats Lua as a programmable systems component, not only a scripting syntax.
+`LuaPath` treats Lua as a programmable systems component, not only a scripting syntax.
 
 Design principles:
 
@@ -28,7 +28,7 @@ Design principles:
 ## Repository Layout
 
 ```
-lua-journey/
+LuaPath/
 ├── en/                          20 English chapters (00–18)
 ├── zh/                          20 Chinese chapters (mirrors /en)
 ├── pitfalls/

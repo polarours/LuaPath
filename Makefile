@@ -1,4 +1,4 @@
-# lua-journey Makefile
+# LuaPath Makefile
 # Common tasks for content development, validation, and testing
 
 .PHONY: help validate lint test-examples test-roadmap-stages test-luajit parity check-links ci clean examples-dir extract-code toc watch version
@@ -14,7 +14,7 @@ SCRIPTS_DIR := scripts
 
 # Default target
 help:
-	@echo "lua-journey - Makefile Targets"
+	@echo "LuaPath - Makefile Targets"
 	@echo ""
 	@echo "Validation:"
 	@echo "  make validate              - Validate all code snippets (syntax check)"
@@ -137,7 +137,7 @@ watch:
 
 # Print version info
 version:
-	@echo "lua-journey development environment"
+	@echo "LuaPath development environment"
 	@echo "Lua: $$($(LUA) -v 2>&1 || echo 'not found')"
 	@echo "LuaJIT: $$($(LUAJIT) -v 2>&1 || echo 'not found')"
 	@echo "luacheck: $$(luacheck --version 2>&1 | head -1 || echo 'not found')"

@@ -114,7 +114,7 @@ local stats = {
   failed = 0,
 }
 
-print("lua-journey Roadmap Stage Tester")
+print("LuaPath Roadmap Stage Tester")
 print("================================")
 print(string.format("Runtime: %s", options.interpreter))
 print(string.format("Root: %s", options.root))

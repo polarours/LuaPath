@@ -50,7 +50,7 @@ We take security issues seriously. If you discover a security vulnerability, ple
 
 ### Code Examples
 
-Code examples in `lua-journey` are educational. When using them in production:
+Code examples in `LuaPath` are educational. When using them in production:
 
 1. **Validate all inputs**: Examples may not include production-grade validation
 2. **Review sandbox configurations**: Sandboxing examples are starting points, not complete solutions

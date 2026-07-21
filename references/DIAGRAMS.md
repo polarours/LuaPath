@@ -1,6 +1,6 @@
 # Visual Diagrams
 
-Architecture and concept diagrams for lua-journey.
+Architecture and concept diagrams for LuaPath.
 
 ---
 

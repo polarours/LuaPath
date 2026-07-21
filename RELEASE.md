@@ -1,6 +1,6 @@
 # Release Guide
 
-This document describes how `lua-journey` releases are versioned and published.
+This document describes how `LuaPath` releases are versioned and published.
 
 ## Versioning Strategy
 
@@ -110,7 +110,7 @@ git add .
 git commit -m "release: v0.X.0 - [brief description]"
 
 # Tag the release
-git tag -a v0.X.0 -m "lua-journey v0.X.0"
+git tag -a v0.X.0 -m "LuaPath v0.X.0"
 
 # Push to remote
 git push origin main
@@ -169,7 +169,7 @@ Example deprecation notice:
 
 ## Version Compatibility
 
-Content in `lua-journey` targets multiple Lua versions:
+Content in `LuaPath` targets multiple Lua versions:
 
 | Content Type | Target Versions |
 |--------------|-----------------|
@@ -181,7 +181,7 @@ Content in `lua-journey` targets multiple Lua versions:
 ## Release Notes Template
 
 ```markdown
-## lua-journey v0.X.0
+## LuaPath v0.X.0
 
 ### Highlights
 

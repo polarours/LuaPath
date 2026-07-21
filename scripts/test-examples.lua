@@ -196,7 +196,7 @@ local stats = {
   metadata_errors = 0,
 }
 
-print("lua-journey Example Runner")
+print("LuaPath Example Runner")
 print("==========================")
 print(string.format("Runtime: %s", runtime))
 print(string.format("Interpreter: %s", options.interpreter))

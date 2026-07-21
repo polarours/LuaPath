@@ -288,7 +288,7 @@ else
   end
 end
 
-print("lua-journey Code Validator")
+print("LuaPath Code Validator")
 print("==========================")
 print()
 

@@ -10,7 +10,7 @@ DIRECTORIES="${@:-en zh}"
 ERRORS=0
 WARNINGS=0
 
-echo "lua-journey Link Checker"
+echo "LuaPath Link Checker"
 echo "========================"
 echo ""
 

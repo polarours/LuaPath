@@ -184,7 +184,7 @@ For a better local experience:
 
 ```elisp
 ;; Add to init.el
-(setq lua-default-directory "/path/to/lua-journey")
+(setq lua-default-directory "/path/to/LuaPath")
 (setq lua-indent-level 2)
 ```
 
@@ -225,7 +225,7 @@ let g:loaded_lua = 1
 4. **Use print() for debugging** — Most playgrounds only support stdout
 5. **Save interesting code** — Use Replit or local files for persistence
 
-## Using Playgrounds with lua-journey
+## Using Playgrounds with LuaPath
 
 ### Testing Chapter Examples
 

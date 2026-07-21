@@ -1,6 +1,6 @@
 # Contributors
 
-Thank you to everyone who has contributed to `lua-journey`!
+Thank you to everyone who has contributed to `LuaPath`!
 
 ## Maintainers
 
@@ -101,7 +101,7 @@ Contributors who found and reported significant errors.
 Active contributors can add this badge to their GitHub README:
 
 ```markdown
-[![lua-journey Contributor](https://img.shields.io/badge/lua--journey-Contributor-00A8E1)](https://github.com/yourusername/lua-journey)
+[![LuaPath Contributor](https://img.shields.io/badge/lua--journey-Contributor-00A8E1)](https://github.com/yourusername/LuaPath)
 ```
 
 ---

@@ -1,6 +1,6 @@
 # GLOSSARY
 
-Technical terms and concepts used throughout lua-journey.
+Technical terms and concepts used throughout LuaPath.
 
 ## A
 
