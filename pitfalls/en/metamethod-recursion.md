@@ -1,54 +1,42 @@
 # Metamethod Recursion
 
-Accessing a field inside `__index` or `__newindex` without `rawget`/`rawset` causes infinite recursion.
-
 ## The Mistake
 
+Defining `__index` or `__newindex` that calls itself, causing infinite recursion.
+
 ```lua
-local mt = {}
-
-function mt.__index(t, key)
-  -- trying to read a default from t itself
-  return t.defaults[key] -- BOOM: t.defaults triggers __index again
-end
-
-function mt.__newindex(t, key, value)
-  -- trying to log all writes
-  print("set", key, value)
-  t[key] = value -- BOOM: triggers __newindex on itself
-end
-
-local obj = setmetatable({}, mt)
+-- Infinite recursion!
+local t = setmetatable({}, {
+  __index = function(self, k)
+    return self[k]  -- Calls __index again!
+  end
+})
 ```
 
-## Why It's Wrong
+## Why It Fails
 
-When Lua cannot find `defaults` directly on the table, it calls `__index`. Inside `__index`, accessing `t.defaults` hits the same metamethod. This recurses until the stack overflows.
-
-The same applies to `__newindex` — assigning `t[key] = value` inside the handler re-triggers the handler.
+When `self[k]` is evaluated, Lua looks up `k` in `self`. If not found, it calls `__index` again with the same `k`, creating an infinite loop.
 
 ## The Fix
 
-Use `rawget` and `rawset` to bypass metamethods:
-
 ```lua
-local mt = {}
+-- Use rawget to bypass metamethods
+local t = setmetatable({}, {
+  __index = function(self, k)
+    return rawget(self, k)  -- Direct table access
+  end
+})
 
-function mt.__index(t, key)
-  local defaults = rawget(t, "defaults") or {}
-  return defaults[key]
-end
-
-function mt.__newindex(t, key, value)
-  print("set", key, value)
-  rawset(t, key, value) -- no recursion
-end
-
-local obj = setmetatable({ defaults = { color = "red" } }, mt)
-print(obj.color) -- "red"
-obj.x = 42        -- prints: set x  42
+-- Or use a separate data table
+local data = {}
+local t = setmetatable({}, {
+  __index = function(self, k)
+    return data[k]
+  end
+})
 ```
 
-## Key Takeaway
+## Related Concepts
 
-Inside any metamethod, never read or write the same table using normal indexing. Always use `rawget`/`rawset` to escape the metamethod chain.
+- [05-metatables.md](../en/05-metatables.md) — Metatables and metamethods
+- [10-lua-internals.md](../en/10-lua-internals.md) — Lua internals
