@@ -290,6 +290,28 @@ print(string.format("Elapsed: %.6f s", os.clock() - start))
 
 ---
 
+## Exercises
+
+### Beginner (30–60 min)
+
+1. **Debug Output**: Write a function that prints variable values with type information and line numbers. Test it with different data types.
+
+2. **Assert Patterns**: Create validation functions that use `assert` to catch common errors (nil values, wrong types, out-of-range numbers).
+
+### Intermediate (1–2 hours)
+
+3. **Error Wrapper**: Build a function that wraps another function with structured error output, including function name and arguments.
+
+4. **Debug Hook**: Use `debug.sethook` to count function calls in a piece of code and report the total.
+
+### Advanced (2–4 hours)
+
+5. **Custom Debug Tool**: Create a mini debugging tool that can set breakpoints (using `debug.sethook`), inspect variables, and step through code.
+
+6. **Performance Profiler**: Build a simple profiler that tracks function call counts and execution times using `debug.getinfo` and `os.clock`.
+
+---
+
 ## Key Takeaways
 
 - **print debugging** is the most common approach in Lua
