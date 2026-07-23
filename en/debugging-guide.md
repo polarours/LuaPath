@@ -290,6 +290,196 @@ print(string.format("Elapsed: %.6f s", os.clock() - start))
 
 ---
 
+## Advanced Debugging Techniques
+
+### Conditional Breakpoints
+
+Use `debug.sethook` to set conditional breakpoints:
+
+```lua
+local function debug_hook(event, line)
+  if event == "line" and line == 42 then  -- Break at line 42
+    print("Breakpoint hit at line " .. line)
+    -- Inspect variables
+    local i = 1
+    while true do
+      local name, value = debug.getlocal(2, i)
+      if not name then break end
+      print("  " .. name .. " = " .. tostring(value))
+      i = i + 1
+    end
+  end
+end
+
+debug.sethook(debug_hook, "line")
+```
+
+### Watch Variables
+
+Monitor variable changes during execution:
+
+```lua
+local function create_watcher(name, get_value)
+  local last_value = nil
+  return function()
+    local current = get_value()
+    if current ~= last_value then
+      print(string.format("[WATCH] %s changed: %s -> %s", 
+        name, tostring(last_value), tostring(current)))
+      last_value = current
+    end
+  end
+end
+
+-- Usage
+local x = 0
+local watcher = create_watcher("x", function() return x end)
+
+x = 10
+watcher()  -- Prints: [WATCH] x changed: nil -> 10
+
+x = 20
+watcher()  -- Prints: [WATCH] x changed: 10 -> 20
+```
+
+### Stack Trace Formatting
+
+```lua
+local function format_traceback(level)
+  local trace = {}
+  local level = level or 2
+  
+  while true do
+    local info = debug.getinfo(level, "nSl")
+    if not info then break end
+    
+    local source = info.source or "?"
+    local linedefined = info.linedefined or "?"
+    local what = info.what or "?"
+    local name = info.name or "<anonymous>"
+    
+    trace[#trace + 1] = string.format("%s:%d in function '%s'", 
+      source, linedefined, name)
+    
+    level = level + 1
+  end
+  
+  return table.concat(trace, "\n")
+end
+```
+
+### Memory Leak Detection
+
+Track object creation and destruction:
+
+```lua
+local object_count = 0
+
+local function create_object()
+  object_count = object_count + 1
+  local obj = {id = object_count}
+  
+  setmetatable(obj, {
+    __gc = function(self)
+      print("[GC] Object " .. self.id .. " collected")
+    end,
+  })
+  
+  return obj
+end
+
+-- Monitor
+print("Active objects: " .. object_count)
+collectgarbage()
+print("After GC: " .. object_count)
+```
+
+---
+
+## Debugging Patterns
+
+### Guard Pattern
+
+```lua
+local function guard(condition, message)
+  if not condition then
+    error(message or "assertion failed", 2)
+  end
+end
+
+-- Usage
+local function process(data)
+  guard(type(data) == "table", "data must be a table")
+  guard(#data > 0, "data must not be empty")
+  -- Process data...
+end
+```
+
+### Debug Output Levels
+
+```lua
+local DEBUG_LEVEL = 1  -- 0=off, 1=basic, 2=detailed, 3=verbose
+
+local function debug_print(level, ...)
+  if level <= DEBUG_LEVEL then
+    print(string.format("[DEBUG %d]", level), ...)
+  end
+end
+
+-- Usage
+debug_print(1, "Starting process")
+debug_print(2, "Input data:", data)
+debug_print(3, "Internal state:", state)
+```
+
+### Error Context Collector
+
+```lua
+local function with_context(fn, context)
+  local ok, result = pcall(fn)
+  if not ok then
+    local info = debug.getinfo(2, "nSl")
+    return nil, string.format("[%s] %s (at %s:%d)", 
+      context, result, info.source, info.currentline)
+  end
+  return result
+end
+
+-- Usage
+local result, err = with_context(function()
+  return risky_operation()
+end, "database.query")
+```
+
+---
+
+## Tools and IDEs
+
+### ZeroBrane Studio
+
+- Full Lua IDE with debugger
+- Set breakpoints, step through code
+- Inspect variables and call stack
+- Supports LuaJIT
+
+### VS Code with Lua Extension
+
+- Syntax highlighting and autocompletion
+- Debug support via `lua-debug` extension
+- Integrated terminal for running scripts
+
+### Command-Line Debugging
+
+```bash
+# Run with debug hooks
+lua5.4 -e "debug.sethook(function(e,l) print(e,l) end, 'call')" script.lua
+
+# Check syntax
+luac5.4 -p script.lua
+```
+
+---
+
 ## Exercises
 
 ### Beginner (30–60 min)

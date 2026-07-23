@@ -331,6 +331,208 @@ return M
 
 ---
 
+## Advanced Embedding Patterns
+
+### Resource Management
+
+Use `__gc` metamethods for automatic cleanup:
+
+```lua
+local Resource = {}
+Resource.__index = Resource
+
+function Resource.new(handle)
+  return setmetatable({handle = handle, closed = false}, Resource)
+end
+
+function Resource:__gc()
+  if not self.closed then
+    print("[GC] Auto-closing resource: " .. tostring(self.handle))
+    -- Close the resource
+    self.closed = true
+  end
+end
+
+function Resource:close()
+  if not self.closed then
+    print("Closing resource: " .. tostring(self.handle))
+    self.closed = true
+  end
+end
+
+-- Usage
+local r = Resource.new("file.txt")
+r:close()  -- Explicit close
+-- If not closed, __gc will clean up
+```
+
+### Plugin Architecture
+
+Design a plugin system with lifecycle hooks:
+
+```lua
+local PluginManager = {}
+PluginManager.__index = PluginManager
+
+function PluginManager.new()
+  return setmetatable({
+    plugins = {},
+    hooks = {
+      init = {},
+      start = {},
+      stop = {},
+      destroy = {},
+    },
+  }, PluginManager)
+end
+
+function PluginManager:register(plugin)
+  table.insert(self.plugins, plugin)
+  if plugin.init then
+    self.hooks.init[#self.hooks.init + 1] = plugin.init
+  end
+  if plugin.start then
+    self.hooks.start[#self.hooks.start + 1] = plugin.start
+  end
+  if plugin.stop then
+    self.hooks.stop[#self.hooks.stop + 1] = plugin.stop
+  end
+end
+
+function PluginManager:run_hook(hook_name, ...)
+  for _, hook in ipairs(self.hooks[hook_name] or {}) do
+    hook(...)
+  end
+end
+```
+
+### Script Sandboxing with Limits
+
+```lua
+local function create_sandbox_with_limits(max_time, max_memory)
+  local env = {
+    print = print,
+    error = error,
+    assert = assert,
+    type = type,
+    tostring = tostring,
+    tonumber = tonumber,
+    pairs = pairs,
+    ipairs = ipairs,
+    pcall = pcall,
+    xpcall = xpcall,
+    math = math,
+    string = string,
+    table = table,
+  }
+  
+  local function run_with_limits(code)
+    local start_time = os.clock()
+    local start_mem = collectgarbage("count")
+    
+    local fn, err = load(code, "sandbox", "t", env)
+    if not fn then
+      return nil, "Compile error: " .. err
+    end
+    
+    -- Set up time check hook
+    debug.sethook(function()
+      if os.clock() - start_time > max_time then
+        error("Time limit exceeded")
+      end
+    end, "", 1000)
+    
+    local ok, result = pcall(fn)
+    
+    -- Remove hook
+    debug.sethook()
+    
+    -- Check memory
+    local mem_used = collectgarbage("count") - start_mem
+    if mem_used > max_memory then
+      return nil, "Memory limit exceeded"
+    end
+    
+    if not ok then
+      return nil, "Runtime error: " .. tostring(result)
+    end
+    
+    return result
+  end
+  
+  return run_with_limits
+end
+```
+
+### Bidirectional Communication
+
+```lua
+local function create_host_script_bridge()
+  local bridge = {
+    host_to_script = {},
+    script_to_host = {},
+  }
+  
+  -- Host sends message to script
+  function bridge:send_to_script(msg)
+    self.host_to_script[#self.host_to_script + 1] = msg
+  end
+  
+  -- Script sends message to host
+  function bridge:send_to_host(msg)
+    self.script_to_host[#self.script_to_host + 1] = msg
+  end
+  
+  -- Host retrieves messages from script
+  function bridge:receive_from_script()
+    return table.remove(self.script_to_host, 1)
+  end
+  
+  -- Script retrieves messages from host
+  function bridge:receive_from_host()
+    return table.remove(self.host_to_script, 1)
+  end
+  
+  return bridge
+end
+```
+
+### Version Compatibility Wrapper
+
+```lua
+local function create_compat_wrapper()
+  local compat = {}
+  
+  -- Lua 5.1 compatibility
+  compat.unpack = unpack or table.unpack
+  
+  -- Lua 5.3+ integer support
+  compat.is_integer = math.type and function(x)
+    return math.type(x) == "integer"
+  end or function(x)
+    return x == math.floor(x)
+  end
+  
+  -- Bitwise operations
+  compat.band = bit32 and bit32.band or function(a, b)
+    -- Fallback for Lua 5.1 without bit32
+    local result = 0
+    for i = 0, 31 do
+      if a % 2 == 1 and b % 2 == 1 then
+        result = result + 2^i
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+    end
+    return result
+  end
+  
+  return compat
+end
+```
+
+---
+
 ## Best Practices
 
 1. **Design clear API boundaries** between host and script

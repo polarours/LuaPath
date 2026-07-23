@@ -223,6 +223,89 @@ end
 
 ---
 
+## Advanced Patterns
+
+### Attribute-Based Access
+
+Use `__index` and `__newindex` to implement attribute-based access:
+
+```lua
+local function create_attrs(defaults)
+  local attrs = {}
+  for k, v in pairs(defaults) do
+    attrs[k] = v
+  end
+  
+  return setmetatable({}, {
+    __index = function(_, k)
+      return attrs[k]
+    end,
+    __newindex = function(_, k, v)
+      if attrs[k] ~= nil then
+        error("Attribute '" .. k .. "' is read-only")
+      end
+      rawset(_, k, v)
+    end,
+  })
+end
+
+local obj = create_attrs({name = "test", value = 42})
+print(obj.name)  -- "test"
+-- obj.name = "new"  -- Error: read-only
+```
+
+### Builder Pattern with Chaining
+
+```lua
+local function builder()
+  local data = {}
+  
+  return setmetatable(data, {
+    __call = function(_, key, value)
+      data[key] = value
+      return data  -- Enable chaining
+    end,
+  })
+end
+
+local config = builder()
+config("host", "localhost")
+  ("port", 8080)
+  ("debug", true)
+
+print(config.host, config.port, config.debug)
+```
+
+### Metamethod for Arithmetic Operations
+
+```lua
+local Vector = {}
+Vector.__index = Vector
+
+function Vector.new(x, y)
+  return setmetatable({x = x or 0, y = y or 0}, Vector)
+end
+
+function Vector.__add(a, b)
+  return Vector.new(a.x + b.x, a.y + b.y)
+end
+
+function Vector.__mul(v, scalar)
+  return Vector.new(v.x * scalar, v.y * scalar)
+end
+
+function Vector:__tostring()
+  return string.format("Vector(%g, %g)", self.x, self.y)
+end
+
+local v1 = Vector.new(1, 2)
+local v2 = Vector.new(3, 4)
+print(v1 + v2)  -- Vector(4, 6)
+print(v1 * 3)   -- Vector(3, 6)
+```
+
+---
+
 ## Common Pitfalls
 
 ### 1. Security Risks with `load`

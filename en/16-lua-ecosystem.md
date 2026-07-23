@@ -256,6 +256,47 @@ end
 
 ---
 
+## Popular Lua Libraries
+
+### Web Frameworks
+
+- **OpenResty**: Nginx + Lua, high-performance web server
+- **Lapis**: Full-featured web framework
+- **Sailor**: MVC web framework
+
+### Database Drivers
+
+- **luasocket**: TCP/UDP networking
+- **lua-nginx-module**: Database access in OpenResty
+- **luasql**: SQL database connectivity
+
+### Serialization
+
+- **lua-cjson**: Fast JSON encoding/decoding
+- **dkjson**: Pure Lua JSON library
+- **lua-MessagePack**: MessagePack serialization
+- **cdata**: Binary data handling
+
+### Testing
+
+- **busted**: BDD-style testing framework
+- **luaunit**: Unit testing framework
+- **deftest**: Test discovery and organization
+
+### Code Quality
+
+- **luacheck**: Static analyzer for Lua
+- **stylua**: Code formatter
+- **lua-language-server**: VS Code extension with LSP
+
+### CLI Tools
+
+- **cliargs**: Command-line argument parsing
+- **penlight**: Utility library with CLI helpers
+- **lua-cli**: Interactive Lua shell
+
+---
+
 ## Best Practices
 
 1. **Use LuaRocks** for package management

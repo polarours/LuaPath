@@ -187,6 +187,9 @@ A table that intercepts operations via metatables to control access, validate in
 ### RAII (Resource Acquisition Is Initialization)
 A pattern where resource lifetime is tied to object scope. Lua 5.4 `<close>` variables implement this. See: [14-lua-in-production.md](en/14-lua-in-production.md)
 
+### Reflection
+Examining and modifying code structure at runtime. The `debug` library provides Lua reflection capabilities. See: [debugging-guide.md](en/debugging-guide.md)
+
 ## Additional Terms
 
 ### Accumulator
@@ -197,6 +200,96 @@ A pattern that converts one interface to another, allowing incompatible interfac
 
 ### Actor Model
 A concurrency model where actors communicate via message passing. Each actor has its own state and mailbox. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
+
+### Closure
+A function that captures variables from its enclosing scope. Closures are first-class in Lua and enable powerful functional programming patterns. See: [03-functions.md](en/03-functions.md)
+
+### Continuation
+A representation of the rest of a computation. Coroutines provide asymmetric continuations in Lua. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Coroutine
+A lightweight thread of execution that can be suspended and resumed. Lua coroutines are cooperative and asymmetric. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Dead Code
+Code that can never be executed. Often a result of incomplete refactoring or unreachable branches. See: [debugging-guide.md](en/debugging-guide.md)
+
+### Dependency Injection
+A pattern where dependencies are provided externally rather than created internally. Reduces coupling and improves testability. See: [06-modules.md](en/06-modules.md)
+
+### DSL (Domain-Specific Language)
+A mini-language designed for a specific problem domain. Lua's flexibility makes it excellent for building internal DSLs. See: [15-advanced-metaprogramming.md](en/15-advanced-metaprogramming.md)
+
+### Event-Driven Programming
+A paradigm where the flow of the program is determined by events such as user actions, messages, or sensor outputs. See: [11-event-system.lua](examples/advanced/11-event-system.lua)
+
+### Garbage Collection
+Automatic memory management that reclaims memory from objects no longer in use. Lua uses incremental mark-and-sweep GC. See: [10-lua-internals.md](en/10-lua-internals.md)
+
+### Generational GC
+A GC strategy that collects young objects more frequently than old ones. Available in Lua 5.4+. See: [10-lua-internals.md](en/10-lua-internals.md)
+
+### Global Environment
+The default table where global variables are stored. In Lua 5.1, accessed via `_G`. In 5.2+, `_ENV` is the environment. See: [01-basics.md](en/01-basics.md)
+
+### Hash Table
+A data structure that maps keys to values using hash functions. Lua tables use hash tables for non-sequential keys. See: [04-tables.md](en/04-tables.md)
+
+### Hook
+A function called by the Lua debug library at specific events (calls, returns, lines). Used for debugging and profiling. See: [debugging-guide.md](en/debugging-guide.md)
+
+### Hot Path
+A code section that is executed frequently and has the most impact on performance. See: [12-performance.md](en/12-performance.md)
+
+### Immutable
+A value that cannot be changed after creation. Lua strings are immutable; tables are mutable. See: [04-tables.md](en/04-tables.md)
+
+### Iterator
+A function that returns successive elements from a collection. Lua uses `pairs` and `ipairs` as built-in iterators. See: [02-control-flow.md](en/02-control-flow.md)
+
+### Lazy Evaluation
+Deferring computation until the result is needed. Lua evaluates eagerly, but coroutine-based generators simulate laziness. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Local Variable
+A variable declared with `local`. Locals are faster than globals because they map to VM registers. See: [01-basics.md](en/01-basics.md)
+
+### Macro
+A form of code transformation. Lua does not have C-style macros but uses `string.gsub` and `load` for similar effects. See: [15-advanced-metaprogramming.md](en/15-advanced-metaprogramming.md)
+
+### Memoization
+An optimization technique that caches function results to avoid redundant computation. See: [03-functions.md](en/03-functions.md)
+
+### Metamethod
+A function in a metatable that handles a specific operation. Examples: `__index`, `__newindex`, `__add`. See: [05-metatables.md](en/05-metatables.md)
+
+### Nil
+Lua's representation of absence of value. Both `nil` and `false` are falsey. See: [01-basics.md](en/01-basics.md)
+
+### Object
+In Lua, any table can serve as an object. Objects gain behavior through metatables and methods. See: [05-metatables.md](en/05-metatables.md)
+
+### Operator Overloading
+Defining custom behavior for standard operators (+, -, *, etc.) through metamethods. See: [05-metatables.md](en/05-metatables.md)
+
+### Pattern
+A template for matching text. Lua patterns use `%d`, `%w`, `.`, `*`, `+`, `-` (not regex). See: [09-standard-library.md](en/09-standard-library.md)
+
+### Pool
+A reusable set of objects that avoids repeated allocation/deallocation. See: [21-advanced/object-pool/](lua-mastery-roadmap/21-advanced/object-pool/)
+
+### Preprocessor
+Code that transforms source before execution. Lua's `string.gsub` and `load` can serve as lightweight preprocessors. See: [15-advanced-metaprogramming.md](en/15-advanced-metaprogramming.md)
+
+### Priority Queue
+A data structure where elements are dequeued by priority, not insertion order. See: [22-advanced/pub-sub-system/](lua-mastery-roadmap/22-advanced/pub-sub-system/)
+
+### Promise
+A placeholder for a future value. Lua does not have native promises; coroutines and callbacks serve similar roles. See: [08-coroutines.md](en/08-coroutines.md)
+
+### Proxy
+An intermediary that controls access to another object. Used for logging, validation, and read-only protection. See: [05-metatables.md](en/05-metatables.md)
+
+### Queue
+A FIFO (first-in, first-out) data structure. Implemented using tables with head/tail indices. See: [12-advanced/](lua-mastery-roadmap/12-advanced/)
 
 ### Async/Await
 A pattern for writing asynchronous code that looks synchronous. In Lua, implemented using coroutines with yield/resume. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
