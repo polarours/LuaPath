@@ -325,6 +325,14 @@ Implement modern Lua patterns including string formatting, iterator composition,
 - Topics: advanced string.format, custom iterators, function composition, fluent APIs
 - Project: [Modern Patterns](40-advanced/modern-patterns/)
 
+### Stage 41: Mini HTTP Server (Capstone)
+**Time**: 12–16 hours
+
+Build a complete, self-contained HTTP server framework in Lua that combines concepts from all previous stages — modules, metatables, coroutines, error handling, middleware pipelines, and production patterns.
+
+- Topics: HTTP protocol, request/response lifecycle, routing, middleware chains, concurrent connection handling, fluent DSL API
+- Project: [Lua HTTP Server](41-capstone/lua-http-server/)
+
 ## Time Investment by Stage
 
 | Stage | Focus | Hours |
@@ -339,7 +347,8 @@ Implement modern Lua patterns including string formatting, iterator composition,
 | 21–28 | Expert projects | 64–96 |
 | 29–36 | Master projects | 64–96 |
 | 37–40 | Expert projects | 32–48 |
-| **Total** | | **406–644** |
+| 41    | Capstone          | 12–16 |
+| **Total** | | **418–660** |
 
 ## How to Use This Roadmap
 
