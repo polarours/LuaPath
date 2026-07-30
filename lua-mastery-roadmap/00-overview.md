@@ -333,6 +333,14 @@ Build a complete, self-contained HTTP server framework in Lua that combines conc
 - Topics: HTTP protocol, request/response lifecycle, routing, middleware chains, concurrent connection handling, fluent DSL API
 - Project: [Lua HTTP Server](41-capstone/lua-http-server/)
 
+### Stage 42: Performance Patterns
+**Time**: 8–12 hours
+
+Optimize Lua code for cache efficiency, memory alignment, and vectorized operations. Understand how data layout affects CPU cache performance and apply patterns that minimize cache misses.
+
+- Topics: cache locality, array-of-structs vs struct-of-arrays, memory alignment, vectorized iteration, prefetching patterns
+- Project: [Cache-friendly Patterns](42-performance/cache-friendly/)
+
 ## Time Investment by Stage
 
 | Stage | Focus | Hours |
@@ -348,7 +356,8 @@ Build a complete, self-contained HTTP server framework in Lua that combines conc
 | 29–36 | Master projects | 64–96 |
 | 37–40 | Expert projects | 32–48 |
 | 41    | Capstone          | 12–16 |
-| **Total** | | **418–660** |
+| 42    | Performance       | 8–12  |
+| **Total** | | **426–680** |
 
 ## How to Use This Roadmap
 
