@@ -341,6 +341,14 @@ Optimize Lua code for cache efficiency, memory alignment, and vectorized operati
 - Topics: cache locality, array-of-structs vs struct-of-arrays, memory alignment, vectorized iteration, prefetching patterns
 - Project: [Cache-friendly Patterns](42-performance/cache-friendly/)
 
+### Stage 43: Toolchain Patterns
+**Time**: 8–12 hours
+
+Integrate Lua into build systems, CI/CD pipelines, and package management workflows. Learn to use Lua as both a build scripting language and a tool for automating development workflows.
+
+- Topics: task-based build systems, CI pipeline hooks, dependency resolution, automated testing workflows
+- Project: [Lua Build System](43-toolchain/lua-build-system/)
+
 ## Time Investment by Stage
 
 | Stage | Focus | Hours |
@@ -357,7 +365,8 @@ Optimize Lua code for cache efficiency, memory alignment, and vectorized operati
 | 37–40 | Expert projects | 32–48 |
 | 41    | Capstone          | 12–16 |
 | 42    | Performance       | 8–12  |
-| **Total** | | **426–680** |
+| 43    | Toolchain         | 8–12  |
+| **Total** | | **434–700** |
 
 ## How to Use This Roadmap
 
