@@ -2,6 +2,11 @@
 -- Combines Router, MiddlewarePipeline, and utility functions into
 -- a single entry point for building HTTP servers.
 
+-- Set up module path when run directly
+if arg and arg[0]:match("app.lua") then
+  package.path = "./../?.lua;./?.lua;" .. package.path
+end
+
 -- Require components lazily to avoid circular dependencies.
 
 local Request = require("request")

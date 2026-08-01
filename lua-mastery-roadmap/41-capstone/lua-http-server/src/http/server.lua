@@ -3,6 +3,11 @@
 -- client connection, yielding when waiting on I/O and resuming when data arrives.
 -- This simulates async behavior without external libraries.
 
+-- Set up module path when run directly
+if arg and arg[0]:match("server.lua") then
+  package.path = "./../?.lua;./?.lua;" .. package.path
+end
+
 local Request = require("request")
 local Response = require("response")
 

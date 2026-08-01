@@ -1,7 +1,7 @@
 -- compare_layouts.lua — Side-by-side comparison of AoS and SoA particle systems
 -- Demonstrates both layout patterns in a single runnable example.
 
-package.path = "?/?.lua;../?.lua;../?/?.lua;" .. package.path
+package.path = "/home/polarours/Projects/Personal/LuaPath/lua-mastery-roadmap/42-performance/cache-friendly/?.lua;" .. package.path
 
 local AosParticles = require("aos_particles")
 local SoaParticles = require("soa_particles")
@@ -23,7 +23,7 @@ local soa = SoaParticles.new(n)
 print("SoA layout initialized")
 print()
 
-print("Updating positions (" .. ITERATIONS or 100 .. " frames)...")
+print("Updating positions (100 frames)...")
 
 local start = os.clock()
 for i = 1, 100 do

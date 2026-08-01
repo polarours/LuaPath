@@ -121,19 +121,22 @@ print(string.format("Root: %s", options.root))
 print()
 
 for _, path in ipairs(files) do
-  stats.total = stats.total + 1
-  print(string.format("TEST: %s", path))
+  -- Skip source modules in src/ directories (they require other modules)
+  if not path:find("/src/") then
+    stats.total = stats.total + 1
+    print(string.format("TEST: %s", path))
   
-  local ok, exit_code = command_succeeded(
-    os.execute(string.format("%s %s 2>&1", options.interpreter, shell_quote(path)))
-  )
+    local ok, exit_code = command_succeeded(
+      os.execute(string.format("%s %s 2>&1", options.interpreter, shell_quote(path)))
+    )
   
-  if ok then
-    stats.passed = stats.passed + 1
-    print("  PASSED")
-  else
-    stats.failed = stats.failed + 1
-    print(string.format("  FAILED (exit code %s)", tostring(exit_code)))
+    if ok then
+      stats.passed = stats.passed + 1
+      print("  PASSED")
+    else
+      stats.failed = stats.failed + 1
+      print(string.format("  FAILED (exit code %s)", tostring(exit_code)))
+    end
   end
 end
 

@@ -2,6 +2,11 @@
 -- Each middleware receives (request, response, next) and decides whether
 -- to call next() to pass control downstream or short-circuit with a response.
 
+-- Set up module path when run directly
+if arg and arg[0]:match("middleware.lua") then
+  package.path = "./../?.lua;./?.lua;" .. package.path
+end
+
 local Response = require("response")
 
 local MiddlewarePipeline = {}

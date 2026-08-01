@@ -2,6 +2,11 @@
 -- Matches incoming requests against registered routes and dispatches
 -- to the appropriate handler. Supports path parameters via :param syntax.
 
+-- Set up module path when run directly
+if arg and arg[0]:match("router.lua") then
+  package.path = "./../?.lua;./?.lua;" .. package.path
+end
+
 local Request = require("request")
 local Response = require("response")
 
