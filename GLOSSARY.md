@@ -289,7 +289,7 @@ A placeholder for a future value. Lua does not have native promises; coroutines 
 An intermediary that controls access to another object. Used for logging, validation, and read-only protection. See: [05-metatables.md](en/05-metatables.md)
 
 ### Queue
-A FIFO (first-in, first-out) data structure. Implemented using tables with head/tail indices. See: [12-advanced/](lua-mastery-roadmap/12-advanced/)
+A FIFO (first-in, first-out) data structure. Implemented using tables with head/tail indices. See: [33-advanced/lock-free-queue/](lua-mastery-roadmap/33-advanced/lock-free-queue/)
 
 ### Async/Await
 A pattern for writing asynchronous code that looks synchronous. In Lua, implemented using coroutines with yield/resume. See: [25-advanced/concurrency-patterns/](lua-mastery-roadmap/25-advanced/concurrency-patterns/)
