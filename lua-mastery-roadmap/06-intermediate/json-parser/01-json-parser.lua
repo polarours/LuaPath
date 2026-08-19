@@ -107,3 +107,5 @@ for i, t in ipairs(tests) do
   else print("[PASS] " .. i .. ": " .. t[1]); passed = passed + 1 end
 end
 print(string.format("\nResults: %d passed, %d failed", passed, failed))
+
+return json
