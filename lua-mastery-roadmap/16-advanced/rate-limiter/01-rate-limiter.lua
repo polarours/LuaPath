@@ -144,3 +144,5 @@ local function main()
 end
 
 main()
+
+return RateLimiter

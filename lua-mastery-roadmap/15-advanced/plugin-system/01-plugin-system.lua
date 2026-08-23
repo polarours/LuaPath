@@ -192,3 +192,5 @@ function main()
 end
 
 main()
+
+return PluginSystem
