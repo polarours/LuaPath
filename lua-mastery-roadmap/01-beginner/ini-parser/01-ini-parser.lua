@@ -120,3 +120,4 @@ level2 = value2
 end
 
 main()
+return { parse_ini = parse_ini }
