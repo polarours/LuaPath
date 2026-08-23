@@ -149,3 +149,5 @@ function main()
 end
 
 main()
+
+return EventBus
