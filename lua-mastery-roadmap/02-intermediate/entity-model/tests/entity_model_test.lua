@@ -3,7 +3,7 @@
 
 package.path = "/home/polarours/Projects/Personal/LuaPath/lua-mastery-roadmap/02-intermediate/entity-model/?.lua;" .. package.path
 
-local entity = require("02-entity-model")
+local Entity = require("02-entity-model")
 
 local pass = 0
 local fail = 0
@@ -42,7 +42,7 @@ end
 print("=== Entity Model Unit Tests ===")
 
 print("\n1. Create entity")
-local e = entity.new("1", "Hero", "character", {"player", "hero"})
+local e = Entity.new("1", "Hero", "character", {"player", "hero"})
 assert_true(e ~= nil, "Entity created")
 assert_eq(e.id, "1", "Entity id")
 assert_eq(e.name, "Hero", "Entity name")
@@ -69,15 +69,15 @@ clone:add_tag("new_tag")
 assert_false(e:has_tag("new_tag"), "Original not affected by clone changes")
 
 print("\n6. Equals check")
-local e2 = entity.new("1", "Hero", "character", {"player", "hero"})
+local e2 = Entity.new("1", "Hero", "character", {"player", "hero"})
 assert_true(e:equals(e2), "Same entity equals")
 -- Note: entities with same fields but different tag order are equal
-local e3 = entity.new("1", "Hero", "character", {"hero", "player"})
+local e3 = Entity.new("1", "Hero", "character", {"hero", "player"})
 assert_true(e:equals(e3), "Same fields equals (order independent)")
 
 print("\n7. Merge entities")
-local base = entity.new("1", "Base", "unit", {"basic"})
-local other = entity.new("2", "Other", "unit", {"special"})
+local base = Entity.new("1", "Base", "unit", {"basic"})
+local other = Entity.new("2", "Other", "unit", {"special"})
 base:merge(other)
 assert_true(base:has_tag("basic"), "Base tag preserved")
 assert_true(base:has_tag("special"), "Other tag added")
