@@ -116,3 +116,5 @@ print("\nKey takeaways:")
 print("  • table.concat beats naive .. by avoiding quadratic realloc")
 print("  • Local variable cache avoids repeated global lookups")
 print("  • Object reuse reduces GC pressure and allocation cost")
+
+return { benchmark = benchmark, fmt_time = fmt_time, results = results }
