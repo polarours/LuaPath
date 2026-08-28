@@ -20,10 +20,10 @@ Design principles:
 | Category | Count |
 |----------|-------|
 | Documentation | 20 chapters × 2 languages (EN + ZH) |
-| Pitfalls | 15 articles × 2 languages (EN + ZH) |
-| Examples | 44 runnable examples |
-| Glossary | 107 terms (EN + ZH) |
-| Roadmap stages | 39 (beginner → advanced) |
+| Pitfalls | 20 articles × 2 languages (EN + ZH) |
+| Examples | 55 runnable examples |
+| Glossary | 151 terms (EN + ZH) |
+| Roadmap stages | 42 (beginner → advanced) |
 
 ## Repository Layout
 
@@ -32,23 +32,23 @@ LuaPath/
 ├── en/                          20 English chapters (00–18)
 ├── zh/                          20 Chinese chapters (mirrors /en)
 ├── pitfalls/
-│   ├── en/                      15 English gotcha articles
-│   └── 中文版/                   15 Chinese gotcha articles
+│   ├── en/                      20 English gotcha articles
+│   └── 中文版/                   20 Chinese gotcha articles
 ├── lua-mastery-roadmap/
 │   ├── 00-overview.md           Staged learning path
 │   ├── 01-beginner/             Stage 1 projects
 │   ├── 02-intermediate/         Stage 2 projects
-│   ├── ...                      Stages 3-35 projects
-│   └── 36-advanced/             Stage 36 projects
+│   ├── ...                      Stages 3-42 projects
+│   └── 43-toolchain/            Stage 43 projects
 ├── examples/
-│   ├── beginner/                10 beginner examples
-│   ├── intermediate/            14 intermediate examples
-│   ├── advanced/                15 advanced examples
-│   └── projects/                5 stage projects (runnable)
+│   ├── beginner/                11 beginner examples
+│   ├── intermediate/            18 intermediate examples
+│   ├── advanced/                22 advanced examples
+│   └── projects/                4 stage projects (runnable)
 ├── exercises/                   Graded exercises (beginner → advanced)
 ├── references/                  Quick reference, version differences, playground guide
 ├── scripts/                     Validation and testing tools
-├── GLOSSARY.md                  107 technical terms
+├── GLOSSARY.md                  151 technical terms
 ├── CONTRIBUTING.md              Contribution guidelines
 └── Makefile                     CI: validate, lint, check-links, parity, test
 ```

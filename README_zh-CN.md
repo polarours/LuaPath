@@ -20,10 +20,10 @@
 | 类别 | 数量 |
 |------|------|
 | 文档 | 20 章 × 2 种语言（EN + ZH） |
-| 陷阱 | 15 篇 × 2 种语言（EN + ZH） |
-| 示例 | 44 个可运行示例 |
-| 术语表 | 107 术语（EN + ZH） |
-| 路线图阶段 | 39 个（入门 → 高级） |
+| 陷阱 | 20 篇 × 2 种语言（EN + ZH） |
+| 示例 | 55 个可运行示例 |
+| 术语表 | 151 术语（EN + ZH） |
+| 路线图阶段 | 42 个（入门 → 高级） |
 
 ## 仓库结构
 
@@ -32,23 +32,23 @@ LuaPath/
 ├── en/                          20 章英文教程 (00–18)
 ├── zh/                          20 章中文教程（镜像 /en）
 ├── pitfalls/
-│   ├── en/                      15 篇英文常见错误
-│   └── 中文版/                   15 篇中文常见错误
+│   ├── en/                      20 篇英文常见错误
+│   └── 中文版/                   20 篇中文常见错误
 ├── lua-mastery-roadmap/
 │   ├── 00-overview.md           分阶段学习路径
 │   ├── 01-beginner/             阶段 1 项目
 │   ├── 02-intermediate/         阶段 2 项目
-│   ├── ...                      阶段 3-35 项目
-│   └── 36-advanced/             阶段 36 项目
+│   ├── ...                      阶段 3-42 项目
+│   └── 43-toolchain/            阶段 43 项目
 ├── examples/
-│   ├── beginner/                10 个入门示例
-│   ├── intermediate/            14 个中级示例
-│   ├── advanced/                15 个高级示例
-│   └── projects/                5 个阶段项目（可运行）
+│   ├── beginner/                11 个入门示例
+│   ├── intermediate/            18 个中级示例
+│   ├── advanced/                22 个高级示例
+│   └── projects/                4 个阶段项目（可运行）
 ├── exercises/                   分级练习（入门 → 高级）
 ├── references/                  速查表、版本差异
 ├── scripts/                     验证和测试工具
-├── GLOSSARY.md                  107 术语参考
+├── GLOSSARY.md                  151 术语参考
 ├── CONTRIBUTING.md              贡献指南
 └── Makefile                     CI：validate、lint、check-links、parity、test
 ```
