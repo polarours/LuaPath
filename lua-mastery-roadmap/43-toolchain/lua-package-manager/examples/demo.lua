@@ -1,7 +1,15 @@
 -- examples/demo.lua — Lua package manager demonstration
 -- Shows how to register packages and resolve dependencies.
 
-package.path = "/home/polarours/Projects/Personal/LuaPath/lua-mastery-roadmap/43-toolchain/lua-package-manager/src/?.lua;" .. package.path
+-- Resolve the implementation directory from this script's own location, so
+-- the test works regardless of the absolute path on disk.
+local function _script_dir()
+  local src = arg and arg[0] or debug.getinfo(1, "S").source
+  if src:sub(1, 1) == "@" then src = src:sub(2) end
+  return src:match("^(.*/)") or "./"
+end
+package.path = _script_dir() .. "../src/?.lua;" .. package.path
+
 
 local PackageManager = require("pkg_manager")
 

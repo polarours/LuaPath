@@ -2,7 +2,15 @@
 -- Run from project root with: lua lua-mastery-roadmap/42-performance/memory-alignment/tests/memory_alignment_test.lua
 
 -- Add parent directory to module path
-package.path = "/home/polarours/Projects/Personal/LuaPath/lua-mastery-roadmap/42-performance/memory-alignment/?.lua;" .. package.path
+-- Resolve the implementation directory from this script's own location, so
+-- the test works regardless of the absolute path on disk.
+local function _script_dir()
+  local src = arg and arg[0] or debug.getinfo(1, "S").source
+  if src:sub(1, 1) == "@" then src = src:sub(2) end
+  return src:match("^(.*/)") or "./"
+end
+package.path = _script_dir() .. "../?.lua;" .. package.path
+
 
 local AlignedBuffer = require("aligned_buffer")
 

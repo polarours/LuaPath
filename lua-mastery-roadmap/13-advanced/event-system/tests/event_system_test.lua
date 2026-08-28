@@ -1,7 +1,15 @@
 -- tests/event_system_test.lua — Unit tests for event bus
 -- Run from project root with: lua tests/event_system_test.lua
 
-package.path = "/home/polarours/Projects/Personal/LuaPath/lua-mastery-roadmap/13-advanced/event-system/?.lua;" .. package.path
+-- Resolve the implementation directory from this script's own location, so
+-- the test works regardless of the absolute path on disk.
+local function _script_dir()
+  local src = arg and arg[0] or debug.getinfo(1, "S").source
+  if src:sub(1, 1) == "@" then src = src:sub(2) end
+  return src:match("^(.*/)") or "./"
+end
+package.path = _script_dir() .. "../?.lua;" .. package.path
+
 
 local EventBus = dofile("lua-mastery-roadmap/13-advanced/event-system/01-event-system.lua")
 
