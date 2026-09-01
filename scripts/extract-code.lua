@@ -6,7 +6,37 @@
 --
 -- Creates extracted/ directory with individual .lua files
 
-local fs = require "lfs" or nil
+-- Try to load luafilesystem; fall back to pure-Lua equivalents for the
+-- three operations we actually need (dir, attributes, mkdir).
+local lfs_available, lfs = pcall(require, "lfs")
+local fs
+if lfs_available then
+  fs = lfs
+else
+  -- Pure-Lua fallback using only stdlib (io.popen / os.execute).
+  -- Covers exactly the three lfs operations this script uses.
+  fs = {
+    dir = function(dir)
+      local cmd = 'ls -1 "' .. dir .. '" 2>/dev/null'
+      local pipe = io.popen(cmd)
+      if not pipe then return function() end end
+      local lines = {}
+      for l in pipe:lines() do table.insert(lines, l) end
+      pipe:close()
+      local i = 0
+      return function()
+        i = i + 1
+        return lines[i]
+      end
+    end,
+    attributes = function(path)
+      return os.execute('test -d "' .. path .. '"')
+    end,
+    mkdir = function(path)
+      return os.execute('mkdir -p "' .. path .. '"') ~= nil
+    end,
+  }
+end
 
 -- Configuration
 local OUTPUT_DIR = "extracted"
@@ -122,7 +152,7 @@ print("==========================")
 print()
 
 for _, dir in ipairs(directories) do
-  if not fs.attributes(dir, "type") then
+  if not fs.attributes(dir) then
     print(string.format("Directory not found: %s", dir))
     goto continue
   end
@@ -147,6 +177,13 @@ print("-------")
 print(string.format("Files processed:    %d", stats.files_processed))
 print(string.format("Code blocks found: %d", stats.blocks_extracted))
 print()
-print(string.format("Output directory:   %s/*/extracted/", os.getcwd()))
+local function get_cwd()
+  local pipe = io.popen("pwd")
+  local cwd = pipe:read("*all"):gsub("\n$", "")
+  pipe:close()
+  return cwd
+end
+
+print(string.format("Output directory:   %s/*/extracted/", get_cwd()))
 print()
 print("Extraction complete")

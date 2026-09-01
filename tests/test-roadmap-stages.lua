@@ -122,7 +122,8 @@ print()
 
 for _, path in ipairs(files) do
   -- Skip source modules in src/ directories (they require other modules)
-  if not path:find("/src/") then
+  -- Skip example scripts that require a specific host environment
+  if not path:find("/src/") and not path:find("/examples/") then
     stats.total = stats.total + 1
     print(string.format("TEST: %s", path))
   

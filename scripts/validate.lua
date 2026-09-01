@@ -206,6 +206,31 @@ local function extract_code_blocks(content)
   return blocks
 end
 
+-- A code block may intentionally contain multiple independent Lua fragments
+-- (a common teaching pattern: "compare module A and module B in one fence").
+-- Try to split such a block on blank-line separators and validate each piece
+-- separately. Only adopt the split if the original failure was <eof>-style
+-- AND every piece compiles cleanly — otherwise preserve the original result
+-- so real errors are never masked.
+local function split_independent_fragments(code)
+  local pieces = {}
+  local current = {}
+  for line in (code .. "\n"):gmatch("(.-)\n") do
+    if line:match("^%s*$") then
+      if #current > 0 then
+        table.insert(pieces, table.concat(current, "\n"))
+        current = {}
+      end
+    else
+      table.insert(current, line)
+    end
+  end
+  if #current > 0 then
+    table.insert(pieces, table.concat(current, "\n"))
+  end
+  return pieces
+end
+
 local function validate_block(block, path)
   local code = table.concat(block.lines, "\n")
   if should_skip(code) then
@@ -215,18 +240,37 @@ local function validate_block(block, path)
 
   local chunkname = string.format("@%s:%d", path, block.start_line)
   local _, err = compile_lua(code, chunkname)
-  if err then
-    if err:match("<eof>") then
-      stats.warnings = stats.warnings + 1
-      return "warning", err
-    end
-
-    stats.failed = stats.failed + 1
-    return "failed", err
+  if not err then
+    stats.passed = stats.passed + 1
+    return "passed"
   end
 
-  stats.passed = stats.passed + 1
-  return "passed"
+  -- On <eof>-style failures, try splitting the block into independent fragments
+  -- separated by blank lines. If every fragment compiles on its own, accept
+  -- them as a multi-fragment teaching example and do not warn.
+  if err:match("<eof>") then
+    local fragments = split_independent_fragments(code)
+    if #fragments > 1 then
+      local all_ok = true
+      for _, frag in ipairs(fragments) do
+        local frag_chunk = string.format("%s#frag", chunkname)
+        local _, frag_err = compile_lua(frag, frag_chunk)
+        if frag_err then
+          all_ok = false
+          break
+        end
+      end
+      if all_ok then
+        stats.passed = stats.passed + 1
+        return "passed"
+      end
+    end
+    stats.warnings = stats.warnings + 1
+    return "warning", err
+  end
+
+  stats.failed = stats.failed + 1
+  return "failed", err
 end
 
 local function process_file(path)
