@@ -9,15 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- New chapters: Debugging Techniques, Testing Strategies, Interoperability Patterns
+- New chapters: Interoperability Patterns (see below)
 - Capstone project templates for each learning phase
-- Automated code example validation
 - Enhanced exercise system with solutions
 
 ### In Progress
 
 - Chapter content expansion with more examples and case studies
 - Quick reference cards and glossary
+
+### Added
+
+- `en/testing-strategies.md` / `zh/testing-strategies.md`: Unit testing,
+  test doubles (stubs/mocks/spies), integration testing, property-based
+  testing, CI integration, and exercises
+- `en/interoperability-patterns.md` / `zh/interoperability-patterns.md`:
+  Lua/C API fundamentals, registering C functions, calling Lua from C,
+  userdata and metatables, memory management, coroutine bridging,
+  async patterns, and exercises
 - CI/CD pipeline for validation
 
 ---
