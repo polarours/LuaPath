@@ -125,7 +125,7 @@
 - 添加 `drain(timeout)` 方法，等待所有活跃对象被释放
 - 添加 `destroy()` 方法，关闭所有连接并停止空闲回收器
 
-**起始骨架：**
+**解答：**
 ```lua
 local Pool = {}
 Pool.__index = Pool
@@ -136,21 +136,161 @@ function Pool:create(config)
   self._max = config.maxSize or 10
   self._idle_timeout = config.idleTimeout or 30
   self._health_check = config.healthCheck or function(c) return true end
-  -- TODO: 初始化池，预创建 minSize 个对象，启动空闲回收器
+
+  -- 指标
+  self._acquire_count = 0
+  self._release_count = 0
+  self._timeout_count = 0
+  self._error_count = 0
+
+  -- 池状态
+  self._idle = {}        -- 空闲对象，以对象自身为键
+  self._active = {}     -- 已借出的对象
+  self._reaper = nil    -- 回收空闲对象的协程
+
+  -- 预创建 minSize 个对象
+  for i = 1, self._min do
+    local obj = config.factory and config.factory() or {}
+    self._idle[obj] = true
+  end
+
+  -- 启动空闲回收协程
+  self._reaper = coroutine.create(function()
+    while true do
+      local deadline = os.clock() + self._idle_timeout
+      while os.clock() < deadline do
+        coroutine.yield()  -- 定期唤醒以检查是否需要销毁
+      end
+      -- 回收已过期的空闲对象
+      local now = os.clock()
+      for obj in pairs(self._idle) do
+        local expire = (obj._pool_expire or 0)
+        if expire > 0 and now >= expire then
+          self._idle[obj] = nil
+          self._timeout_count = self._timeout_count + 1
+          if config.dispose then config.dispose(obj) end
+        end
+      end
+      -- 维持 minSize
+      while #self._idle < self._min do
+        local obj = config.factory and config.factory() or {}
+        self._idle[obj] = true
+      end
+    end
+  end)
+  coroutine.resume(self._reaper)
   return self
 end
 
-function Pool:acquire()
-  -- TODO: 返回空闲对象或创建新对象；如果达到 maxSize 则阻塞
+function Pool:acquire(timeout)
+  self._acquire_count = self._acquire_count + 1
+  local deadline = timeout and (os.clock() + timeout) or math.huge
+
+  while true do
+    -- 尝试找一个健康的空闲对象
+    for obj in pairs(self._idle) do
+      local ok, err = pcall(self._health_check, obj)
+      if ok and err then
+        self._idle[obj] = nil
+        self._active[obj] = true
+        return obj
+      else
+        -- 不健康：丢弃并计入错误
+        self._idle[obj] = nil
+        self._error_count = self._error_count + 1
+        if self._dispose then self._dispose(obj) end
+      end
+    end
+
+    -- 无空闲对象：若未达到上限则创建新的
+    local total = self:count()
+    if total < self._max then
+      local obj = self._factory and self._factory() or {}
+      self._active[obj] = true
+      return obj
+    end
+
+    -- 达到上限：等待 release（向回收协程让出）
+    if os.clock() >= deadline then
+      self._timeout_count = self._timeout_count + 1
+      return nil, "acquire timed out"
+    end
+    coroutine.resume(self._reaper)
+    coroutine.yield()
+  end
 end
 
 function Pool:release(obj)
-  -- TODO: 重置对象并归还到空闲池
+  if not obj then return end
+  self._release_count = self._release_count + 1
+  self._active[obj] = nil
+
+  -- 重置对象后再放回空闲池
+  if self._reset then self._reset(obj) end
+
+  -- 标记过期时间
+  obj._pool_expire = os.clock() + self._idle_timeout
+  self._idle[obj] = true
 end
 
 function Pool:stats()
-  -- TODO: 返回所有指标的快照
+  return {
+    acquire_count = self._acquire_count,
+    release_count = self._release_count,
+    timeout_count = self._timeout_count,
+    error_count   = self._error_count,
+    idle = self:count(),
+    active = 0,
+  }
 end
+
+function Pool:count()
+  local n = 0
+  for _ in pairs(self._idle) do n = n + 1 end
+  return n
+end
+
+function Pool:drain(timeout)
+  local deadline = timeout and (os.clock() + timeout) or math.huge
+  while next(self._active) do
+    if os.clock() >= deadline then
+      return false, "drain timed out"
+    end
+    coroutine.yield()
+  end
+  return true
+end
+
+function Pool:destroy()
+  if self._reaper then
+    coroutine.close(self._reaper)
+    self._reaper = nil
+  end
+  for obj in pairs(self._idle) do
+    if self._dispose then self._dispose(obj) end
+  end
+  self._idle = {}
+  self._active = {}
+end
+```
+
+**使用示例：**
+```lua
+local pool = Pool:create {
+  minSize       = 2,
+  maxSize       = 5,
+  idleTimeout   = 5,
+  factory       = function() return { id = math.random(1,9999) } end,
+  healthCheck   = function(c) return c.id ~= nil end,
+  reset         = function(c) c.query = nil end,
+  dispose       = function(c) c.id = nil end,
+}
+
+local conn = pool:acquire()
+print("acquired", conn.id)
+pool:release(conn)
+print("stats", next(pool:stats()))  -- 验证 stats 键存在
+pool:destroy()
 ```
 
 ### 项目 2：带通配符的发布-订阅（阶段 22）

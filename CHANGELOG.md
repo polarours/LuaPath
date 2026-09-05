@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - New chapters: Interoperability Patterns (see below)
 - Capstone project templates for each learning phase
-- Enhanced exercise system with solutions
+- Enhanced exercise system with solutions (Object Pool implementation in exercises/advanced.md)
 
 ### In Progress
 

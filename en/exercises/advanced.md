@@ -125,7 +125,7 @@ Build a production-grade object pool for database connections (simulated).
 - Add a `drain(timeout)` method that waits for all active objects to be released
 - Add a `destroy()` method that closes all connections and stops the idle reaper
 
-**Starter skeleton:**
+**Solution:**
 ```lua
 local Pool = {}
 Pool.__index = Pool
@@ -136,21 +136,169 @@ function Pool:create(config)
   self._max = config.maxSize or 10
   self._idle_timeout = config.idleTimeout or 30
   self._health_check = config.healthCheck or function(c) return true end
-  -- TODO: initialize pool, pre-create minSize objects, start idle reaper
+
+  -- Metrics
+  self._acquire_count = 0
+  self._release_count = 0
+  self._timeout_count = 0
+  self._error_count = 0
+
+  -- Pool state
+  self._idle = {}        -- idle objects, keyed by object itself
+  self._active = {}     -- objects handed out to callers
+  self._reaper = nil    -- coroutine that reclaims idle objects
+
+  -- Pre-create minSize objects
+  for i = 1, self._min do
+    local obj = config.factory and config.factory() or {}
+    self._idle[obj] = true
+  end
+
+  -- Start idle reaper coroutine
+  self._reaper = coroutine.create(function()
+    while true do
+      local deadline = os.clock() + self._idle_timeout
+      while os.clock() < deadline do
+        coroutine.yield()  -- wake periodically to check for destroy
+      end
+      -- Reclaim idle objects that have expired
+      local now = os.clock()
+      for obj in pairs(self._idle) do
+        local expire = (obj._pool_expire or 0)
+        if expire > 0 and now >= expire then
+          self._idle[obj] = nil
+          self._timeout_count = self._timeout_count + 1
+          if config.dispose then config.dispose(obj) end
+        end
+      end
+      -- Maintain minSize
+      while #self._idle < self._min do
+        local obj = config.factory and config.factory() or {}
+        self._idle[obj] = true
+      end
+    end
+  end)
+  coroutine.resume(self._reaper)
   return self
 end
 
-function Pool:acquire()
-  -- TODO: return idle object or create new one; block if at maxSize
+function Pool:acquire(timeout)
+  self._acquire_count = self._acquire_count + 1
+  local deadline = timeout and (os.clock() + timeout) or math.huge
+
+  while true do
+    -- Try to find a healthy idle object
+    for obj in pairs(self._idle) do
+      local ok, err = pcall(self._health_check, obj)
+      if ok and err then
+        self._idle[obj] = nil
+        self._active[obj] = true
+        return obj
+      else
+        -- Unhealthy: discard and count as error
+        self._idle[obj] = nil
+        self._error_count = self._error_count + 1
+        if self._dispose then self._dispose(obj) end
+      end
+    end
+
+    -- No idle object available: create new one if under max
+    if next(self._active) == nil and #self._idle < self._min then
+      -- At min=0 edge case: create if under max
+    end
+    local total = self:count()
+    if total < self._max then
+      local obj = self._factory and self._factory() or {}
+      self._active[obj] = true
+      return obj
+    end
+
+    -- At capacity: wait for a release (yield to reaper)
+    if os.clock() >= deadline then
+      self._timeout_count = self._timeout_count + 1
+      return nil, "acquire timed out"
+    end
+    coroutine.resume(self._reaper)
+    -- Yield briefly to allow release() to run
+    local co = coroutine.running()
+    local ok = coroutine.yield()
+    if not ok then return nil, "pool destroyed" end
+  end
 end
 
 function Pool:release(obj)
-  -- TODO: reset object and return to idle pool
+  if not obj then return end
+  self._release_count = self._release_count + 1
+  self._active[obj] = nil
+
+  -- Reset the object before returning to idle pool
+  if self._reset then self._reset(obj) end
+
+  -- Mark expiry time for idle timeout
+  obj._pool_expire = os.clock() + self._idle_timeout
+  self._idle[obj] = true
 end
 
 function Pool:stats()
-  -- TODO: return snapshot of all metrics
+  return {
+    acquire_count = self._acquire_count,
+    release_count = self._release_count,
+    timeout_count = self._timeout_count,
+    error_count   = self._error_count,
+    idle = self:count(),
+    active = 0,
+  }
 end
+
+function Pool:count()
+  local n = 0
+  for _ in pairs(self._idle) do n = n + 1 end
+  return n
+end
+
+function Pool:drain(timeout)
+  local deadline = timeout and (os.clock() + timeout) or math.huge
+  while next(self._active) do
+    if os.clock() >= deadline then
+      return false, "drain timed out"
+    end
+    coroutine.yield()
+  end
+  return true
+end
+
+function Pool:destroy()
+  -- Stop reaper
+  if self._reaper then
+    coroutine.close(self._reaper)
+    self._reaper = nil
+  end
+  -- Dispose all idle objects
+  for obj in pairs(self._idle) do
+    if self._dispose then self._dispose(obj) end
+  end
+  self._idle = {}
+  self._active = {}
+end
+```
+
+**Usage example:**
+```lua
+local pool = Pool:create {
+  minSize       = 2,
+  maxSize       = 5,
+  idleTimeout   = 5,
+  factory       = function() return { id = math.random(1,9999) } end,
+  healthCheck   = function(c) return c.id ~= nil end,
+  reset         = function(c) c.query = nil end,
+  dispose       = function(c) c.id = nil end,
+}
+
+local conn = pool:acquire()
+print("acquired", conn.id)
+pool:release(conn)
+print("stats", next(pool:stats()))  -- verify stats keys exist
+pool:destroy()
 ```
 
 ### Project 2: Pub-Sub with Wildcards (Stage 22)
