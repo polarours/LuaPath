@@ -19,7 +19,7 @@
 
 | 类别 | 数量 |
 |------|------|
-| 文档 | 20 章 × 2 种语言（EN + ZH） |
+| 文档 | 22 章 × 2 种语言（EN + ZH） |
 | 陷阱 | 20 篇 × 2 种语言（EN + ZH） |
 | 示例 | 55 个可运行示例 |
 | 术语表 | 151 术语（EN + ZH） |
@@ -29,8 +29,8 @@
 
 ```
 LuaPath/
-├── en/                          20 章英文教程 (00–18)
-├── zh/                          20 章中文教程（镜像 /en）
+├── en/                          22 章英文教程 (00–18, 3 跨领域)
+├── zh/                          22 章中文教程（镜像 /en）
 ├── pitfalls/
 │   ├── en/                      20 篇英文常见错误
 │   └── 中文版/                   20 篇中文常见错误
@@ -78,6 +78,16 @@ LuaPath/
   [08 — 协程](zh/08-coroutines.md)、
   [协程 C 边界](pitfalls/中文版/coroutine-c-boundary.md)、
   [task-scheduler 项目](lua-mastery-roadmap/03-intermediate/task-scheduler/)
+
+- **测试与质量：**
+  [测试策略](zh/testing-strategies.md)、
+  [调试指南](zh/debugging-guide.md)、
+  [错误处理](zh/07-error-handling.md)
+
+- **嵌入与互操作：**
+  [互操作模式](zh/interoperability-patterns.md)、
+  [Lua C API](zh/11-lua-c-api.md)、
+  [嵌入模式](zh/17-embedding-patterns.md)
 
 - **性能：**
   [12 — 性能](zh/12-performance.md)、

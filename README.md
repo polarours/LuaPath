@@ -19,7 +19,7 @@ Design principles:
 
 | Category | Count |
 |----------|-------|
-| Documentation | 20 chapters × 2 languages (EN + ZH) |
+| Documentation | 22 chapters × 2 languages (EN + ZH) |
 | Pitfalls | 20 articles × 2 languages (EN + ZH) |
 | Examples | 55 runnable examples |
 | Glossary | 151 terms (EN + ZH) |
@@ -29,8 +29,8 @@ Design principles:
 
 ```
 LuaPath/
-├── en/                          20 English chapters (00–18)
-├── zh/                          20 Chinese chapters (mirrors /en)
+├── en/                          22 English chapters (00–18, 3 cross-cutting)
+├── zh/                          22 Chinese chapters (mirrors /en)
 ├── pitfalls/
 │   ├── en/                      20 English gotcha articles
 │   └── 中文版/                   20 Chinese gotcha articles
@@ -42,7 +42,7 @@ LuaPath/
 │   └── 43-toolchain/            Stage 43 projects
 ├── examples/
 │   ├── beginner/                11 beginner examples
-│   ├── intermediate/            18 intermediate examples
+│   ├── intermediate/             18 intermediate examples
 │   ├── advanced/                22 advanced examples
 │   └── projects/                4 stage projects (runnable)
 ├── exercises/                   Graded exercises (beginner → advanced)
@@ -78,6 +78,16 @@ LuaPath/
   [08 — Coroutines](en/08-coroutines.md),
   [Coroutine C Boundary](pitfalls/en/coroutine-c-boundary.md),
   [task-scheduler project](lua-mastery-roadmap/03-intermediate/task-scheduler/)
+
+- **Testing and quality:**
+  [Testing Strategies](en/testing-strategies.md),
+  [Debugging Guide](en/debugging-guide.md),
+  [Error Handling](en/07-error-handling.md)
+
+- **Embedding and interop:**
+  [Interoperability Patterns](en/interoperability-patterns.md),
+  [The Lua C API](en/11-lua-c-api.md),
+  [Embedding Patterns](en/17-embedding-patterns.md)
 
 - **Performance:**
   [12 — Performance](en/12-performance.md),
