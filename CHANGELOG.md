@@ -9,9 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- New chapters: Interoperability Patterns (see below)
 - Capstone project templates for each learning phase
-- Enhanced exercise system with solutions (Object Pool implementation in exercises/advanced.md)
+- Quick reference cards (en + zh)
 
 ### In Progress
 
@@ -27,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Lua/C API fundamentals, registering C functions, calling Lua from C,
   userdata and metatables, memory management, coroutine bridging,
   async patterns, and exercises
+- Stage directory READMEs for all 9 roadmap stages (`01-beginner/` …
+  `09-advanced/`) — EN + ZH, each with project table and run instructions
+- Object Pool full solution in `exercises/advanced.md` (replaces
+  4 TODO placeholders in both EN and ZH)
+- `README.md` / `README_zh-CN.md`: updated chapter count to 22, added
+  entry points for Testing Strategies and Interoperability Patterns
 - CI/CD pipeline for validation
 
 ---
