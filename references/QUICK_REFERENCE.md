@@ -1,4 +1,4 @@
-# Quick Reference Cards
+# 快速参考卡片
 
 Concise reference for common Lua operations and patterns.
 
