@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- Capstone project templates for each learning phase
 - Quick reference cards (en + zh)
 
 ### In Progress
@@ -19,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Capstone project templates for each learning phase
+  (`lua-mastery-roadmap/41-capstone/capstone-templates/`):
+  text-data-tool, reactive-pipeline, script-runtime, service-manager
 - `en/testing-strategies.md` / `zh/testing-strategies.md`: Unit testing,
   test doubles (stubs/mocks/spies), integration testing, property-based
   testing, CI integration, and exercises
