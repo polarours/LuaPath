@@ -262,6 +262,120 @@ setmetatable(t, {
 
 ---
 
+## 案例研究：会自己长出来的校验器
+
+一个配置服务必须在每次请求时校验传入记录是否符合 schema。schema 存放在一张
+table 里，因此最直接的实现是每次调用都遍历这张表。本案例研究的是一个更窄的
+问题：如果 schema 是静态的，能否在加载时把它变成代码，而不是永远解释执行它——
+这个改造真的划算吗？
+
+### 参考实现
+
+```lua
+local function validate_generic(record, spec)
+  for i = 1, #spec do
+    local rule = spec[i]
+    local value = record[rule.field]
+    if value == nil then
+      if rule.required then return false, rule.field .. " is required" end
+    elseif type(value) ~= rule.type then
+      return false, rule.field .. " must be a " .. rule.type
+    end
+  end
+  return true
+end
+```
+
+每次调用都要从这张表重新推导行为：一个循环、每条规则两个分支，以及靠拼接构造的
+错误消息。
+
+### 元编程改变了什么
+
+用 schema 拼出源码字符串，只 `load` 一次，然后保留返回的函数。生成物就是一个
+普通的 Lua 函数：
+
+```lua
+-- generated validator
+return function(record)
+  local v
+  v = record["id"]
+  if v == nil then return false, "id is required" end
+  if v ~= nil and type(v) ~= "number" then return false, "id must be a number" end
+  v = record["name"]
+  if v == nil then return false, "name is required" end
+  if v ~= nil and type(v) ~= "string" then return false, "name must be a string" end
+  v = record["score"]
+  if v ~= nil and type(v) ~= "number" then return false, "score must be a number" end
+  v = record["tags"]
+  if v ~= nil and type(v) ~= "table" then return false, "tags must be a table" end
+  return true
+end
+```
+
+三处结构性差异，每一处都在省掉参考实现每次调用都要重做的工作：
+
+1. **没有规则循环。** 循环在生成时就被展开了。
+2. **每个字段只查一次 table**，不必反复读取 `rule.field` 和 `rule.type`。
+3. **消息是预渲染好的字面量**，校验期间不发生任何拼接。
+
+### 让结论成立的那道守卫
+
+生成的代码更快但错了，就毫无价值。因此该示例会用包含八条记录的语料库交叉比对
+两种实现（其中包含畸形记录：`id` 是字符串、`name` 是数字、`tags` 是字符串），
+一旦发现不一致就拒绝输出任何计时数据：
+
+```
+Correctness: 8/8 records agree with the reference validator
+             0 mismatches
+```
+
+这道守卫成本很低，且永久存在，在每次测量前都会运行。要留着它：正是它防止了这个
+优化在日后悄悄破坏正确性。
+
+### 实测结果
+
+自己跑一遍：
+
+```bash
+lua examples/advanced/23-schema-codegen.lua
+```
+
+在本机实测，每条路径各 1,200,000 次校验调用：
+
+| 运行时 | 解释器 | 比值（参考实现 ÷ 生成实现） |
+|--------|--------|------------------------------|
+| Lua 5.4 | PUC | 1.62x – 1.77x |
+| Lua 5.1 | PUC | 1.53x |
+| LuaJIT 2.1.1791988261 | LuaJIT | 3.10x |
+
+从这些数字里应当读出两点：
+
+- **绝对耗时取决于机器；信比值。** 示例会把两者都打印出来，方便你和自己的硬件
+  对比，但真正能跨机器迁移的是比值。
+- **收益大小取决于 VM。** 这里 LuaJIT 的收益大约是 PUC Lua 的两倍，因为它更容易
+  把生成的函数追踪（trace）成紧凑的机器码，而难以用同样方式优化那个驱动 table 的
+  循环。把某一个运行时的数字套用到另一个上，正是本案例要避免的错误。
+
+### 什么时候不该用
+
+代码生成是一笔开销，不是默认选项。以下情况请优先使用参考实现：
+
+- **schema 每次请求都会变。** 编译是按 schema 一次完成的；如果你一直在重编译，
+  只是把开销挪了个位置。
+- **记录很大而校验不在热路径上。** 在一个 50µs 的操作上提升 1.6 倍，不值得换一个
+  没人读得懂的生成文件。
+- **可读性比循环更重要。** 调试时必须能把生成源码打印出来看懂，那是长期维护成本，
+  而不是一次性设置成本。
+- **你写不出那道守卫。** 如果两种实现无法用语料库比对，你就无法区分一次正确的
+  优化和一次错误的优化。
+
+```bash
+# 完整运行：先打印生成源码，再输出计时结果
+lua examples/advanced/23-schema-codegen.lua
+```
+
+---
+
 ## 最佳实践
 
 1. **优先使用静态代码**，当性能至关重要时

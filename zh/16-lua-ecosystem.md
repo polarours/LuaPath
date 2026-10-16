@@ -256,6 +256,124 @@ end
 
 ---
 
+## 案例研究：如何选依赖才不后悔
+
+一个项目需要同时支持 Lua 5.1、5.3、5.4 和 LuaJIT，并且必须在可能没有安装
+`luarocks` 的环境中运行。需求是 JSON 编码。前文已经列出了候选库（`cjson`、
+`dkjson`、`json`）；本案例研究的是让"选哪个"这个决定可以撤销的那套机制。
+
+### 要防住的失败模式
+
+声明依赖只说明了你的期望。真正的失败是：在你改不了的环境里，到了**加载**时刻
+才发现库不存在，然后整个进程跟着一起崩。因此这个决定要做两次：
+
+1. **安装时** —— 在 `.rockspec` 里声明偏好顺序。
+2. **加载时** —— 真正做一次探测，并且手里已经握着一个能用的降级实现。
+
+### 探测
+
+```lua
+local function probe(name)
+  local ok, mod = pcall(require, name)
+  if ok then return { available = true, module = mod } end
+  return { available = false, reason = tostring(mod) }
+end
+
+local JSON_CANDIDATES = { "cjson", "dkjson", "json" }
+```
+
+技巧就在于 `pcall(require, ...)`：模块不存在时它返回的是错误字符串而不是抛出
+异常，于是"缺失"是一个被正常处理的条件，而不是一次崩溃。
+
+在一台没有安装任何 JSON 库的机器上，探测会如实报告：
+
+```
+Dependency probe
+----------------
+  cjson                [missing]      not installed
+  dkjson               [missing]      not installed
+  json                 [missing]      not installed
+  built-in fallback    [available]    stdlib only, always present
+
+Selected encoder: built-in fallback
+```
+
+### 为什么降级实现必须是真的
+
+这是最容易做错的地方。一个写成 `error("install cjson")` 的东西不是降级实现，
+它是把原来的失败换了个说法再执行一遍。这里的降级实现是一个完整的、只用标准库的
+编码器（约 60 行），处理了字符串转义、数组与对象的区分、循环 table 拒绝，以及
+非有限数值：
+
+```lua
+-- JSON 没有 NaN/Infinity 的表示
+if value ~= value or value == math.huge or value == -math.huge then
+  error("cannot encode non-finite number: " .. tostring(value))
+end
+```
+
+非有限数值满足 `value ~= value`，这就是在没有 `math.isnan` 时检测 NaN 的办法。
+这两种情况，朴素的编码器都会悄无声息地产出非法 JSON。
+
+### 如实报告差异
+
+当确实存在偏好库时，该示例会把它输出与自带降级实现进行比对。逐字节相同是**被
+报告、而不是被断言**的——键顺序和浮点格式在不同库之间本就存在合法差异：
+
+```
+Selected encoder (cjson) vs fallback byte-identical: false
+  fallback output:
+  {"empty_list":[],"enabled":true,"limits":{"cpu":0.5,...}}
+```
+
+在这里断言相等本身就是 bug：测试会因为外观原因失败，然后就会有人把它删掉。如实
+报告既保留了信息，又不会制造一次假故障。
+
+### 让降级实现保持存活
+
+从不被执行的降级实现会悄悄腐坏——它从"存在快路径"的那天起就不再被跑到了。所以
+内容校验会在**每一条可用路径**上都运行：
+
+```
+Content checks
+--------------
+  [cjson] ok   service name preserved
+  [cjson] ok   array preserved
+  [cjson] ok   newline escaped
+  ...
+  [fallback] ok   service name preserved
+  [fallback] ok   array preserved
+  ...
+Cyclic input rejected: true
+```
+
+自己把两条路径都跑一遍：
+
+```bash
+# 降级路径（未安装 JSON 库）
+lua examples/advanced/24-ecosystem-probe.lua
+
+# 快路径（任何提供 .encode 函数的库）
+LUA_PATH="/path/to/modules/?.lua;;" lua examples/advanced/24-ecosystem-probe.lua
+```
+
+已在 Lua 5.4、Lua 5.1 和 LuaJIT 2.1 上验证，全部退出码为 0。
+
+### 依赖策略清单
+
+在给 Lua 项目加第三方依赖之前，先回答这些问题：
+
+- **有没有一个我愿意当作生产级看待的降级实现？** 没有的话，就写一个；否则就承认
+  这个依赖是必需的，并在启动时响亮地失败。
+- **版本约束够诚实地窄、够实际地宽吗？** `"cjson >= 2.1"` 和 `"cjson"` 的失败
+  画像完全不同。
+- **这个库支持我宣称支持的每一个 Lua 版本吗？** 本章前面那张版本对照表就是为
+  这项检查而存在的。
+- **依赖缺失时我能知道吗？** 带报告的探测会给你一行日志；不加保护的 `require`
+  只会给你一个堆栈回溯。
+
+---
+
 ## 最佳实践
 
 1. **使用 LuaRocks** 进行包管理

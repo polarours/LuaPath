@@ -21,7 +21,7 @@ Design principles:
 |----------|-------|
 | Documentation | 22 chapters × 2 languages (EN + ZH) |
 | Pitfalls | 20 articles × 2 languages (EN + ZH) |
-| Examples | 55 runnable examples |
+| Examples | 57 runnable examples |
 | Glossary | 151 terms (EN + ZH) |
 | Roadmap stages | 42 (beginner → advanced) |
 
@@ -43,7 +43,7 @@ LuaPath/
 ├── examples/
 │   ├── beginner/                11 beginner examples
 │   ├── intermediate/             18 intermediate examples
-│   ├── advanced/                22 advanced examples
+│   ├── advanced/                24 advanced examples
 │   └── projects/                4 stage projects (runnable)
 ├── exercises/                   Graded exercises (beginner → advanced)
 ├── references/                  Quick reference, version differences, playground guide

@@ -297,6 +297,129 @@ end
 
 ---
 
+## Case Study: Choosing a Dependency Without Regret
+
+A project must ship on Lua 5.1, 5.3, 5.4, and LuaJIT, and it must run in
+environments where `luarocks` may not be installed. JSON encoding is the need.
+The chapter has listed candidates (`cjson`, `dkjson`, `json`); this case study is
+about the mechanism that makes picking one reversible.
+
+### The Failure Mode Being Designed Against
+
+Declaring a dependency only tells you what you hoped for. The failure is
+discovering the library is missing at *load* time, in an environment you cannot
+change — and taking the process down with it. So the decision is made twice:
+
+1. **Install time** — preferred order declared in the `.rockspec`.
+2. **Load time** — an actual probe, with a working fallback already in hand.
+
+### The Probe
+
+```lua
+local function probe(name)
+  local ok, mod = pcall(require, name)
+  if ok then return { available = true, module = mod } end
+  return { available = false, reason = tostring(mod) }
+end
+
+local JSON_CANDIDATES = { "cjson", "dkjson", "json" }
+```
+
+`pcall(require, ...)` is the whole trick: a missing module returns an error string
+instead of raising, so absence is a normal, handled condition rather than a crash.
+
+On a machine with no JSON libraries installed, the probe reports honestly:
+
+```
+Dependency probe
+----------------
+  cjson                [missing]      not installed
+  dkjson               [missing]      not installed
+  json                 [missing]      not installed
+  built-in fallback    [available]    stdlib only, always present
+
+Selected encoder: built-in fallback
+```
+
+### Why The Fallback Must Be Real
+
+This is the part people get wrong. A fallback written as `error("install cjson")`
+is not a fallback — it is the original failure with extra steps. Here the fallback
+is a complete stdlib-only encoder (~60 lines) that handles string escaping,
+array-vs-object detection, cyclic-table rejection, and non-finite numbers:
+
+```lua
+-- JSON has no NaN/Infinity representation
+if value ~= value or value == math.huge or value == -math.huge then
+  error("cannot encode non-finite number: " .. tostring(value))
+end
+```
+
+A non-finite number makes `value ~= value` true, which is how you detect NaN
+without a `math.isnan`. Both of those are cases where a naive encoder silently
+produces invalid JSON.
+
+### Reporting The Difference Honestly
+
+When a preferred library *is* present, the example compares its output against
+the shipped fallback. Byte-for-byte identity is **reported, not asserted** — key
+order and float formatting legitimately differ between libraries:
+
+```
+Selected encoder (cjson) vs fallback byte-identical: false
+  fallback output:
+  {"empty_list":[],"enabled":true,"limits":{"cpu":0.5,...}}
+```
+
+Asserting equality here would be the bug: the test would fail for cosmetic
+reasons, and someone would delete it. Reporting it keeps the information without
+manufacturing a false failure.
+
+### Keeping The Fallback Alive
+
+A fallback that is never executed rots silently — it stops being exercised the
+day a fast path exists. So the content checks run on **every available path**:
+
+```
+Content checks
+--------------
+  [cjson] ok   service name preserved
+  [cjson] ok   array preserved
+  [cjson] ok   newline escaped
+  ...
+  [fallback] ok   service name preserved
+  [fallback] ok   array preserved
+  ...
+Cyclic input rejected: true
+```
+
+Run both paths yourself:
+
+```bash
+# Fallback path (no JSON library installed)
+lua examples/advanced/24-ecosystem-probe.lua
+
+# Fast path (any library providing a .encode function)
+LUA_PATH="/path/to/modules/?.lua;;" lua examples/advanced/24-ecosystem-probe.lua
+```
+
+Verified on Lua 5.4, Lua 5.1, and LuaJIT 2.1 — all exit 0.
+
+### Dependency Policy Checklist
+
+Before adding a third-party dependency to a Lua project, answer these:
+
+- **Is there a fallback I would accept as production-grade?** If not, write one
+  or decide the dependency is truly mandatory and fail loudly at startup.
+- **Is the version constraint narrow enough to be honest, wide enough to be
+  useful?** `"cjson >= 2.1"` vs `"cjson"` have very different failure profiles.
+- **Does the library support every Lua version I claim to support?** The
+  version table earlier in this chapter exists for exactly this check.
+- **Will I know when the dependency goes missing?** A probe with a report gives
+  you a log line; an unguarded `require` gives you a stack trace.
+
+---
+
 ## Best Practices
 
 1. **Use LuaRocks** for package management

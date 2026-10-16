@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Case studies for Chapters 15 and 16 (EN + ZH), each backed by a runnable,
+  measured example: `examples/advanced/23-schema-codegen.lua` (codegen vs
+  schema-walk validator, 1.62–1.77x on Lua 5.4, 3.10x on LuaJIT) and
+  `examples/advanced/24-ecosystem-probe.lua` (dependency probe with a real
+  stdlib-only JSON fallback)
 - Capstone project templates for each learning phase
   (`lua-mastery-roadmap/41-capstone/capstone-templates/`):
   text-data-tool, reactive-pipeline, script-runtime, service-manager

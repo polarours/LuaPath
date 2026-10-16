@@ -345,6 +345,124 @@ setmetatable(t, {
 
 ---
 
+## Case Study: A Validator That Writes Itself
+
+A configuration service must validate incoming records against a schema on every
+request. The schema lives in a table, so the straightforward implementation walks
+that table on every call. This case study asks a narrower question: if the schema
+is static, can we turn it into code once at load time instead of interpreting it
+forever after — and does that actually pay?
+
+### The Reference Implementation
+
+```lua
+local function validate_generic(record, spec)
+  for i = 1, #spec do
+    local rule = spec[i]
+    local value = record[rule.field]
+    if value == nil then
+      if rule.required then return false, rule.field .. " is required" end
+    elseif type(value) ~= rule.type then
+      return false, rule.field .. " must be a " .. rule.type
+    end
+  end
+  return true
+end
+```
+
+Every call re-derives its behaviour from the table: a loop, two branches per rule,
+and a message built by concatenation.
+
+### What Metaprogramming Changes
+
+Build the source string from the schema, load it once, and keep the resulting
+function. The generated artifact is a normal Lua function:
+
+```lua
+-- generated validator
+return function(record)
+  local v
+  v = record["id"]
+  if v == nil then return false, "id is required" end
+  if v ~= nil and type(v) ~= "number" then return false, "id must be a number" end
+  v = record["name"]
+  if v == nil then return false, "name is required" end
+  if v ~= nil and type(v) ~= "string" then return false, "name must be a string" end
+  v = record["score"]
+  if v ~= nil and type(v) ~= "number" then return false, "score must be a number" end
+  v = record["tags"]
+  if v ~= nil and type(v) ~= "table" then return false, "tags must be a table" end
+  return true
+end
+```
+
+Three structural differences, each doing work the reference had to redo per call:
+
+1. **No rule loop.** The loop was unrolled at generation time.
+2. **One table lookup per field**, instead of re-reading `rule.field` and `rule.type`.
+3. **Messages are pre-rendered literals**, so no concatenation happens while validating.
+
+### The Guard That Makes The Claim Meaningful
+
+Generated code that is faster but wrong is worthless, so the example
+cross-checks both implementations against a corpus of eight records — including
+misshapen ones (`id` as a string, `name` as a number, `tags` as a string) — and
+refuses to report any timing if they disagree:
+
+```
+Correctness: 8/8 records agree with the reference validator
+             0 mismatches
+```
+
+The guard is cheap, permanent, and runs before every measurement. Keep it: it is
+what stops the optimization from silently breaking correctness later.
+
+### Measured Results
+
+Run it yourself:
+
+```bash
+lua examples/advanced/23-schema-codegen.lua
+```
+
+Measured on this machine, 1,200,000 validation calls per path:
+
+| Runtime | Interpreter | Ratio (reference ÷ generated) |
+|---------|-------------|-------------------------------|
+| Lua 5.4 | PUC | 1.62x – 1.77x |
+| Lua 5.1 | PUC | 1.53x |
+| LuaJIT 2.1.1791988261 | LuaJIT | 3.10x |
+
+Two readings from those numbers:
+
+- **Absolute times are machine-specific; trust the ratio.** The example prints
+  both so you can compare against your own hardware, but the ratio is what
+  transfers between machines.
+- **The payoff depends on the VM.** LuaJIT gains roughly twice as much as PUC
+  Lua here, because it can trace the generated function into tight machine code
+  more easily than it can the table-driven loop. Generalizing from one runtime's
+  number to another is the mistake this case study exists to prevent.
+
+### When Not To Use This
+
+Code generation is a cost, not a default. Prefer the reference implementation when:
+
+- **The schema changes per request.** Compilation happens once per schema; if you
+  recompile constantly, you have only moved the expense.
+- **Records are large and validation is not on a hot path.** A 1.6x improvement on
+  a 50µs operation is not worth a generated file nobody can read.
+- **Readability outranks the loop.** Generated source must be dumped and
+  understood during debugging; that is ongoing maintenance, not setup cost.
+- **You cannot write the guard.** If the two implementations cannot be compared
+  on a corpus, you have no way to tell a correct optimization from a wrong one.
+
+```bash
+# Full run with the generated source printed, then the timing block
+lua examples/advanced/23-schema-codegen.lua
+```
+
+---
+
 ## Best Practices
 
 1. **Prefer static code** when performance is critical
