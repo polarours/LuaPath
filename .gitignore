@@ -39,3 +39,11 @@ luac.out
 *.x86_64
 *.hex
 
+
+# Compiled C host binaries built from stage examples
+lua-mastery-roadmap/**/embed_lua
+examples/**/embed_lua
+
+# Generated code-extraction output
+en/extracted/
+zh/extracted/
