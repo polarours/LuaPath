@@ -331,6 +331,70 @@ return M
 
 ---
 
+## 案例研究：你的沙箱真的挡住了什么吗？
+
+Allow-list 沙箱给人一种安全感：你列出了脚本能用的东西，其余的都拦住了。但"我没有列出
+`os`"不等于"恶意脚本接触不到 `os`"。本案例研究把四类已知逃逸手法分别投给两种设计，
+数一数每种设计真正挡住了几条。
+
+### 两种设计
+
+**朴素**设计是大多数人写的那种：一张允许的全局变量表，没有任何元表护栏。
+
+```lua
+local function build_naive_sandbox(allow)
+  local env = {}
+  for name in pairs(allow) do env[name] = _G[name] end
+  return env
+end
+```
+
+**加固**设计多加了两样很小的东西：一个拒绝新全局变量的 `__newindex` 元表，以及一个
+显式过滤器，即使命中 `debug` 也要把它删掉。
+
+```lua
+setmetatable(env, {
+  __newindex = function(_, k, _)
+    error("write to new global " .. tostring(k) .. " not permitted", 2)
+  end,
+})
+```
+
+### 逃逸手法
+
+```lua
+local attempts = {
+  { name = "1. 读取 _G.os",   code = 'local os = _G.os return os ~= nil and "LEAKED" or "BLOCKED"' },
+  { name = "2. pcall(require)", code = 'local ok, v = pcall(require, "cjson") return type(v)' },
+  { name = "3. 写入新全局",     code = 'new_global = 42 return "WROTE"' },
+  { name = "4. debug.getinfo",  code = 'local ok = pcall(function() return debug.getinfo() end) return ok' },
+}
+```
+
+跑一下：
+
+```bash
+lua examples/advanced/25-sandbox-escape.lua
+```
+
+已在 Lua 5.4、Lua 5.1 和 LuaJIT 2.1 上验证，全部退出码 0：
+
+```
+naive    : 3/4 escape attempts blocked
+hardened : 4/4 escape attempts blocked
+```
+
+### 如何读这个结果
+
+两种设计在第 1、2、4 条上结论一致——这些仅靠 allow-list 就挡住了。真正拉开差距的是
+**第 3 条**：朴素的 env 会悄无声息地接受 `new_global = 42`，因为一张普通 table 对
+新键没有任何态度。`__newindex` 护栏把这次写入变成一个错误，被 `pcall` 边界捕获。
+
+这就是实际结论：allow-list 挡住的是你**列了**的那些；元表挡住的是你**忘了**的那些。
+忘了是最常见的失败模式，所以元表值得加。
+
+---
+
 ## 最佳实践
 
 1. **设计清晰的 API 边界**，主机和脚本之间

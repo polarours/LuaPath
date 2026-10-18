@@ -7,17 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned
-
-- Quick reference cards (en + zh)
-
 ### In Progress
 
 - Chapter content expansion with more examples and case studies
-- Quick reference cards and glossary
 
 ### Added
 
+- Case study for Chapter 17 (EN + ZH) backed by
+  `examples/advanced/25-sandbox-escape.lua`: four escape attempts run against a
+  naive allow-list sandbox (3/4 blocked) vs a hardened one with a `__newindex`
+  guard and a `debug` filter (4/4 blocked), verified on Lua 5.4, 5.1, and LuaJIT
+- Quick reference cards completed in both languages:
+  `references/QUICK_REFERENCE.md` + `references/QUICK_REFERENCE.zh-CN.md`
+  (434 lines each)
 - Case studies for Chapters 15 and 16 (EN + ZH), each backed by a runnable,
   measured example: `examples/advanced/23-schema-codegen.lua` (codegen vs
   schema-walk validator, 1.62–1.77x on Lua 5.4, 3.10x on LuaJIT) and

@@ -533,6 +533,76 @@ end
 
 ---
 
+## Case Study: Does Your Sandbox Actually Block Anything?
+
+An allow-list sandbox feels secure: you listed what the script may use and
+blocked the rest. But "I did not list `os`" is not the same as "a malicious
+script cannot reach `os`." This case study runs four known classes of escape
+against two designs and counts how many each one actually stops.
+
+### The Two Designs
+
+The **naive** design is the one most people write: a table of allowed globals,
+with no metatable guarding it.
+
+```lua
+local function build_naive_sandbox(allow)
+  local env = {}
+  for name in pairs(allow) do env[name] = _G[name] end
+  return env
+end
+```
+
+The **hardened** design adds two small things: a `__newindex` metatable that
+rejects new globals, and an explicit filter that removes `debug` even when it
+was requested.
+
+```lua
+setmetatable(env, {
+  __newindex = function(_, k, _)
+    error("write to new global " .. tostring(k) .. " not permitted", 2)
+  end,
+})
+```
+
+### The Escape Attempts
+
+```lua
+local attempts = {
+  { name = "1. read _G.os",       code = 'local os = _G.os return os ~= nil and "LEAKED" or "BLOCKED"' },
+  { name = "2. pcall(require)",   code = 'local ok, v = pcall(require, "cjson") return type(v)' },
+  { name = "3. new global write", code = 'new_global = 42 return "WROTE"' },
+  { name = "4. debug.getinfo",    code = 'local ok = pcall(function() return debug.getinfo() end) return ok' },
+}
+```
+
+Run it:
+
+```bash
+lua examples/advanced/25-sandbox-escape.lua
+```
+
+Verified on Lua 5.4, Lua 5.1, and LuaJIT 2.1 — all exit 0:
+
+```
+naive    : 3/4 escape attempts blocked
+hardened : 4/4 escape attempts blocked
+```
+
+### Reading the Result
+
+The two designs agree on attempts 1, 2, and 4 — those are blocked by the
+allow-list alone. The single line that separates them is **attempt 3**: the
+naive env silently accepts `new_global = 42` because a plain table has no
+opinion about new keys. The `__newindex` guard turns that write into an error
+the `pcall` boundary catches.
+
+This is the practical lesson: an allow-list blocks the things you listed
+against; the metatable blocks the things you *forgot*. Forgetting is the
+common failure, so the metatable earns its place.
+
+---
+
 ## Best Practices
 
 1. **Design clear API boundaries** between host and script
