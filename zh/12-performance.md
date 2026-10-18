@@ -598,9 +598,13 @@ print("p99: " .. samples[99])
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/advanced/03-object-pool.lua` — Table 复用模式
 - `examples/advanced/01-ecs-system.lua` — 性能感知设计
+- `examples/advanced/08-gc-tuning.lua` — GC 模式与参数
+- `examples/advanced/16-memory-profiling.lua` — 内存分析辅助手段
+- `examples/advanced/22-memory-optimization.lua` — table 复用与弱引用
+- `examples/projects/04-perf-analysis.lua` — 基准测试框架
 
 ---
 

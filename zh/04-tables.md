@@ -784,11 +784,15 @@ Lua 参考手册明确说明排序不是稳定的。相等元素的相对顺序�
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/beginner/05-table-copy.lua` — 浅拷贝和深拷贝模式
 - `examples/intermediate/01-prototype-entity.lua` — 基于 table 的面向对象
 - `examples/intermediate/05-readonly-table.lua` — 不可变 table 模式
 - `examples/advanced/03-object-pool.lua` — 性能优化中的 table 复用
+- `examples/advanced/04-iterator-patterns.lua` — 有状态迭代器与协程迭代器
+- `examples/beginner/03-word-frequency.lua` — table 当映射、文本遍历
+- `examples/beginner/06-table-operations.lua` — table.insert/remove/sort/concat/pack
+- `examples/intermediate/12-data-structures.lua` — 用 table 实现栈、队列、链表
 
 ---
 

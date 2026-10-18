@@ -759,11 +759,15 @@ ECS 将组件按类型存储在独立的数组中（Structure of Arrays）。系
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/intermediate/01-prototype-entity.lua` — OOP 模式
 - `examples/intermediate/02-event-bus.lua` — 事件系统
 - `examples/intermediate/05-readonly-table.lua` — 代理模式
 - `examples/advanced/01-ecs-system.lua` — ECS 实现
+- `examples/advanced/11-event-system.lua` — 带优先级与 once 的发布订阅
+- `examples/advanced/13-state-machine.lua` — 基于 table 与协程的状态机
+- `examples/advanced/18-state-machine-demo.lua` — 简单状态机演示
+- `examples/advanced/20-event-system.lua` — 发布订阅事件发射器
 
 ---
 

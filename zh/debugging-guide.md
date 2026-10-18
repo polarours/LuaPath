@@ -309,3 +309,12 @@ print(string.format("Elapsed: %.6f s", os.clock() - start))
 - **使用结构化调试输出**（前缀、过滤）处理复杂程序
 - **IDE 调试器**（ZeroBrane、VS Code）提供断点和单步执行
 - **优化前先分析** — 先测量，再优化
+
+
+---
+
+## 示例代码
+
+本章可运行示例：
+- `examples/advanced/06-debug-library.lua` — debug.getinfo/getlocal/sethook
+- `examples/advanced/19-debug-helpers.lua` — 内省与日志辅助

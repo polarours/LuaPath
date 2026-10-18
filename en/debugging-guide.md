@@ -511,3 +511,12 @@ luac5.4 -p script.lua
 - **Use structured debug output** (prefixed, filtered) for complex programs
 - **IDE debuggers** (ZeroBrane, VS Code) provide breakpoints and step-through
 - **Profile before optimizing** — measure first, then optimize
+
+
+---
+
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/advanced/06-debug-library.lua` — debug.getinfo/getlocal/sethook
+- `examples/advanced/19-debug-helpers.lua` — Introspection and logging helpers

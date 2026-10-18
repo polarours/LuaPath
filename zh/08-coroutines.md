@@ -638,9 +638,12 @@ C 函数没有可以被挂起的 Lua 栈。Lua 只能在 Lua 层级的调用边�
 
 ## 示例代码
 
-本章可运行的示例：
+本章可运行示例：
 - `examples/intermediate/03-coroutine-scheduler.lua` — 完整的协作式调度器
 - `examples/beginner/01-moving-average.lua` — 基于协程的流处理
+- `examples/advanced/14-coroutine-channels.lua` — 通道与类 select 模式
+- `examples/intermediate/09-coroutine-patterns.lua` — 生产者-消费者、协程管道
+- `examples/projects/03-task-scheduler.lua` — 协作式轮转调度器
 
 ---
 

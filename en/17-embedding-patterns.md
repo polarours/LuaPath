@@ -645,6 +645,14 @@ common failure, so the metatable earns its place.
 
 ---
 
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/advanced/21-sandbox-demo.lua` — Restricted environment execution
+- `examples/advanced/25-sandbox-escape.lua` — Four escape attempts vs two designs
+
+---
+
 ## Further Reading
 
 - [Lua 5.4 Reference Manual — Section 4](https://www.lua.org/manual/5.4/manual.html#4)

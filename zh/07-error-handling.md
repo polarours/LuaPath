@@ -643,9 +643,11 @@ end
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/intermediate/02-event-bus.lua` — 事件分发中的错误处理
 - `examples/advanced/02-sandbox-environment.lua` — 基于 pcall 的沙箱环境
+- `examples/intermediate/07-error-patterns.lua` — pcall、xpcall、结构化错误
+- `examples/intermediate/18-error-recovery.lua` — 用 pcall/xpcall 做错误恢复
 
 ---
 

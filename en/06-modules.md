@@ -619,6 +619,8 @@ When A requires B which requires A, A may be partially loaded (or nil) when B tr
 Runnable examples for this chapter:
 - `examples/intermediate/04-stateful-module.lua` — Stateful module with lifecycle
 - `examples/intermediate/02-event-bus.lua` — Module-based event system
+- `examples/intermediate/11-module-patterns.lua` — require caching, stateful vs stateless
+- `examples/intermediate/15-module-pattern.lua` — Module encapsulation and private state
 
 ---
 

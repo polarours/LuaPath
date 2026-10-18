@@ -729,7 +729,7 @@ GC 时机是非确定性的。对象可能立即被回收、很久之后才被�
 
 ## 示例代码
 
-本章可运行的示例：
+本章可运行示例：
 - `examples/advanced/02-sandbox-environment.lua` — 沙箱化执行
 - `examples/advanced/03-object-pool.lua` — 生产级对象复用
 

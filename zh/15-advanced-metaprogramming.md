@@ -418,6 +418,13 @@ lua examples/advanced/23-schema-codegen.lua
 
 ---
 
+## 示例代码
+
+本章可运行示例：
+- `examples/advanced/23-schema-codegen.lua` — schema 生成校验器代码
+
+---
+
 ## 延伸阅读
 
 - [Lua 5.4 参考手册 — 第6节](https://www.lua.org/manual/5.4/manual.html#6)

@@ -616,9 +616,11 @@ module("mymod", package.seeall)  -- 不要使用这个
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/intermediate/04-stateful-module.lua` — 带生命周期的有状态模块
 - `examples/intermediate/02-event-bus.lua` — 基于模块的事件系统
+- `examples/intermediate/11-module-patterns.lua` — require 缓存、有状态与无状态模块
+- `examples/intermediate/15-module-pattern.lua` — 模块封装与私有状态
 
 ---
 

@@ -641,6 +641,9 @@ There's no built-in cancel. Set a flag (shared upvalue or table field) that the 
 Runnable examples for this chapter:
 - `examples/intermediate/03-coroutine-scheduler.lua` — Full cooperative scheduler
 - `examples/beginner/01-moving-average.lua` — Coroutine-based stream processing
+- `examples/advanced/14-coroutine-channels.lua` — Channels and select-like patterns
+- `examples/intermediate/09-coroutine-patterns.lua` — Producer-consumer, coroutine pipelines
+- `examples/projects/03-task-scheduler.lua` — Cooperative round-robin scheduler
 
 ---
 

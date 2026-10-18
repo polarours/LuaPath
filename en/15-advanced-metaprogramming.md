@@ -505,6 +505,13 @@ lua examples/advanced/23-schema-codegen.lua
 
 ---
 
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/advanced/23-schema-codegen.lua` — schema → validator code generation
+
+---
+
 ## Further Reading
 
 - [Lua 5.4 Reference Manual — Section 6](https://www.lua.org/manual/5.4/manual.html#6)

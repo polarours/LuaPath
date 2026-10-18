@@ -765,6 +765,7 @@ end
 ## Example Code
 
 Runnable examples for this chapter:
+- `examples/beginner/12-control-flow-patterns.lua` — Every loop form, the three iterator forms, and the iteration pitfalls measured live
 - `examples/beginner/01-moving-average.lua` — Loop with accumulation
 - `examples/intermediate/03-coroutine-scheduler.lua` — Coroutine-based iteration
 

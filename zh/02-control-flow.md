@@ -764,7 +764,8 @@ end
 
 ## 示例代码
 
-本章可运行的示例：
+本章可运行示例：
+- `examples/beginner/12-control-flow-patterns.lua` — 全部循环形式、三种迭代器形式，以及运行时实测的迭代陷阱
 - `examples/beginner/01-moving-average.lua` — 带累加的循环
 - `examples/intermediate/03-coroutine-scheduler.lua` — 基于协程的迭代
 

@@ -509,7 +509,10 @@ end
 
 ## 示例代码
 
-本章的可运行示例位于：
+本章可运行示例：
 - `examples/beginner/01-moving-average.lua`
 - `examples/beginner/02-trim-function.lua`
 - `examples/beginner/04-clamp-lerp.lua`
+- `examples/beginner/07-type-checking.lua` — type()、tonumber()、类型守卫
+- `examples/beginner/09-math-patterns.lua` — math 库：lerp、clamp、取整
+- `examples/beginner/10-scope-and-blocks.lua` — do-end 块、变量遮蔽、作用域

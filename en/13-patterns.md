@@ -764,6 +764,10 @@ Runnable examples for this chapter:
 - `examples/intermediate/02-event-bus.lua` — Event system
 - `examples/intermediate/05-readonly-table.lua` — Proxy pattern
 - `examples/advanced/01-ecs-system.lua` — ECS implementation
+- `examples/advanced/11-event-system.lua` — pub/sub with priority and once
+- `examples/advanced/13-state-machine.lua` — Table-based and coroutine FSMs
+- `examples/advanced/18-state-machine-demo.lua` — Simple state machine demo
+- `examples/advanced/20-event-system.lua` — Publish/subscribe emitter
 
 ---
 

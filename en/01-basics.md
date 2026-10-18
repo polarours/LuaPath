@@ -509,7 +509,10 @@ If `value` is `false` but meaningful, the condition still passes and `use(false)
 
 ## Example Code
 
-Runnable examples for this chapter are in:
+Runnable examples for this chapter:
 - `examples/beginner/01-moving-average.lua`
 - `examples/beginner/02-trim-function.lua`
 - `examples/beginner/04-clamp-lerp.lua`
+- `examples/beginner/07-type-checking.lua` — type(), tonumber(), type guards
+- `examples/beginner/09-math-patterns.lua` — math library: lerp, clamp, rounding
+- `examples/beginner/10-scope-and-blocks.lua` — do-end blocks, shadowing, scope

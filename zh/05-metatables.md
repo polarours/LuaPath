@@ -838,10 +838,20 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/intermediate/01-prototype-entity.lua` — 基于原型的 OOP
 - `examples/intermediate/05-readonly-table.lua` — 只读代理模式
 - `examples/advanced/01-ecs-system.lua` — 基于 metatable 的组件系统
+- `examples/advanced/05-metatable-oop.lua` — 带继承的完整 OOP 体系
+- `examples/advanced/07-weak-tables.lua` — __mode 缓存与终结器
+- `examples/advanced/12-proxy-table.lua` — 只读、校验、日志代理
+- `examples/advanced/15-metamethod-operators.lua` — 各算术元方法
+- `examples/intermediate/06-metatable-basics.lua` — __index/__newindex/__call/__tostring
+- `examples/intermediate/10-metamethods.lua` — 算术与比较元方法
+- `examples/intermediate/14-weak-references.lua` — __mode = 'k'/'v'/'kv' 与 GC
+- `examples/intermediate/16-weak-references-demo.lua` — 弱表与 GC 行为
+- `examples/intermediate/17-metatable-magic.lua` — 元方法概览
+- `examples/projects/02-entity-model.lua` — 原型式实体模型
 
 ---
 

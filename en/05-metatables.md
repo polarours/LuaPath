@@ -842,6 +842,16 @@ Runnable examples for this chapter:
 - `examples/intermediate/01-prototype-entity.lua` — Prototype-based OOP
 - `examples/intermediate/05-readonly-table.lua` — Read-only proxy pattern
 - `examples/advanced/01-ecs-system.lua` — Metatable-based component system
+- `examples/advanced/05-metatable-oop.lua` — Full OOP system with inheritance
+- `examples/advanced/07-weak-tables.lua` — __mode caches and finalizers
+- `examples/advanced/12-proxy-table.lua` — Read-only, validation, logging proxies
+- `examples/advanced/15-metamethod-operators.lua` — All arithmetic metamethods
+- `examples/intermediate/06-metatable-basics.lua` — __index/__newindex/__call/__tostring
+- `examples/intermediate/10-metamethods.lua` — Arithmetic and comparison metamethods
+- `examples/intermediate/14-weak-references.lua` — __mode = 'k'/'v'/'kv' and GC
+- `examples/intermediate/16-weak-references-demo.lua` — Weak-table GC behaviour
+- `examples/intermediate/17-metatable-magic.lua` — Metamethod tour
+- `examples/projects/02-entity-model.lua` — Prototype entity model
 
 ---
 

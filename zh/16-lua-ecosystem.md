@@ -416,6 +416,15 @@ LUA_PATH="/path/to/modules/?.lua;;" lua examples/advanced/24-ecosystem-probe.lua
 
 ---
 
+## 示例代码
+
+本章可运行示例：
+- `examples/advanced/24-ecosystem-probe.lua` — 依赖探测与 JSON 降级
+- `examples/beginner/11-version-compat.lua` — 版本探测与特性开关
+- `examples/intermediate/13-version-compat.lua` — 5.1、5.3、5.4 的差异
+
+---
+
 ## 延伸阅读
 
 - [LuaRocks 文档](https://luarocks.org/)

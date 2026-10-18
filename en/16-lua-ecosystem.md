@@ -462,6 +462,15 @@ Before adding a third-party dependency to a Lua project, answer these:
 
 ---
 
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/advanced/24-ecosystem-probe.lua` — Dependency probe with JSON fallback
+- `examples/beginner/11-version-compat.lua` — Version detection and feature gating
+- `examples/intermediate/13-version-compat.lua` — 5.1 vs 5.3 vs 5.4 differences
+
+---
+
 ## Further Reading
 
 - [LuaRocks Documentation](https://luarocks.org/)

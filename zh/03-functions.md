@@ -811,10 +811,12 @@ print(f())  -- 42
 
 ## 示例代码
 
-本章的可运行示例：
+本章可运行示例：
 - `examples/intermediate/04-stateful-module.lua` — 基于闭包的有状态模块
 - `examples/intermediate/02-event-bus.lua` — 高阶函数模式
 - `examples/advanced/01-ecs-system.lua` — 函数密集型架构
+- `examples/advanced/09-closure-patterns.lua` — memoize、once、debounce、throttle
+- `examples/advanced/17-functional-composition.lua` — compose、curry、高阶函数
 
 ---
 

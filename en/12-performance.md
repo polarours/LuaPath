@@ -601,6 +601,10 @@ The first iterations are interpreted (not JIT-compiled). Warmup allows the JIT t
 Runnable examples for this chapter:
 - `examples/advanced/03-object-pool.lua` — Table reuse pattern
 - `examples/advanced/01-ecs-system.lua` — Performance-conscious design
+- `examples/advanced/08-gc-tuning.lua` — GC modes and parameters
+- `examples/advanced/16-memory-profiling.lua` — Memory profiling helpers
+- `examples/advanced/22-memory-optimization.lua` — Table reuse and weak references
+- `examples/projects/04-perf-analysis.lua` — Benchmarking harness
 
 ---
 

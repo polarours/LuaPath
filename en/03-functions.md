@@ -815,6 +815,8 @@ Runnable examples for this chapter:
 - `examples/intermediate/04-stateful-module.lua` — Closure-based stateful module
 - `examples/intermediate/02-event-bus.lua` — Higher-order function patterns
 - `examples/advanced/01-ecs-system.lua` — Function-heavy architecture
+- `examples/advanced/09-closure-patterns.lua` — memoize, once, debounce, throttle
+- `examples/advanced/17-functional-composition.lua` — compose, curry, higher-order functions
 
 ---
 

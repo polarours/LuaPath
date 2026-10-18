@@ -608,10 +608,14 @@ local result = table.concat(parts)
 
 ## 示例代码
 
-本章可运行的示例：
+本章可运行示例：
 - `examples/beginner/01-moving-average.lua` — 字符串和 math 模式
 - `examples/beginner/03-word-frequency.lua` — 基于 gmatch 的文本处理
 - `examples/intermediate/04-stateful-module.lua` — 带 I/O 的模块
+- `examples/advanced/10-regex-subset.lua` — Lua 模式匹配与 PCRE 对比
+- `examples/beginner/08-string-format.lua` — string.format：补位与对齐
+- `examples/intermediate/08-string-patterns.lua` — gmatch、gsub、捕获组
+- `examples/projects/01-ini-parser.lua` — 用 Lua 模式匹配解析 INI
 
 ---
 

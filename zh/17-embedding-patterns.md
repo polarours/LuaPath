@@ -437,6 +437,14 @@ hardened : 4/4 escape attempts blocked
 
 ---
 
+## 示例代码
+
+本章可运行示例：
+- `examples/advanced/21-sandbox-demo.lua` — 受限环境执行
+- `examples/advanced/25-sandbox-escape.lua` — 四种逃逸手法对比两种设计
+
+---
+
 ## 延伸阅读
 
 - [Lua 5.4 参考手册 — 第4节](https://www.lua.org/manual/5.4/manual.html#4)

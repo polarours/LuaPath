@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `make check-chapters` CI gate (`scripts/check-example-chapters.lua`) validating
+  three invariants: every example's `-- Chapter:` header names a real chapter,
+  every example is linked from its own chapter in both EN and ZH, and every
+  `examples/*.lua` path a chapter mentions exists on disk
+- `examples/beginner/12-control-flow-patterns.lua` (Ex. 29): all four loop
+  forms, the three custom-iterator forms, and the chapter's iteration pitfalls
+  measured at runtime (`#` on a holed table returned 4, `ipairs` stopped at the
+  hole while `pairs` saw 3, `pairs` order differed from insertion order) plus
+  stable partition, chunked iteration, and retry with backoff — 20 checks,
+  passing on Lua 5.4, 5.1 and LuaJIT
+- "Example Code" sections for Chapters 15, 16, 17 and the debugging guide
+  (EN + ZH), which previously had none
 - Case study for Chapter 17 (EN + ZH) backed by
   `examples/advanced/25-sandbox-escape.lua`: four escape attempts run against a
   naive allow-list sandbox (3/4 blocked) vs a hardened one with a `__newindex`
@@ -42,6 +54,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `README.md` / `README_zh-CN.md`: updated chapter count to 22, added
   entry points for Testing Strategies and Interoperability Patterns
 - CI/CD pipeline for validation
+
+### Fixed
+
+- 26 of 58 examples declared a `-- Chapter:` header that matched no chapter file
+  (`07-metatables`, `09-advanced`, `11-data-structures`, …) — leftovers from
+  chapter renumbering that broke navigation. All now point at the chapter that
+  actually covers the topic; the 3 files under `examples/projects/` also gained
+  the `-- Chapter:` line they were missing entirely.
+- 42 of the 58 examples were referenced by no chapter at all, so runnable
+  material was invisible to readers. Every chapter's "Example Code" section now
+  lists its own examples in both EN and ZH (keeping existing cross-references).
 
 ---
 

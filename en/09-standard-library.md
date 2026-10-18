@@ -612,6 +612,10 @@ Runnable examples for this chapter:
 - `examples/beginner/01-moving-average.lua` — String and math patterns
 - `examples/beginner/03-word-frequency.lua` — gmatch-based text processing
 - `examples/intermediate/04-stateful-module.lua` — Module with I/O
+- `examples/advanced/10-regex-subset.lua` — Lua patterns vs PCRE
+- `examples/beginner/08-string-format.lua` — string.format: padding and alignment
+- `examples/intermediate/08-string-patterns.lua` — gmatch, gsub, capture groups
+- `examples/projects/01-ini-parser.lua` — INI parsing with Lua patterns
 
 ---
 

@@ -646,6 +646,8 @@ Without wrapping, error messages lose context about where they originated. Wrapp
 Runnable examples for this chapter:
 - `examples/intermediate/02-event-bus.lua` — Error handling in event dispatch
 - `examples/advanced/02-sandbox-environment.lua` — pcall-based sandboxing
+- `examples/intermediate/07-error-patterns.lua` — pcall, xpcall, structured errors
+- `examples/intermediate/18-error-recovery.lua` — Error recovery with pcall/xpcall
 
 ---
 

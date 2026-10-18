@@ -789,6 +789,10 @@ Runnable examples for this chapter:
 - `examples/intermediate/01-prototype-entity.lua` — Table-based OOP
 - `examples/intermediate/05-readonly-table.lua` — Immutable table patterns
 - `examples/advanced/03-object-pool.lua` — Table reuse for performance
+- `examples/advanced/04-iterator-patterns.lua` — Stateful and coroutine iterators
+- `examples/beginner/03-word-frequency.lua` — Table as map, text iteration
+- `examples/beginner/06-table-operations.lua` — table.insert/remove/sort/concat/pack
+- `examples/intermediate/12-data-structures.lua` — Stack, queue, linked list on tables
 
 ---
 
