@@ -1,5 +1,5 @@
 -- Example 6: Debug Library
--- Chapter: 09-advanced
+-- Chapter: debugging-guide
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

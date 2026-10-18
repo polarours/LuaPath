@@ -1,5 +1,5 @@
 -- Example 11: Event System
--- Chapter: 11-advanced
+-- Chapter: 13-patterns
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

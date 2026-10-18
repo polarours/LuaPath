@@ -1,5 +1,5 @@
 -- Example 16: Weak References
--- Chapter: 07-weak-tables
+-- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 

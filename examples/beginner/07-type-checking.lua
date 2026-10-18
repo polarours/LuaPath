@@ -1,5 +1,5 @@
 -- Example 7: Type Checking and Coercion
--- Chapter: 02-operators
+-- Chapter: 01-basics
 -- Difficulty: Beginner
 -- Lua Version: 5.1+
 --

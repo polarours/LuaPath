@@ -1,5 +1,5 @@
 -- Example 14: Weak References
--- Chapter: 05-gc-and-metatables
+-- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 --

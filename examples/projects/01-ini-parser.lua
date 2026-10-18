@@ -1,5 +1,6 @@
 -- Example 01: INI Parser
 -- Project: 01-ini-parser
+-- Chapter: 09-standard-library
 -- Difficulty: Beginner
 -- Lua Version: 5.1+
 --

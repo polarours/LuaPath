@@ -1,5 +1,5 @@
 -- Example 7: Weak Tables
--- Chapter: 09-advanced
+-- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

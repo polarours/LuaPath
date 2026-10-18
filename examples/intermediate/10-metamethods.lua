@@ -1,5 +1,5 @@
 -- Example 10: Metamethods Deep Dive
--- Chapter: 09-metatables
+-- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 --

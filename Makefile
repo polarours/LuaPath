@@ -1,7 +1,7 @@
 # LuaPath Makefile
 # Common tasks for content development, validation, and testing
 
-.PHONY: help validate lint test-examples test-roadmap-stages test-luajit parity check-links ci clean examples-dir extract-code toc watch version
+.PHONY: help validate lint test-examples test-roadmap-stages test-luajit parity check-links check-chapters ci clean examples-dir extract-code toc watch version
 
 # Configuration
 LUA ?= lua5.4
@@ -26,6 +26,7 @@ help:
 	@echo "  make examples-dir          - Create examples directory structure"
 	@echo "  make extract-code          - Extract code blocks from markdown files"
 	@echo "  make check-links           - Validate internal links"
+	@echo "  make check-chapters        - Verify example Chapter: headers resolve"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean                 - Remove generated files"
@@ -101,6 +102,12 @@ check-links:
 	@bash $(SCRIPTS_DIR)/check-links.sh
 	@echo "==> Link check complete"
 
+# Verify every example's `-- Chapter:` header names a real chapter
+check-chapters:
+	@echo "==> Checking example chapter references..."
+	@$(LUA) $(SCRIPTS_DIR)/check-example-chapters.lua
+	@echo "==> Chapter check complete"
+
 # Check EN/ZH mirrored learner content
 parity:
 	@echo "==> Checking EN/ZH parity..."
@@ -114,7 +121,7 @@ toc:
 	@echo "==> TOC generated"
 
 # Run all validation and tests
-ci: validate lint check-links parity test-examples test-roadmap-stages
+ci: validate lint check-links check-chapters parity test-examples test-roadmap-stages
 	@echo "==> CI checks complete"
 
 # Clean generated files

@@ -1,5 +1,5 @@
 -- Example 12: Proxy Tables
--- Chapter: 07-metatables
+-- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

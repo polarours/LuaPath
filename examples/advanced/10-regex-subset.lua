@@ -1,5 +1,5 @@
 -- Example 10: Pattern Matching (Regex Subset)
--- Chapter: 10-advanced
+-- Chapter: 09-standard-library
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

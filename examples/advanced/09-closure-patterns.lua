@@ -1,5 +1,5 @@
 -- Example 9: Closure Patterns
--- Chapter: 09-advanced
+-- Chapter: 03-functions
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

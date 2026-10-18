@@ -1,5 +1,6 @@
 -- Example 03: Cooperative Task Scheduler
 -- Project: 03-task-scheduler
+-- Chapter: 08-coroutines
 -- Difficulty: Intermediate-Advanced
 -- Lua Version: 5.1+
 --

@@ -1,5 +1,5 @@
 -- Example 6: Metatable Basics
--- Chapter: 06-metatables
+-- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 --

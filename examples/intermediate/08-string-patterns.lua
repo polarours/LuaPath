@@ -1,5 +1,5 @@
 -- Example 8: String Pattern Matching
--- Chapter: 07-strings
+-- Chapter: 09-standard-library
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 --

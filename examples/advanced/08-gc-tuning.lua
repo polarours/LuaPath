@@ -1,5 +1,5 @@
 -- Example 8: Garbage Collection Tuning
--- Chapter: 08-advanced
+-- Chapter: 12-performance
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

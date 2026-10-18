@@ -1,5 +1,5 @@
 -- Example 13: Version Compatibility Patterns
--- Chapter: 09-advanced
+-- Chapter: 16-lua-ecosystem
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
 --

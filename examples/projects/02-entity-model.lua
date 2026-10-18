@@ -1,5 +1,6 @@
 --[[
   Project:    Prototype-Based Entity Model
+  Chapter:    05-metatables
   Difficulty: Stage B (Intermediate)
   Demonstrates: Prototype inheritance via metatables, read-only overlays,
                 set-based tags, clone/merge/equals on entity objects

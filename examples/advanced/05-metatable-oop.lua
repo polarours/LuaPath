@@ -1,5 +1,5 @@
 -- Example 5: Metatable OOP System
--- Chapter: 05-oop
+-- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 --

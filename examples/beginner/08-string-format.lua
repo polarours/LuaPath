@@ -1,5 +1,5 @@
 -- Example 8: String Formatting
--- Chapter: 03-strings
+-- Chapter: 09-standard-library
 -- Difficulty: Beginner
 -- Lua Version: 5.1+
 --
