@@ -3,7 +3,7 @@
 > **Phase**: Advanced  
 > **Prerequisites**: Chapters 05 (Metatables), 06 (Modules)  
 > **Time**: 8–12 hours  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT
 
 ---
 

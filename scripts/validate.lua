@@ -246,7 +246,7 @@ end
 
 -- Version gating ------------------------------------------------------------
 --
--- Every chapter declares "Lua Versions: 5.1, 5.3, 5.4, LuaJIT". A snippet
+-- Every chapter declares "Lua Versions: 5.1, 5.3, 5.4, 5.5, LuaJIT". A snippet
 -- that needs a newer Lua is fine as long as it says so; a snippet that
 -- quietly needs one is a documentation bug, because the reader on 5.1 has no
 -- way to know.

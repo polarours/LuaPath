@@ -3,7 +3,7 @@
 > **Phase**: C (Concurrency and Runtime Surfaces)  
 > **Prerequisites**: Chapter 07 — Error Handling  
 > **Time Estimate**: 2–3 hours reading + 3–5 hours exercises  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT (differences noted)
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT (differences noted)
 
 ---
 

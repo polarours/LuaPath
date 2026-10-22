@@ -3,7 +3,7 @@
 > **Phase**: Cross-cutting  
 > **Prerequisites**: Chapter 07 — Error Handling  
 > **Time Estimate**: 2–3 hours  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT
 
 ---
 

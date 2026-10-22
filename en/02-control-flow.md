@@ -3,7 +3,7 @@
 > **Phase**: A (Core Language Literacy)  
 > **Prerequisites**: Chapter 01 — Basics  
 > **Time Estimate**: 2–3 hours reading + 2–4 hours exercises  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT (differences noted)
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT (differences noted)
 
 ---
 

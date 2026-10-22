@@ -3,7 +3,7 @@
 > **Phase**: D (Internals and Native Integration)  
 > **Prerequisites**: Chapter 10 — Lua Internals  
 > **Time Estimate**: 3–4 hours reading + 4–6 hours exercises  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT (differences noted)
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT (differences noted)
 
 ---
 

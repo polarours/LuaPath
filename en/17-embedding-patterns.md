@@ -3,7 +3,7 @@
 > **Phase**: Advanced  
 > **Prerequisites**: Chapters 10 (Internals), 11 (C API)  
 > **Time**: 10–15 hours  
-> **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
+> **Lua Versions**: 5.1, 5.3, 5.4, 5.5, LuaJIT
 
 ---
 
