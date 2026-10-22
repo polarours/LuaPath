@@ -10,8 +10,15 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        lua-version: ['5.4']
+        include:
+          - lua-version: '5.5.1'
+            interpreter: lua5.5
+            make-target: validate
+          - lua-version: '5.1.5'
+            interpreter: lua5.1
+            make-target: validate-51
     steps:
       - uses: actions/checkout@v4
 
@@ -20,14 +27,8 @@ jobs:
         with:
           luaVersion: ${{ matrix.lua-version }}
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lua5.4 luarocks
-          luarocks install luacheck || true
-
       - name: Validate code snippets
-        run: make validate
+        run: make ${{ matrix.make-target }} LUA=${{ matrix.interpreter }}
 
       - name: Check internal links
         run: make check-links
@@ -35,11 +36,41 @@ jobs:
       - name: Check EN/ZH parity
         run: make parity
 
+      - name: Check stage and chapter references
+        run: make check-stage-refs
+
+      - name: Check EN/ZH code sample mirroring
+        run: make check-code-mirror
+
+      - name: Check stage README file references
+        run: make check-stage-files
+
   test-examples:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        lua-version: ['5.4']
+        include:
+          # The action resolves an unaliased version to a literal tarball name
+          # (https://www.lua.org/ftp/lua-<version>.tar.gz), so the patch version
+          # has to be spelled out: "5.5" would ask for a tarball that does not
+          # exist. The aliases it does know ("5.1" -> "5.1.5", "5.4" -> "5.4.4")
+          # pin an older patch release, so the versions are given explicitly.
+          - lua-version: '5.5.1'
+            interpreter: lua5.5
+            runtime: '5.5'
+          - lua-version: '5.4.9'
+            interpreter: lua5.4
+            runtime: '5.4'
+          - lua-version: '5.3.6'
+            interpreter: lua5.3
+            runtime: '5.3'
+          - lua-version: '5.1.5'
+            interpreter: lua5.1
+            runtime: '5.1'
+          - lua-version: 'luajit'
+            interpreter: luajit
+            runtime: luajit
     steps:
       - uses: actions/checkout@v4
 
@@ -49,13 +80,46 @@ jobs:
           luaVersion: ${{ matrix.lua-version }}
 
       - name: Test examples
-        run: make test-examples
+        run: make test-examples LUA=${{ matrix.interpreter }} LUA_RUNTIME=${{ matrix.runtime }}
+
+      - name: Check the version comparison table
+        run: make test-version-facts LUA=${{ matrix.interpreter }}
+
+      - name: Run the pitfall article samples
+        run: make check-pitfall-examples LUA=${{ matrix.interpreter }}
+
+      - name: Check the standard library names in the documents
+        run: make check-stdlib-names
+
+      - name: Check the C API names in the documents
+        run: make check-capi-names
 
   test-roadmap-stages:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        lua-version: ['5.4']
+        include:
+          # The action resolves an unaliased version to a literal tarball name
+          # (https://www.lua.org/ftp/lua-<version>.tar.gz), so the patch version
+          # has to be spelled out: "5.5" would ask for a tarball that does not
+          # exist. The aliases it does know ("5.1" -> "5.1.5", "5.4" -> "5.4.4")
+          # pin an older patch release, so the versions are given explicitly.
+          - lua-version: '5.5.1'
+            interpreter: lua5.5
+            runtime: '5.5'
+          - lua-version: '5.4.9'
+            interpreter: lua5.4
+            runtime: '5.4'
+          - lua-version: '5.3.6'
+            interpreter: lua5.3
+            runtime: '5.3'
+          - lua-version: '5.1.5'
+            interpreter: lua5.1
+            runtime: '5.1'
+          - lua-version: 'luajit'
+            interpreter: luajit
+            runtime: luajit
     steps:
       - uses: actions/checkout@v4
 
@@ -65,7 +129,7 @@ jobs:
           luaVersion: ${{ matrix.lua-version }}
 
       - name: Test roadmap stages
-        run: make test-roadmap-stages
+        run: make test-roadmap-stages LUA=${{ matrix.interpreter }} LUA_RUNTIME=${{ matrix.runtime }}
 
   lint:
     runs-on: ubuntu-latest
@@ -83,14 +147,25 @@ jobs:
           sudo apt-get install -y luarocks
           luarocks install luacheck || true
 
+      # `make lint` skips luacheck when it is missing, so a failed install
+      # would turn this job into a no-op. Fail loudly instead.
+      - name: Require luacheck
+        run: |
+          command -v luacheck
+          luacheck --version
+
       - name: Run linter
         run: make lint
-        continue-on-error: true
 
   build-c:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Lua 5.4
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.4'
 
       - name: Install Lua dev headers
         run: |
@@ -108,3 +183,9 @@ jobs:
           cd lua-mastery-roadmap/04-advanced/embed-lua
           gcc -Wall -o embed_lua 05-embed-lua.c -llua -lm
           ./embed_lua
+
+      - name: Build capstone C stack host
+        run: |
+          cd examples/projects/05-c-stack-host
+          gcc -Wall -Wextra -I/usr/include/lua5.4 -o host host.c -llua5.4 -lm
+          ./host

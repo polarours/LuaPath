@@ -159,6 +159,7 @@ local stats = {
   passed = 0,
   failed = 0,
   skipped = 0,
+  version_gated = 0,
   warnings = 0,
 }
 
@@ -180,6 +181,8 @@ local function extract_code_blocks(content)
   local blocks = {}
   local current_block
   local line_number = 0
+  local heading = ""
+  local preceding = ""
 
   for line in (content .. "\n"):gmatch("(.-)\n") do
     line_number = line_number + 1
@@ -191,7 +194,14 @@ local function extract_code_blocks(content)
           lang = language,
           lines = {},
           start_line = line_number + 1,
+          heading = heading,
+          preceding = preceding,
         }
+      elseif line:match("^#+%s") then
+        heading = line
+        preceding = ""
+      elseif line:match("%S") then
+        preceding = line
       end
     elseif line:match("^```%s*$") then
       if current_block.lang == "lua" then
@@ -231,11 +241,71 @@ local function split_independent_fragments(code)
   return pieces
 end
 
+-- Version gating ------------------------------------------------------------
+--
+-- Every chapter declares "Lua Versions: 5.1, 5.3, 5.4, LuaJIT". A snippet
+-- that needs a newer Lua is fine as long as it says so; a snippet that
+-- quietly needs one is a documentation bug, because the reader on 5.1 has no
+-- way to know.
+--
+-- So: work out the newest Lua a block requires, from the label around it,
+-- and skip the block when the runtime running the validator is older than
+-- that. What is left failing is exactly the set of unlabelled, incompatible
+-- snippets.
+
+local runtime_minor = tonumber(_VERSION:match("Lua 5%.(%d+)")) or tonumber(_VERSION:match("(%d+)%.(%d+)")) or 4
+
+-- A version marker only counts in a version-ish context, so that an
+-- unrelated "5.3" in a heading is not mistaken for a version requirement.
+local function detect_min_version(text)
+  if not text then return nil end
+  local best = nil
+  local function consider(v)
+    if v and v >= 1 and v <= 5 and (not best or v > best) then best = v end
+  end
+  -- A capture may only appear at the end of a pattern used with gmatch.
+  --
+  -- "Lua 5.3", "Lua 5.3+", "Lua 5.3 说明", "-- Lua 5.3+"
+  for minor in text:gmatch("Lua%s+5%.(%d+)") do
+    consider(tonumber(minor))
+  end
+  -- "(5.3+)" -- the trailing "+)" is simply left unmatched
+  for minor in text:gmatch("%(%d%.(%d+)") do
+    consider(tonumber(minor))
+  end
+  -- The Chinese track uses full-width parentheses: "（5.3+）"
+  for minor in text:gmatch("（%d%.(%d+)") do
+    consider(tonumber(minor))
+  end
+  return best
+end
+
+local function block_min_version(block)
+  local best = nil
+  local function consider(v)
+    if v and (not best or v > best) then best = v end
+  end
+  consider(detect_min_version(block.heading))
+  consider(detect_min_version(block.preceding))
+  -- A label inside the block itself, usually the first line.
+  for i = 1, math.min(3, #block.lines) do
+    consider(detect_min_version(block.lines[i]))
+  end
+  return best
+end
+
 local function validate_block(block, path)
   local code = table.concat(block.lines, "\n")
   if should_skip(code) then
     stats.skipped = stats.skipped + 1
     return "skipped"
+  end
+
+  local min_version = block_min_version(block)
+  if min_version and runtime_minor < min_version then
+    stats.skipped = stats.skipped + 1
+    stats.version_gated = stats.version_gated + 1
+    return "version-gated", min_version
   end
 
   local chunkname = string.format("@%s:%d", path, block.start_line)
@@ -293,6 +363,9 @@ local function process_file(path)
     elseif status == "warning" then
       print(string.format("  WARN: %s (block %d, line %d)", path, block_index, block.start_line))
       print(string.format("    Reason: %s", block_err))
+    elseif status == "version-gated" then
+      print(string.format("  GATED: %s (block %d, line %d) needs Lua 5.%d+",
+        path, block_index, block.start_line, block_err))
     end
   end
 end
@@ -349,7 +422,9 @@ print(string.format("Total blocks:  %d", stats.total))
 print(string.format("Passed:        %d", stats.passed))
 print(string.format("Failed:        %d", stats.failed))
 print(string.format("Skipped:       %d", stats.skipped))
+print(string.format("Version-gated: %d", stats.version_gated))
 print(string.format("Warnings:      %d", stats.warnings))
+print(string.format("Runtime:       %s", _VERSION))
 print()
 
 if stats.failed > 0 then

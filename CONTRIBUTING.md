@@ -100,12 +100,43 @@ end
 Run the validation script before committing:
 
 ```bash
-make validate      # Check all code snippets
+make validate      # Check all code snippets (current runtime)
+make validate-51   # Check all code snippets against the Lua 5.1 baseline
 make parity        # Check EN/ZH mirrored structure
-make check-links   # Validate internal links
+make check-links   # Validate internal links and their anchors
+make check-chapters    # Verify every example's chapter header names a real chapter
+make check-stage-refs  # Verify every Stage/Chapter reference names the right thing
+make check-code-mirror # Verify the EN and ZH code samples are the same code
+make check-stage-files # Verify stage READMEs name files that exist
+make check-pitfall-examples # Run the code samples in the pitfall articles
+make check-stdlib-names  # Verify the stdlib members the docs name exist
+make check-capi-names    # Verify the C API functions the docs name exist
+make test-version-facts # Check the version table against the running runtime
 make lint          # Run style checks
 make test-examples # Test example code
+make ci-matrix     # Everything above, plus Lua 5.1 and LuaJIT
 ```
+
+The `check-*` gates exist because the two tracks drift apart silently.
+`check-stage-refs` catches a reference that names a topic belonging to a
+different number — the roadmap has 42 stages and 18 chapters, and both use
+"Stage 03" style labels, so "Chapter 12 -- State Machines" is a real error
+that no spell checker sees. `check-code-mirror` catches the mirror image: a
+sample that reads `require("app")` in one language and `require("src.http.app")`
+in the other runs differently, and the Chinese reader who copies it gets a
+broken script. Comments and prose may be translated; the code may not.
+`check-stage-files` catches a run command that names a file which was renamed
+long ago, and `check-pitfall-examples` runs the samples in the pitfall
+articles, because a sample that dies on its first line teaches a stack trace
+instead of the lesson. `check-stdlib-names` and `check-capi-names` catch a chapter that
+calls a function no Lua has. `test-version-facts` checks the comparison table in
+`references/VERSION_DIFFERENCES.md` against the runtime that is running it,
+so the table cannot quietly go out of date.
+
+`make validate-51` is the one that catches version drift: a snippet that
+quietly needs Lua 5.2+ fails there, while a snippet that *says* it needs
+5.2+ is skipped. Every chapter declares "Lua Versions: 5.1, 5.3, 5.4,
+LuaJIT", so that claim is checked rather than asserted.
 
 ### 5. Submit Pull Request
 

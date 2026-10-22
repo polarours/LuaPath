@@ -83,7 +83,7 @@ local function normalize_runtime(runtime)
   if value == "luajit" then
     return "luajit"
   end
-  if value:match("^5%.[1-4]$") then
+  if value:match("^5%.[1-5]$") then
     return value
   end
   return nil
@@ -104,6 +104,7 @@ local version_rank = {
   ["5.2"] = 2,
   ["5.3"] = 3,
   ["5.4"] = 4,
+  ["5.5"] = 5,
 }
 
 local function is_compatible(spec, runtime)
@@ -112,7 +113,7 @@ local function is_compatible(spec, runtime)
     return runtime == "luajit"
   end
 
-  local exact = normalized:match("^(5%.[1-4])$")
+  local exact = normalized:match("^(5%.[1-5])$")
   if exact then
     if runtime == "luajit" then
       return exact == "5.1"
@@ -120,7 +121,7 @@ local function is_compatible(spec, runtime)
     return runtime == exact
   end
 
-  local minimum = normalized:match("^(5%.[1-4])%+$")
+  local minimum = normalized:match("^(5%.[1-5])%+$")
   if minimum then
     if runtime == "luajit" then
       return minimum == "5.1"
@@ -222,8 +223,11 @@ for _, path in ipairs(files) do
     else
       stats.ran = stats.ran + 1
       print(string.format("RUN:  %s", path))
+      -- stdin comes from /dev/null: an example that reads input would
+      -- otherwise block the whole run when the suite is started from a
+      -- terminal.
       local ok, exit_code = command_succeeded(
-        os.execute(string.format("%s %s", options.interpreter, shell_quote(path)))
+        os.execute(string.format("%s %s < /dev/null", options.interpreter, shell_quote(path)))
       )
       if not ok then
         stats.failed = stats.failed + 1

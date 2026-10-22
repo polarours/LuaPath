@@ -26,15 +26,27 @@ for dir in $DIRECTORIES; do
   while IFS= read -r file; do
     # Extract all internal links from the file
     # Pattern: [text](relative/path.md#anchor) or [text](relative/path.md)
-    links=$(grep -oE '\[([^\]]+)\]\(([^\)]+)\]' "$file" 2>/dev/null | grep -v '^http' || true)
+    # Note: a ']' inside a bracket expression must not be backslash-escaped.
+    # GNU grep treats "\]" as the end of the expression, so the previous
+    # pattern matched nothing at all and this check was silently vacuous.
+    #
+    # Fenced code blocks are stripped first: an expression like t[i](x) inside
+    # a snippet is not a markdown link.
+    links=$(awk '
+      /^```/ { infence = !infence; next }
+      infence { next }
+      { print }
+    ' "$file" 2>/dev/null \
+      | sed -E 's/`[^`]*`//g' \
+      | grep -oE '\[[^]]*\]\([^)]*\)' \
+      | sed -E 's/.*\]\((.*)\)$/\1/' \
+      | grep -v '^http' | grep -v '^mailto:' || true)
     
-    while IFS= read -r link; do
-      if [ -z "$link" ]; then
+    # The extraction above already reduced each link to its URL.
+    while IFS= read -r url; do
+      if [ -z "$url" ]; then
         continue
       fi
-      
-      # Extract the URL part
-      url=$(echo "$link" | grep -oE '\([^)]+\)' | tr -d '()')
       
       # Skip external links
       if [[ "$url" == http* ]] || [[ "$url" == mailto:* ]]; then
@@ -56,11 +68,12 @@ for dir in $DIRECTORIES; do
         base_dir=$(dirname "$file")
         target="$base_dir/$path"
         
-        if [ ! -f "$target" ]; then
+        if [ ! -e "$target" ]; then
           echo "  BROKEN: $file -> $path"
           ERRORS=$((ERRORS + 1))
         elif [ -n "$anchor" ] && [[ "$anchor" != "$url" ]]; then
-          # TODO: Check if anchor exists in target file
+          # The fragment itself is verified by scripts/check-anchors.lua, which
+          # knows how to build a heading slug the way GitHub does.
           WARNINGS=$((WARNINGS + 1))
         fi
       fi

@@ -102,6 +102,19 @@ local function extract_chapter_ref(content)
   return nil
 end
 
+-- Extracts the example number from a `-- Example 12: Title` header. Scans line
+-- by line rather than anchoring to the start of the file, so a leading comment
+-- block does not hide the number.
+local function extract_example_number(content)
+  for line in (content .. "\n"):gmatch("(.-)\n") do
+    local value = line:match("^[%-%s]*Example%s+(%d+):")
+    if value then
+      return tonumber(value)
+    end
+  end
+  return nil
+end
+
 local chapters, chapters_err = collect_chapters()
 if not chapters then
   io.stderr:write("Unable to inspect en/: " .. chapters_err .. "\n")
@@ -149,6 +162,45 @@ for _, path in ipairs(examples) do
     else
       example_chapter[path] = ref
     end
+  end
+end
+
+-- Pass 1b: example numbering must be present, unique and contiguous.
+--
+-- The number is what a reader quotes ("see Example 23"), so it has to identify
+-- exactly one file. The historical scheme restarted at 1 in every directory
+-- and had gaps, which made "Example 11" ambiguous across three directories
+-- and duplicated outright. Numbers now run 1..N across the whole tree, in
+-- difficulty order: beginner, then intermediate, advanced, projects.
+local number_owner = {}
+local numbered = 0
+
+for _, path in ipairs(examples) do
+  local content = read_file(path)
+  if content then
+    local value = extract_example_number(content)
+    if not value then
+      errors = errors + 1
+      print(string.format("NO EXAMPLE NUMBER: %s", path))
+    else
+      local n = value
+      numbered = numbered + 1
+      if number_owner[n] then
+        errors = errors + 1
+        print(string.format("DUPLICATE EXAMPLE NUMBER: %s and %s both claim %d",
+          number_owner[n], path, n))
+      else
+        number_owner[n] = path
+      end
+    end
+  end
+end
+
+-- The numbers must cover 1..N with no holes.
+for n = 1, numbered do
+  if not number_owner[n] then
+    errors = errors + 1
+    print(string.format("MISSING EXAMPLE NUMBER: no example claims %d", n))
   end
 end
 
