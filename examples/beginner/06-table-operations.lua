@@ -5,6 +5,16 @@
 --
 -- Demonstrates: table.insert, table.remove, table.sort, table.concat, table.pack/unpack
 
+-- table.pack/table.unpack are 5.2+ APIs. On 5.1 the global unpack() does the
+-- same job, and pack can be backported by recording select("#", ...) in a .n
+-- field -- which is precisely what table.pack does.
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+local unpack_values = table.unpack or unpack
+
 --- Print a table's contents
 -- @param t table to print
 -- @param label optional label
@@ -79,17 +89,18 @@ local function main()
 
   -- 4. table.pack and table.unpack
   print("\n4. Pack and Unpack:")
+  print(string.format("  table.pack available: %s", tostring(type(table.pack) == "function")))
   local function multi_return()
     return 1, "two", 3.0, true
   end
 
-  local packed = table.pack(multi_return())
+  local packed = pack(multi_return())
   print(string.format("  Packed: %d values", packed.n))
   for i = 1, packed.n do
     print(string.format("    [%d] = %s (%s)", i, tostring(packed[i]), type(packed[i])))
   end
 
-  local a, b, c, d = table.unpack(packed)
+  local a, b, c, d = unpack_values(packed, 1, packed.n)
   print(string.format("  Unpacked: %s, %s, %s, %s", tostring(a), tostring(b), tostring(c), tostring(d)))
 
   -- 5. Building arrays

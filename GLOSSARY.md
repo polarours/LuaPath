@@ -466,7 +466,7 @@ An intermediary that controls access to another object. Used for logging, valida
 A FIFO (first-in, first-out) data structure. Implemented using tables with head/tail indices. See: [12-performance.md](en/12-performance.md)
 
 ### Recursion
-A function calling itself. Lua supports recursion but does not optimize tail calls in all cases. See: [03-functions.md](en/03-functions.md)
+A function calling itself. Lua supports proper tail calls: a call in tail position reuses the stack frame, so tail recursion does not grow the stack. `return 1 + f(x)` is not in tail position and does grow it. See: [03-functions.md](en/03-functions.md)
 
 ### Reference Type
 A type where assignment copies the reference, not the data. Tables, functions, userdata, and threads are reference types. See: [01-basics.md](en/01-basics.md)

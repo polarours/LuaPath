@@ -211,21 +211,27 @@ print(process(5))  -- "11"
 
 ### Currying
 
+> **Lua 5.2 note**: table.unpack arrived in Lua 5.2. On Lua 5.1 the global unpack() does the same job. debug.getinfo(fn).nparams is 5.2+ as well, so on Lua 5.1 the arity is passed explicitly, as below.
+
 ```lua
+-- table.unpack is 5.2+; on 5.1 the global unpack() does the same job.
+local unpack_values = table.unpack or unpack
+
 local function curry(fn, arity)
+  -- nparams is 5.2+; on 5.1 pass the arity explicitly.
   arity = arity or debug.getinfo(fn).nparams
   return function(...)
     local args = {...}
     if #args >= arity then
-      return fn(table.unpack(args))
+      return fn(unpack_values(args))
     end
     return function(...)
-      return fn(table.unpack(args), ...)
+      return fn(unpack_values(args), ...)
     end
   end
 end
 
-local add = curry(function(a, b) return a + b end)
+local add = curry(function(a, b) return a + b end, 2)
 print(add(3)(4))  -- 7
 ```
 
@@ -254,8 +260,15 @@ function Bus:on(event, handler)
 end
 
 function Bus:emit(event, ...)
+  -- Collect the handlers first: a handler may unsubscribe itself while it
+  -- runs, and removing it from the list during the iteration would make
+  -- ipairs skip the handler behind it.
   local h = self.handlers[event] or {}
-  for _, handler in ipairs(h) do
+  local snapshot = {}
+  for i, handler in ipairs(h) do
+    snapshot[i] = handler
+  end
+  for _, handler in ipairs(snapshot) do
     handler(...)
   end
 end
@@ -264,12 +277,23 @@ end
 ### Priority Event Bus
 
 ```lua
-function Bus:on(event, handler, priority)
-  priority = priority or 0
-  local h = self.handlers[event] or {}
-  h[#h + 1] = {fn = handler, priority = priority}
+-- A priority-ordered variant. It keeps its own list: the plain Bus:on
+-- stores bare functions, this one stores {fn, priority} entries, and
+-- overwriting Bus:on would break Bus:emit and Bus:once as well.
+local priority_handlers = {}
+
+function Bus:onPriority(event, handler, priority)
+  local h = priority_handlers[event] or {}
+  h[#h + 1] = {fn = handler, priority = priority or 0}
   table.sort(h, function(a, b) return a.priority > b.priority end)
-  self.handlers[event] = h
+  priority_handlers[event] = h
+end
+
+function Bus:emitPriority(event, ...)
+  local h = priority_handlers[event] or {}
+  for _, entry in ipairs(h) do
+    entry.fn(...)
+  end
 end
 ```
 
@@ -410,16 +434,33 @@ end
 ### Callable Tables
 
 ```lua
-local Rule = setmetatable({}, {
+-- The rule object: a table with the chainable methods.
+local Rule = {}
+Rule.__index = Rule
+
+function Rule:check(condition)
+  self.checks[#self.checks + 1] = condition
+  return self
+end
+
+function Rule:on_fail(message)
+  self.failure = message
+  return self
+end
+
+-- The callable front door: Rule("name") builds a rule object.
+setmetatable(Rule, {
   __call = function(_, name)
-    return {name = name, checks = {}}
-  end
+    return setmetatable({name = name, checks = {}}, Rule)
+  end,
 })
 
 local r = Rule("age_check")
   :check("age >= 18")
   :check("age <= 120")
   :on_fail("invalid age")
+
+print(r.name, #r.checks, r.failure)  -- age_check  2  invalid age
 ```
 
 ### Builder Pattern
@@ -639,7 +680,9 @@ Vec2.__index = Vec2
 function Vec2.__add(a, b) return Vec2.new(a.x + b.x, a.y + b.y) end
 
 -- BAD: Metatable stores data
-local bad = setmetatable({data = {}}, {__index = function(_, k) ... end})
+local bad = setmetatable({data = {}}, {__index = function(_, k)
+  -- ...
+end})
 ```
 
 ### 5. Test Patterns in Isolation

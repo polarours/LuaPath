@@ -381,14 +381,18 @@ print(code)  -- 42
 ### 2. locale-Dependent String Operations
 
 ```lua
--- Sorting is locale-dependent
+-- Sorting compares bytes, whatever the locale is
 local items = {"c", "a", "B", "b", "A"}
 table.sort(items)
--- Result depends on locale! May not be ASCII order
+-- Always A, B, a, b, c -- the order of the byte values
 
--- For ASCII order, use byte comparison
+-- The same, spelled out
 table.sort(items, function(a, b) return a:byte() < b:byte() end)
 ```
+
+> `table.sort` compares strings with `strcmp`, so the result does not depend
+> on the locale. What the locale does change is `string.format("%f")` and
+> `os.date`, which follow the C library's rules.
 
 ### 3. Blocking I/O in Logic Layers
 
@@ -422,6 +426,8 @@ f:close()
 ```
 
 ### 5. UTF-8 Byte vs Codepoint
+
+> **Lua 5.3 note**: The utf8 library arrived in Lua 5.3, so this snippet requires Lua 5.3+ and does not run on Lua 5.1.
 
 ```lua
 local s = "你好"
@@ -460,6 +466,8 @@ end
 ```
 
 ### 3. Document Text Encoding
+
+> **Lua 5.3 note**: utf8.codes arrived in Lua 5.3, so this snippet requires Lua 5.3+ and does not run on Lua 5.1.
 
 ```lua
 --- Parse UTF-8 string and return codepoints

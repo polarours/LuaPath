@@ -1,28 +1,30 @@
-# Intermediate Stage (continued)
+# Stage 6: JSON Parsing
 
-**Stage Level**: 26-30
+**Stage**: 6 | **Time**: 8–12 hours
 **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
 
 ## Overview
 
-Intermediate production patterns covering parser construction and system design.
+Build a JSON parser from scratch using recursive descent. Understand parsing techniques, error recovery, and data serialization.
 
-## Projects
+- Topics: recursive descent parsing, error handling, data serialization
+
+## Project
 
 | Project | Description | Skills |
 |---------|-------------|--------|
-| [JSON Parser](json-parser/) | Parse and generate JSON data | recursion, tokenization |
-| [Config System](config-system/) | Configuration file handler | modules, persistence |
-| | | |
+| JSON Parser | Build a recursive descent JSON parser from scratch. | Recursive descent parsing; Lexer/tokenizer design; Grammar-driven parsing |
 
 ## Prerequisites
 
-- Completion of previous intermediate stages
-- Understanding of Lua tables and recursion
+- Completion of the previous stage
+- The chapters listed above
 
 ## How to Run
 
 ```bash
-cd <project-name>/
-lua <project-name>.lua
+cd json-parser
+lua 01-json-parser.lua
 ```
+
+Change into the project directory, then run the command above.

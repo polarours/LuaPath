@@ -23,10 +23,10 @@ A practical INI file parser that demonstrates string manipulation and table cons
 ## How to Run
 
 ```bash
-lua ini-parser.lua
+lua 01-ini-parser.lua
 ```
 
-Expects an `example.ini` file in the same directory. Modify the script to use a different input path if needed.
+The script embeds a sample INI document, parses it and prints the resulting configuration. Edit the `ini_content` string near the bottom of the script to parse your own input.
 
 ## Key Concepts
 
@@ -46,8 +46,10 @@ Expects an `example.ini` file in the same directory. Modify the script to use a 
 ## Files
 
 ```
-ini-parser/
-├── README.md          ← This file
-├── ini-parser.lua     ← Main implementation
-└── example.ini        ← Sample input file
+01-beginner/ini-parser/
+├── README.md
+├── README.zh-CN.md
+├── 01-ini-parser.lua      — Main implementation
+└── tests/
+    └── ini_parser_test.lua  — Test suite
 ```

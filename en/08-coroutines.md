@@ -354,17 +354,23 @@ end
 Some C functions cannot yield. If a coroutine yields inside a C function, the program crashes:
 
 ```lua
--- BROKEN: io.read is C, cannot yield inside it
+-- BROKEN on 5.1 and LuaJIT: a yield cannot cross a C call
 local co = coroutine.create(function()
-  print(io.read())  -- May crash if yielded inside
+  local ok, err = pcall(function()
+    coroutine.yield("inside pcall")
+  end)
+  print(ok, err)  -- false, "attempt to yield across metamethod/C-call boundary"
 end)
 
--- SAFE: Use Lua-level I/O or yield outside C calls
+-- SAFE: yield outside the C call
 local co = coroutine.create(function()
-  local line = io.read()  -- I/O completes before yield
-  coroutine.yield(line)   -- Yield is safe here
+  local line = io.read()  -- I/O completes before the yield
+  coroutine.yield(line)   -- the yield is safe here
 end)
 ```
+
+> **Lua 5.4 note**: 5.4 made `pcall` yieldable, so the first sample runs
+> there. LuaJIT follows the 5.1 rule.
 
 > **Lua 5.4 note**: More C functions support yielding in 5.4, but not all. Check documentation.
 
@@ -470,7 +476,7 @@ end
 
 -- BAD: State buried inside coroutine
 local function worker()
-  local queue = ...  -- Where did this come from?
+  local queue = nil   -- Where did this come from?
   local running = true  -- How to stop?
 end
 ```

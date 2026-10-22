@@ -1,4 +1,4 @@
--- Example 7: Weak Tables
+-- Example 39: Weak Tables
 -- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -95,16 +95,16 @@ local function demo_weak_keys()
   weak_keys[key2] = "value2"
 
   print(string.format("  Before GC: %d entries", #weak_keys))
-  print(string.format("  key1 exists: %s", weak_keys[key1] ~= nil))
-  print(string.format("  key2 exists: %s", weak_keys[key2] ~= nil))
+  print(string.format("  key1 exists: %s", tostring(weak_keys[key1] ~= nil)))
+  print(string.format("  key2 exists: %s", tostring(weak_keys[key2] ~= nil)))
 
   -- Allow key1 to be collected
   key1 = nil
   collectgarbage("collect")
 
   print(string.format("  After GC: %d entries", #weak_keys))
-  print(string.format("  key1 exists: %s", weak_keys[{name = "first"}] ~= nil))
-  print(string.format("  key2 exists: %s", weak_keys[key2] ~= nil))
+  print(string.format("  key1 exists: %s", tostring(weak_keys[{name = "first"}] ~= nil)))
+  print(string.format("  key2 exists: %s", tostring(weak_keys[key2] ~= nil)))
 end
 
 --- Demonstrate value weak tables (caching)
@@ -130,7 +130,7 @@ local function demo_weak_values()
   collectgarbage("collect")
 
   print(string.format("  After GC: %d cached objects", stats()))
-  print(string.format("  obj_c still in cache: %s", cache["c"] ~= nil))
+  print(string.format("  obj_c still in cache: %s", tostring(cache["c"] ~= nil)))
 end
 
 --- Demonstrate object deduplication
@@ -165,8 +165,8 @@ local function demo_object_dedup()
   print(string.format("  Cache size after GC: %d", cache.size()))
 
   -- Objects are still referenced, so they stay
-  print(string.format("  obj1 still valid: %s", obj1 ~= nil))
-  print(string.format("  obj2 still valid: %s", obj2 ~= nil))
+  print(string.format("  obj1 still valid: %s", tostring(obj1 ~= nil)))
+  print(string.format("  obj2 still valid: %s", tostring(obj2 ~= nil)))
 end
 
 --- Demonstrate observer pattern with weak refs

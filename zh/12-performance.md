@@ -83,8 +83,8 @@ for i = 1, 10000 do
   t[i] = i
 end
 
--- 好：预分配（5.3+：table.create）
-local t = table.create(10000)
+-- 好：预分配。table.create 是 Lua 5.5 才加的；在 5.1 到 5.4 上表会随着填充增长。
+local t = table.create and table.create(10000) or {}
 for i = 1, 10000 do
   t[i] = i
 end
@@ -505,7 +505,6 @@ print("p99: " .. samples[99])
 
 - 整数运算更快（原生 int64）
 - 位运算符是原生的（比 `bit32` 更快）
-- `table.create` 用于预分配
 - `math.type` 用于数字子类型检查
 
 ### Lua 5.4
@@ -513,6 +512,11 @@ print("p99: " .. samples[99])
 - 分代 GC 模式（适合分配密集型工作负载）
 - `__close` 用于确定性资源清理
 - 整数除法略有优化
+
+### Lua 5.5
+
+- `table.create` 用于预分配一个大小已知的 table
+- `math.atan2`、`math.log10` 和双曲线函数已被移除：它们在 5.4 被废弃，在 5.5 删除
 
 ### LuaJIT
 
@@ -582,7 +586,7 @@ print("p99: " .. samples[99])
 
 ### 中级（1–2 小时）
 
-4. **Table 预分配**：比较逐步增长 table 与 `table.create` 构建 10 万元素数组的性能。测量时间和 GC 计数。
+4. **Table 预分配**：比较逐步增长 table 与 `table.create`（Lua 5.5+）构建 10 万元素数组的性能。测量时间和 GC 计数。
 
 5. **闭包避免**：重构一个闭包密集的函数以最小化闭包创建。对前后版本进行基准测试。
 

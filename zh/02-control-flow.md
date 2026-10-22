@@ -228,12 +228,15 @@ end
 
 多返回值：
 
+> **Lua 5.3 说明**：整数除法运算符 `//` 是 Lua 5.3 引入的。在 Lua 5.1 上请使用 `math.floor(a / b)`，如下所示。
+
 ```lua
+-- `//` 是 5.3+ 语法；math.floor(a / b) 是 5.1 的等价写法。
 local function divmod(a, b)
   if b == 0 then
     return nil, "division by zero"  -- 错误约定
   end
-  return a // b, a % b  -- 多个返回值
+  return math.floor(a / b), a % b  -- 多个返回值
 end
 
 local quotient, remainder = divmod(10, 3)
@@ -578,15 +581,18 @@ end
 
 ```lua
 -- Lua 5.2+
+-- 坐标必须带出循环：到了标签处时 for 变量已经越出作用域。
+local found_i, found_j
 for i = 1, n do
   for j = 1, m do
     if matrix[i][j] == target then
+      found_i, found_j = i, j
       goto found
     end
   end
 end
 ::found::
-print("Found at " .. i .. "," .. j)
+print("Found at " .. found_i .. "," .. found_j)
 ```
 
 ### LuaJIT
@@ -714,7 +720,9 @@ local function retry(fn, max_attempts, delay)
       local wait_time = delay * (2 ^ (attempt - 1))  -- 指数退避
       print("Attempt " .. attempt .. " failed: " .. last_err)
       print("Retrying in " .. wait_time .. "s...")
-      os.sleep(wait_time)  -- 需要 LuaSocket 或类似库
+      -- Lua 自带没有 sleep：要用 LuaSocket 的 socket.sleep()，
+      -- 或在 POSIX 上用 os.execute("sleep N")。后者会一次起一个进程。
+      os.execute(string.format("sleep %d", wait_time))
     end
   end
   

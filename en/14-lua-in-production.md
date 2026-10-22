@@ -78,7 +78,8 @@ local API = {
 local M = {}
 M.get_player = function() return player end
 return M
-
+```
+```lua
 -- api_v2.lua (additive changes)
 local v1 = require("api_v1")
 local M = setmetatable({}, {__index = v1})
@@ -96,9 +97,24 @@ local function create_sandbox()
     string = string,
     math = math,
     table = table,
+    type = type,
+    tostring = tostring,
+    tonumber = tonumber,
+    pairs = pairs,
+    ipairs = ipairs,
+    error = error,
+    assert = assert,
+    pcall = pcall,
+    xpcall = xpcall,
+    select = select,
+    unpack = unpack or table.unpack,
     -- No io, os, debug, package
   }
-  return setmetatable(env, {__index = _G})
+  -- Deliberately no __index = _G fallback here. The allow-list above is
+  -- complete: a fallback to the real globals would defeat the sandbox,
+  -- because a lookup of `os` would miss in env and then resolve through
+  -- __index to _G.os, making the names left out above reachable again.
+  return env
 end
 ```
 
@@ -154,7 +170,16 @@ end
 
 ```lua
 local function run_untrusted(code, sandbox_env, limits)
-  local chunk, err = load(code, "untrusted", "t", sandbox_env)
+  -- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+  -- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+  -- followed by setfenv() on the compiled chunk.
+  local chunk, err
+  if loadstring then
+    chunk, err = loadstring(code, "untrusted")
+    if chunk then setfenv(chunk, sandbox_env) end
+  else
+    chunk, err = load(code, "untrusted", "t", sandbox_env)
+  end
   if not chunk then
     return nil, "parse error: " .. err
   end
@@ -179,6 +204,8 @@ local function run_untrusted(code, sandbox_env, limits)
   return result
 end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ---
 
@@ -255,7 +282,7 @@ end
 
 ## Version Upgrade Strategy
 
-### Compatibility Test Corpus
+### Compatibility Test Corpus (5.3+)
 
 ```lua
 -- tests/compat/5_1.lua
@@ -275,7 +302,7 @@ function tests.test_integers()
 end
 ```
 
-### Feature-Gating
+### Feature-Gating (5.3+)
 
 ```lua
 -- Gate version-specific features
@@ -480,14 +507,32 @@ end)
 
 ```lua
 -- DANGEROUS: Full access
-local chunk = load(user_code)
+local user_code = "print('hello from untrusted code')"
+-- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+local chunk
+if loadstring then
+  chunk = loadstring(user_code)
+else
+  chunk = load(user_code)
+end
 chunk()  -- Can do anything!
 
 -- SAFE: Sandboxed
 local env = create_sandbox()
-local chunk = load(user_code, "user", "t", env)
+-- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+-- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+-- followed by setfenv() on the compiled chunk.
+local chunk
+if loadstring then
+  chunk = loadstring(user_code, "user")
+  if chunk then setfenv(chunk, env) end
+else
+  chunk = load(user_code, "user", "t", env)
+end
 chunk()
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### 2. Ignoring Error Context
 
@@ -529,7 +574,7 @@ local r = make_resource()
 r:close()  -- Deterministic
 ```
 
-### 5. Hardcoding Lua Version Assumptions
+### 5. Hardcoding Lua Version Assumptions (5.3+)
 
 ```lua
 -- BAD: Assumes 5.3+ features

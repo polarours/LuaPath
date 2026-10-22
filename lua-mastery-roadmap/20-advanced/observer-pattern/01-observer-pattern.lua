@@ -2,7 +2,7 @@
   Example: Observer Pattern
   Chapter: Stage 20 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Observable subject, multiple observers, weak references, event filtering
 ]]
 
@@ -35,7 +35,7 @@ function Observable:unsubscribe(id)
 end
 
 function Observable:notify(event, data)
-    for id, entry in pairs(self.observers) do
+    for _, entry in pairs(self.observers) do
         if not entry.filter or entry.filter(event, data) then
             entry.observer:onEvent(event, data)
         end
@@ -107,12 +107,12 @@ local function main()
     local counter = Counter:new()
 
     print("--- Subscribe observers ---")
-    local id1 = subject:subscribe(logger1)
+    subject:subscribe(logger1)
     local id2 = subject:subscribe(logger2)
-    local id3 = subject:subscribe(alerter, function(event, data)
+    subject:subscribe(alerter, function(event, data)
         return event == "temperature"
     end)
-    local id4 = subject:subscribe(counter)
+    subject:subscribe(counter)
 
     print("\n--- Notify events ---")
     subject:notify("temperature", 75)

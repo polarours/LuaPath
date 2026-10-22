@@ -1,11 +1,11 @@
---[[
-  Project:    Prototype-Based Entity Model
-  Chapter:    05-metatables
-  Difficulty: Stage B (Intermediate)
-  Demonstrates: Prototype inheritance via metatables, read-only overlays,
-                set-based tags, clone/merge/equals on entity objects
-]]
--- Lua Version: 5.4
+-- Example 61: Prototype-Based Entity Model
+-- Project: 02-entity-model
+-- Chapter: 05-metatables
+-- Difficulty: Intermediate
+-- Lua Version: 5.1+
+--
+-- Demonstrates: Prototype inheritance via metatables, read-only overlays,
+--               set-based tags, clone/merge/equals on entity objects
 
 local Entity = {}
 Entity.__index = Entity

@@ -20,6 +20,8 @@ end
 Worse — assuming order for serialization:
 
 ```lua
+local config = { host = "localhost", port = 8080, debug = true }
+
 local function serialize(t)
   local parts = {}
   for k, v in pairs(t) do
@@ -28,9 +30,25 @@ local function serialize(t)
   return table.concat(parts, ", ")
 end
 
--- Two calls may produce different strings:
-serialize(config) -- "host=localhost, port=8080, debug=true"
-serialize(config) -- "port=8080, host=localhost, debug=true"
+-- The order is not guaranteed. It differs between Lua versions, and it can
+-- change when the table is modified:
+serialize(config) -- "host=localhost, port=8080, debug=true" on Lua 5.1
+serialize(config) -- "debug=true, host=localhost, port=8080" on Lua 5.5
+
+-- Two calls in the same run do agree, but nothing promises that either.
+```
+
+## Reproduction
+
+A plain table has no fixed iteration order:
+
+```lua
+local config = {host = "localhost", port = 8080, debug = true}
+
+-- the order may change between runs!
+for k, v in pairs(config) do
+  print(k, v)
+end
 ```
 
 ## Why It's Wrong

@@ -38,5 +38,5 @@ local t = setmetatable({}, {
 
 ## Related Concepts
 
-- [05-metatables.md](../en/05-metatables.md) — Metatables and metamethods
-- [10-lua-internals.md](../en/10-lua-internals.md) — Lua internals
+- [05-metatables.md](../../en/05-metatables.md) — Metatables and metamethods
+- [10-lua-internals.md](../../en/10-lua-internals.md) — Lua internals

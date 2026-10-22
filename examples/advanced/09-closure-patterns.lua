@@ -1,4 +1,4 @@
--- Example 9: Closure Patterns
+-- Example 41: Closure Patterns
 -- Chapter: 03-functions
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -7,6 +7,9 @@
 -- Shows: closure-based state, upvalue lifetime, shared mutable state pitfalls
 
 local M = {}
+
+-- table.unpack arrived in Lua 5.2; on 5.1 the global unpack() does the job.
+local unpack_values = table.unpack or unpack
 
 -- Factory function: creates objects with private state
 function M.counter(start)
@@ -59,7 +62,7 @@ function M.debounce(fn, delay_ms)
         local function execute()
             if timer_id then
                 timer_id = nil
-                return fn(table.unpack(args))
+                return fn(unpack_values(args))
             end
         end
         return execute()

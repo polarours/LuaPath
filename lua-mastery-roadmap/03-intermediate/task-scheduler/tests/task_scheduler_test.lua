@@ -1,5 +1,5 @@
 -- tests/task_scheduler_test.lua — Unit tests for task scheduler
--- Run from project root with: lua tests/task_scheduler_test.lua
+-- Run from the project directory with: lua tests/task_scheduler_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
 -- the test works regardless of the absolute path on disk.
@@ -17,7 +17,7 @@ local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -27,23 +27,13 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1
   else
     fail = fail + 1
     print("FAIL: " .. msg .. " (expected true)")
-  end
-end
-
-function assert_false(val, msg)
-  total = total + 1
-  if not val then
-    pass = pass + 1
-  else
-    fail = fail + 1
-    print("FAIL: " .. msg .. " (expected false)")
   end
 end
 

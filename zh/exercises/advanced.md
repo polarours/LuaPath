@@ -27,7 +27,7 @@
    使用命令模式实现事务日志。每个命令是一个包含 `execute(self)`、`undo(self)` 和 `serialize(self)` 方法的表。构建一个 `Invoker` 跟踪历史并支持 `undo(n)` 和 `redo(n)`。
    - 将日志序列化为 JSON 文件并从磁盘重新加载
    - 验证重新加载后的 `undo` 与内存中的 `undo` 行为一致
-   - 处理边界情况：空历史的 undo、超出栈深度的 redo、序列化引用闭包 upvalue 的命令
+   - 处理边界情况：空历史的 undo、超出栈深度的 redo、序列化引用闭包上值的命令
 
 4. **观察者模式（阶段 20）** — `困难`
    构建一个 `EventEmitter`，支持 `on(event, handler)`、`off(event, handler)` 和 `emit(event, ...)`。添加 `once(event, handler)` 便捷方法，首次触发后自动移除。
@@ -118,10 +118,10 @@
 **需求：**
 - `Pool:create(config)` 支持 `minSize`、`maxSize`、`idleTimeout`、`healthCheck`
 - 跟踪指标：`acquire_count`、`release_count`、`timeout_count`、`error_count`
-- 空闲对象在 `idleTimeout` 秒后被回收（使用计时器 coroutine）
+- 空闲对象在 `idleTimeout` 秒后被回收（使用计时器协程）
 - `healthCheck(conn)` 在返回对象前运行；不健康的对象被丢弃
 - 暴露 `stats()` 返回包含所有计数器的快照表
-- 使用基于 coroutine 的 yield 安全处理并发 `acquire` 调用
+- 使用基于协程的 yield 安全处理并发 `acquire` 调用
 - 添加 `drain(timeout)` 方法，等待所有活跃对象被释放
 - 添加 `destroy()` 方法，关闭所有连接并停止空闲回收器
 
@@ -203,6 +203,9 @@ function Pool:acquire(timeout)
     end
 
     -- 无空闲对象：若未达到上限则创建新的
+    if next(self._active) == nil and #self._idle < self._min then
+      -- min=0 的边界情况：未达上限时创建
+    end
     local total = self:count()
     if total < self._max then
       local obj = self._factory and self._factory() or {}
@@ -216,7 +219,10 @@ function Pool:acquire(timeout)
       return nil, "acquire timed out"
     end
     coroutine.resume(self._reaper)
-    coroutine.yield()
+    -- 短暂让出，以便 release() 获得运行机会
+    local co = coroutine.running()
+    local ok = coroutine.yield()
+    if not ok then return nil, "pool destroyed" end
   end
 end
 
@@ -262,10 +268,14 @@ function Pool:drain(timeout)
 end
 
 function Pool:destroy()
+  -- 停止回收协程
   if self._reaper then
-    coroutine.close(self._reaper)
+    -- coroutine.close 从 5.4 起才有；在 5.1 和 LuaJIT 上回收协程
+    -- 只会被丢弃，并随对象池一起被垃圾回收器回收。
+    if coroutine.close then coroutine.close(self._reaper) end
     self._reaper = nil
   end
+  -- 释放所有空闲对象
   for obj in pairs(self._idle) do
     if self._dispose then self._dispose(obj) end
   end
@@ -273,6 +283,8 @@ function Pool:destroy()
   self._active = {}
 end
 ```
+
+> **Lua 5.4 说明**：coroutine.close() 是 Lua 5.4 才引入的；在 Lua 5.1 和 LuaJIT 上，回收协程只会被丢弃，并随对象池一起被垃圾回收器回收。
 
 **使用示例：**
 ```lua
@@ -412,7 +424,7 @@ end
 
 3. 在分层 FSM 中，如何处理跨层级转换（如 `combat` 中的子状态直接转换到 `idle` 中的子状态）而不破坏每个层级转换表的封装？
 
-4. 在 Lua 中构建数据管道时，如何在基于 coroutine 的生成器（惰性求值）和基于列表的阶段（立即求值）之间做选择？对内存使用和错误传播有什么影响？
+4. 在 Lua 中构建数据管道时，如何在基于协程的生成器（惰性求值）和基于列表的阶段（立即求值）之间做选择？对内存使用和错误传播有什么影响？
 
 5. 部署加载器在启动时发现冲突的模块版本。应该硬失败、使用最新版本，还是允许按服务覆盖版本？模块应该声明什么契约才能使这个选择安全？
 

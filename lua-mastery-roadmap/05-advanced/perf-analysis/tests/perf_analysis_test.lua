@@ -1,8 +1,8 @@
 -- tests/perf_analysis_test.lua — Unit tests for performance analysis
--- Run from project root with: lua tests/perf_analysis_test.lua
+-- Run from the project directory with: lua tests/perf_analysis_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
--- the test works regardless of the absolute path on disk.
+-- the test works regardless of the working directory it is started from.
 local function _script_dir()
   local src = arg and arg[0] or debug.getinfo(1, "S").source
   if src:sub(1, 1) == "@" then src = src:sub(2) end
@@ -12,13 +12,13 @@ package.path = _script_dir() .. "../?.lua;" .. package.path
 
 
 -- Import the benchmark and formatting functions from the demo
-local benchmark = dofile("lua-mastery-roadmap/05-advanced/perf-analysis/04-perf-analysis.lua")
+local benchmark = dofile(_script_dir() .. "../04-perf-analysis.lua")
 
 local pass = 0
 local fail = 0
 local total = 0
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1
@@ -38,7 +38,7 @@ print("\n2. Performance patterns demonstrate optimization")
 -- We verify the concept by running a simple benchmark
 local function naive_concat()
   local s = ""
-  for i = 1, 100 do s = s .. "x" end
+  for _ = 1, 100 do s = s .. "x" end
 end
 
 local function table_concat()

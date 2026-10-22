@@ -1,4 +1,4 @@
--- Example 3: Coroutine-based Task Scheduler
+-- Example 15: Coroutine-based Task Scheduler
 -- Chapter: 08-coroutines
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -7,6 +7,9 @@
 
 local Scheduler = {}
 Scheduler.__index = Scheduler
+
+-- table.unpack arrived in Lua 5.2; on 5.1 the global unpack() does the job.
+local unpack_values = table.unpack or unpack
 
 --- Create a new scheduler
 -- @return scheduler instance
@@ -22,7 +25,13 @@ end
 -- @param ... arguments to pass to the function
 -- @return coroutine reference
 function Scheduler:spawn(fn, ...)
-  local co = coroutine.create(fn)
+  -- The extra arguments are handed to the task function. coroutine.create(fn)
+  -- alone would start the function with no arguments at all, silently
+  -- dropping whatever the caller passed.
+  local args = { ... }
+  local co = coroutine.create(function()
+    fn(unpack_values(args))
+  end)
   table.insert(self.tasks, {
     coroutine = co,
     status = "ready",
@@ -42,61 +51,51 @@ end
 function Scheduler:run(duration)
   self.running = true
   local start_time = os.time()
-  
+
   while self.running and (#self.tasks > 0) do
     -- Check duration limit
     if duration > 0 and (os.time() - start_time) >= duration then
       break
     end
-    
+
     local current_time = os.time()
     local i = 1
-    
+
     while i <= #self.tasks do
       local task = self.tasks[i]
-      
-      -- Skip tasks that are waiting
+
       if task.wait_until > current_time then
+        -- Skip tasks that are waiting
         i = i + 1
-        goto continue
-      end
-      
-      -- Resume coroutine
-      local status = coroutine.status(task.coroutine)
-      
-      if status == "suspended" then
-        local success, result, param = coroutine.resume(task.coroutine)
-        
-        if not success then
-          print(string.format("Task error: %s", param))
+      else
+        -- Resume coroutine
+        local status = coroutine.status(task.coroutine)
+
+        if status == "suspended" then
+          local success, result, param = coroutine.resume(task.coroutine)
+
+          if not success then
+            print(string.format("Task error: %s", param))
+            table.remove(self.tasks, i)
+          else
+            -- Handle yield commands
+            if result == "wait" then
+              task.wait_until = current_time + (param or 0)
+            end
+
+            -- Check if coroutine finished
+            if coroutine.status(task.coroutine) == "dead" then
+              table.remove(self.tasks, i)
+            else
+              i = i + 1
+            end
+          end
+        elseif status == "dead" then
           table.remove(self.tasks, i)
-          goto continue
+        else
+          i = i + 1
         end
-        
-        -- Handle yield commands
-        if result == "wait" then
-          task.wait_until = current_time + (param or 0)
-        end
-        
-        -- Check if coroutine finished
-        if coroutine.status(task.coroutine) == "dead" then
-          table.remove(self.tasks, i)
-          goto continue
-        end
-        
-      elseif status == "dead" then
-        table.remove(self.tasks, i)
-        goto continue
       end
-      
-      i = i + 1
-      
-      ::continue::
-    end
-    
-    -- Small yield to avoid blocking
-    if #self.tasks > 0 then
-      -- In real implementation, use proper timing
     end
   end
 end

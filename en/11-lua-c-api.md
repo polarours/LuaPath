@@ -430,7 +430,7 @@ static int good_func(lua_State *L) {
     lua_pushnumber(L, 1);
     lua_pushnumber(L, 2);
     lua_pushnumber(L, 3);
-    lua_settop(L, -2);  // Keep only top value
+    lua_settop(L, 1);   // Drop the two extra values; one is returned
     return 1;
 }
 ```
@@ -634,6 +634,7 @@ Light userdata is just a pointer — Lua doesn't manage its memory. Full userdat
 
 Runnable examples for this chapter:
 - `examples/advanced/01-ecs-system.lua` — Uses userdata-like patterns
+- `examples/projects/05-c-stack-host/05-c-stack-host.lua` — Builds and runs the C API example, asserting on the host's stack report
 - `examples/projects/` — Target for embedding projects
 
 ---

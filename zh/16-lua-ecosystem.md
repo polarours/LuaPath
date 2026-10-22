@@ -231,13 +231,13 @@ stylua --check src/
 
 ### 版本差异
 
-| 特性 | 5.1 | 5.3 | 5.4 | LuaJIT |
-|------|-----|-----|-----|--------|
-| 整数 | 否 | 是 | 是 | 否 |
-| 位运算 | 否 | 是 | 是 | 是 |
-| 分代 GC | 否 | 否 | 是 | 否 |
-| `goto` | 否 | 是 | 是 | 是 |
-| `_ENV` | 否 | 是 | 是 | 部分 |
+| 特性 | 5.1 | 5.3 | 5.4 | 5.5 | LuaJIT |
+|------|-----|-----|-----|-----|--------|
+| 整数 | 否 | 是 | 是 | 是 | 否 |
+| 位运算 | 否 | 是 | 是 | 是 | 是 |
+| 分代 GC | 否 | 否 | 是 | 是 | 否 |
+| `goto` | 否 | 是 | 是 | 是 | 是 |
+| `_ENV` | 否 | 是 | 是 | 是 | 否 |
 
 ### 兼容性库
 
@@ -245,14 +245,65 @@ stylua --check src/
 -- 为 5.2+ 提供 5.1 兼容性
 local unpack = unpack or table.unpack
 
--- 5.1 的位运算
-local bit = require("bit32") or require("bit")
+-- 位运算。模块不存在时 require 会报错而不是返回 nil，
+-- 所以必须按版本选择模块：
+--   LuaJIT            -> bit 库
+--   Lua 5.2 和 5.3   -> 已废弃的 bit32 模块
+--   PUC Lua 5.1       -> 根本没有位运算符
+--   Lua 5.4 及以后  -> 运算符 & | ~ << >> 已内置
+local bit
+if type(jit) == "table" then
+  bit = require("bit")
+elseif _VERSION == "Lua 5.2" or _VERSION == "Lua 5.3" then
+  bit = require("bit32")
+end
 
 -- 运行时检测版本
 local function is_lua51()
   return _VERSION == "Lua 5.1"
 end
 ```
+
+---
+
+## 流行的 Lua 库
+
+### Web 框架
+
+- **OpenResty**：Nginx + Lua，高性能 Web 服务器
+- **Lapis**：功能完备的 Web 框架
+- **Sailor**：MVC Web 框架
+
+### 数据库驱动
+
+- **luasocket**：TCP/UDP 网络通信
+- **lua-nginx-module**：OpenResty 中的数据库访问
+- **luasql**：SQL 数据库连接
+
+### 序列化
+
+- **lua-cjson**：快速 JSON 编解码
+- **dkjson**：纯 Lua 的 JSON 库
+- **lua-MessagePack**：MessagePack 序列化
+- **cdata**：二进制数据处理
+
+### 测试
+
+- **busted**：BDD 风格的测试框架
+- **luaunit**：单元测试框架
+- **deftest**：测试发现与组织
+
+### 代码质量
+
+- **luacheck**：Lua 静态分析器
+- **stylua**：代码格式化器
+- **lua-language-server**：带 LSP 的 VS Code 扩展
+
+### CLI 工具
+
+- **cliargs**：命令行参数解析
+- **penlight**：带 CLI 辅助工具的通用库
+- **lua-cli**：交互式 Lua Shell
 
 ---
 
@@ -312,7 +363,7 @@ if value ~= value or value == math.huge or value == -math.huge then
 end
 ```
 
-非有限数值满足 `value ~= value`，这就是在没有 `math.isnan` 时检测 NaN 的办法。
+非有限数值满足 `value ~= value`，不需要任何库函数就能检测出 NaN。
 这两种情况，朴素的编码器都会悄无声息地产出非法 JSON。
 
 ### 如实报告差异

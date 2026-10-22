@@ -1,4 +1,4 @@
--- Example 18: State Machine
+-- Example 50: State Machine
 -- Chapter: 13-patterns
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

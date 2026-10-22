@@ -38,5 +38,5 @@ local t = setmetatable({}, {
 
 ## 相关概念
 
-- [05-metatables.md](../zh/05-metatables.md) — 元表与元方法
-- [10-lua-internals.md](../zh/10-lua-internals.md) — Lua 内部机制
+- [05-metatables.md](../../zh/05-metatables.md) — 元表与元方法
+- [10-lua-internals.md](../../zh/10-lua-internals.md) — Lua 内部机制

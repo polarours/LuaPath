@@ -2,7 +2,7 @@
   Example: Plugin System
   Chapter: 15 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.3+
+  Lua Version: 5.1+
   Demonstrates: plugin loader, lifecycle hooks, configuration, discovery, hot-reload
 ]]
 
@@ -15,7 +15,11 @@ function PluginSystem.new(opts)
         _plugins = {},
         _order = {},
         _config = opts.config or {},
-        _hooks = { before_init = {}, after_init = {}, before_start = {}, after_start = {}, before_stop = {}, after_stop = {} },
+        _hooks = {
+            before_init = {}, after_init = {},
+            before_start = {}, after_start = {},
+            before_stop = {}, after_stop = {},
+        },
     }, PluginSystem)
 end
 
@@ -132,7 +136,7 @@ function PluginSystem:status()
     end
 end
 
-function main()
+local function main()
     print("=== Plugin System ===\n")
 
     local sys = PluginSystem.new({

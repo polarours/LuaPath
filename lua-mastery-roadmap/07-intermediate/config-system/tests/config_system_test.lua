@@ -1,5 +1,5 @@
 -- tests/config_system_test.lua — Unit tests for config system
--- Run from project root with: lua tests/config_system_test.lua
+-- Run from the project directory with: lua tests/config_system_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
 -- the test works regardless of the absolute path on disk.
@@ -17,7 +17,7 @@ local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -27,7 +27,7 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1
@@ -55,13 +55,16 @@ assert_true(sections ~= nil, "Config loaded")
 assert_eq(sections.server.host, "0.0.0.0", "Server host parsed")
 assert_eq(sections.server.port, 3000, "Server port parsed")
 
+print("\n3. Schema defaults")
+local schema = { server = { host = "default_host", port = 8080 }, cache = { ttl = 60 } }
+local with_defaults = config.load(tmpfile, schema)
+-- A key the file already has keeps the file's value; a section the file does
+-- not have is filled in from the schema.
+assert_eq(with_defaults.server.host, "0.0.0.0", "File value wins over the schema default")
+assert_eq(with_defaults.cache.ttl, 60, "Schema default fills in a missing section")
+
 -- Cleanup
 os.remove(tmpfile)
-
-print("\n3. Schema defaults")
-local schema = { server = { host = "default_host", port = 8080 } }
-sections = config.load(tmpfile or "/dev/null", schema)
--- Should have defaults applied
 
 print("\n=== Results: " .. pass .. "/" .. total .. " passed ===")
 if fail > 0 then

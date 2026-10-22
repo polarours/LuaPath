@@ -466,10 +466,14 @@ end, debug.traceback)
 
 ```lua
 -- BAD: Hard to match programmatically
-if err == "file not found" then ... end  -- Fragile string matching
+if err == "file not found" then
+  -- ...
+end  -- Fragile string matching
 
 -- GOOD: Structured errors
-if err and err.code == "E_FILE_NOT_FOUND" then ... end
+if err and err.code == "E_FILE_NOT_FOUND" then
+  -- ...
+end
 ```
 
 ---

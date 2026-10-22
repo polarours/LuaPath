@@ -21,7 +21,7 @@
 
 ## OOP 模式
 
-### 原型 + 元表 类
+### 原型 + 元表类
 
 标准的 Lua OOP 模式：
 
@@ -211,21 +211,27 @@ print(process(5))  -- "11"
 
 ### 柯里化
 
+> **Lua 5.2 说明**：table.unpack 是 Lua 5.2 引入的；在 Lua 5.1 上全局 unpack() 起同样作用。debug.getinfo(fn).nparams 同样是 5.2+ 的 API，因此在 Lua 5.1 上需要显式传入 arity，如下所示。
+
 ```lua
+-- table.unpack 是 5.2+；在 5.1 上，全局 unpack() 起同样作用。
+local unpack_values = table.unpack or unpack
+
 local function curry(fn, arity)
+  -- nparams 是 5.2+；在 5.1 上请显式传入 arity。
   arity = arity or debug.getinfo(fn).nparams
   return function(...)
     local args = {...}
     if #args >= arity then
-      return fn(table.unpack(args))
+      return fn(unpack_values(args))
     end
     return function(...)
-      return fn(table.unpack(args), ...)
+      return fn(unpack_values(args), ...)
     end
   end
 end
 
-local add = curry(function(a, b) return a + b end)
+local add = curry(function(a, b) return a + b end, 2)
 print(add(3)(4))  -- 7
 ```
 
@@ -254,8 +260,14 @@ function Bus:on(event, handler)
 end
 
 function Bus:emit(event, ...)
+  -- 先把处理器收集起来：处理器可能在执行中取消自己的订阅，
+  -- 如果这时就从列表里删掉它，ipairs 会跳过后面的处理器。
   local h = self.handlers[event] or {}
-  for _, handler in ipairs(h) do
+  local snapshot = {}
+  for i, handler in ipairs(h) do
+    snapshot[i] = handler
+  end
+  for _, handler in ipairs(snapshot) do
     handler(...)
   end
 end
@@ -264,12 +276,22 @@ end
 ### 优先级事件总线
 
 ```lua
-function Bus:on(event, handler, priority)
-  priority = priority or 0
-  local h = self.handlers[event] or {}
-  h[#h + 1] = {fn = handler, priority = priority}
+-- 一个按优先级排序的变体。它使用自己的列表：普通的 Bus:on 存的是函数，
+-- 而这里存的是 {fn, priority} 条目，直接覆盖 Bus:on 会连带把 Bus:emit 和 Bus:once 也弄坏。
+local priority_handlers = {}
+
+function Bus:onPriority(event, handler, priority)
+  local h = priority_handlers[event] or {}
+  h[#h + 1] = {fn = handler, priority = priority or 0}
   table.sort(h, function(a, b) return a.priority > b.priority end)
-  self.handlers[event] = h
+  priority_handlers[event] = h
+end
+
+function Bus:emitPriority(event, ...)
+  local h = priority_handlers[event] or {}
+  for _, entry in ipairs(h) do
+    entry.fn(...)
+  end
 end
 ```
 
@@ -410,16 +432,33 @@ end
 ### 可调用表
 
 ```lua
-local Rule = setmetatable({}, {
+-- 规则对象：一个带着链式方法的 table。
+local Rule = {}
+Rule.__index = Rule
+
+function Rule:check(condition)
+  self.checks[#self.checks + 1] = condition
+  return self
+end
+
+function Rule:on_fail(message)
+  self.failure = message
+  return self
+end
+
+-- 可调用的前门：Rule("name") 构建一个规则对象。
+setmetatable(Rule, {
   __call = function(_, name)
-    return {name = name, checks = {}}
-  end
+    return setmetatable({name = name, checks = {}}, Rule)
+  end,
 })
 
 local r = Rule("age_check")
   :check("age >= 18")
   :check("age <= 120")
   :on_fail("invalid age")
+
+print(r.name, #r.checks, r.failure)  -- age_check  2  invalid age
 ```
 
 ### Builder 模式
@@ -639,7 +678,9 @@ Vec2.__index = Vec2
 function Vec2.__add(a, b) return Vec2.new(a.x + b.x, a.y + b.y) end
 
 -- 错误：元方法存储数据
-local bad = setmetatable({data = {}}, {__index = function(_, k) ... end})
+local bad = setmetatable({data = {}}, {__index = function(_, k)
+  -- ...
+end})
 ```
 
 ### 5. 隔离测试模式

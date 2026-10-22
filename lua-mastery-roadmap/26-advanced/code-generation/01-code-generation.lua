@@ -2,13 +2,30 @@
   Example: Code Generation
   Chapter: Stage 26 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: String-based code gen, load(), DSL construction, template expansion
 ]]
 
 ------------------------------------------------------------
 -- 1. STRING-BASED CODE GENERATION
 ------------------------------------------------------------
+
+-- load() accepts a string chunk only from Lua 5.2 on; 5.1 offers
+-- loadstring() instead, and the custom-environment form (5.2+) maps onto
+-- setfenv() there.
+local function load_chunk(src, chunkname, env)
+    if loadstring then
+        local chunk, err = loadstring(src, chunkname)
+        if not chunk then return nil, err end
+        if env then setfenv(chunk, env) end
+        return chunk
+    end
+    if env then
+        return load(src, chunkname, "t", env)
+    end
+    return load(src, chunkname)
+end
+
 local function generateGetterSetter(fieldName, defaultValue)
     local getter = string.format(
         "return function(self) return self._%s end",
@@ -22,7 +39,7 @@ local function generateGetterSetter(fieldName, defaultValue)
         "return function(self) self._%s = %s end",
         fieldName, defaultValue
     )
-    return load(getter)(), load(setter)(), load(init)()
+    return load_chunk(getter)(), load_chunk(setter)(), load_chunk(init)()
 end
 
 local function demo_string_codegen()
@@ -85,7 +102,7 @@ function DSL.build(env)
         end
     end
     code = code .. "return result"
-    return load(code)()
+    return load_chunk(code)()
 end
 
 local function demo_dsl()
@@ -120,7 +137,7 @@ end
 
 function Template.generateFunction(templateStr, vars)
     local code = Template.render(templateStr, vars)
-    local fn, err = load(code, "generated", "t", {})
+    local fn, err = load_chunk(code, "generated", {})
     if not fn then
         error("Code generation failed: " .. err)
     end
@@ -155,7 +172,7 @@ local function createFunctions(spec)
     local functions = {}
     for name, body in pairs(spec) do
         local code = string.format("return function(...) %s end", body)
-        functions[name] = load(code, name, "t", setmetatable({}, {
+        functions[name] = load_chunk(code, name, setmetatable({}, {
             __index = _G
         }))()
     end

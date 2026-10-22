@@ -45,5 +45,5 @@ strict()
 
 ## Related Concepts
 
-- [01-basics.md](../en/01-basics.md) — Variables and scope
-- [06-modules.md](../en/06-modules.md) — Module system
+- [01-basics.md](../../en/01-basics.md) — Variables and scope
+- [06-modules.md](../../en/06-modules.md) — Module system

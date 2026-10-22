@@ -1,29 +1,31 @@
-# Advanced Stage
+# Stage 4: Internals and Native Integration
 
-**Stage Level**: 16-20
+**Stage**: 4 | **Time**: 30–40 hours | **Chapters**: 10–11
 **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
 
 ## Overview
 
-This stage focuses on production-grade patterns including embedding Lua in C, advanced metaprogramming, and Lua C API integration.
+Understand the VM and embed Lua in host applications. This stage bridges Lua and C — essential for game engines, plugins, and system tools.
 
-## Projects
+- Topics: Lua VM model, memory allocation, C API, userdata, stack discipline
+- Pitfall focus: stack overflow, userdata lifetime, GC reference tracking
+
+## Project
 
 | Project | Description | Skills |
 |---------|-------------|--------|
-| [Embed Lua](embed-lua/) | Embed Lua in C applications | C API, userdata |
-| | | |
+| Embedding Lua in C | A complete example of embedding the Lua VM in a C host application. | `lua_State` lifecycle management; Pushing and popping values on the Lua stack; Creating userdata with embedded C data |
 
 ## Prerequisites
 
-- Understanding of Lua metatables and the C API
-- Familiarity with C programming
+- Completion of the previous stage
+- The chapters listed above
 
 ## How to Run
 
 ```bash
-cd <project-name>/
-# C projects require compilation:
-gcc -o embed_lua 05-embed-lua.c -l:liblua5.5.so -lm -ldl
+cd embed-lua
 ./embed_lua
 ```
+
+Change into the project directory, then run the command above.

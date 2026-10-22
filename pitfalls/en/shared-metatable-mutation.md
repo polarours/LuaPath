@@ -39,5 +39,5 @@ obj.custom_data = {}  -- Instance-specific data
 
 ## Related Concepts
 
-- [05-metatables.md](../en/05-metatables.md) — Metatables and metamethods
-- [13-patterns.md](../en/13-patterns.md) — Design patterns
+- [05-metatables.md](../../en/05-metatables.md) — Metatables and metamethods
+- [13-patterns.md](../../en/13-patterns.md) — Design patterns

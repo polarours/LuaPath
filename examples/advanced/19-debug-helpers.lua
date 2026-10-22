@@ -1,4 +1,4 @@
--- Example 21: Debug Helpers
+-- Example 51: Debug Helpers
 -- Chapter: debugging-guide
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

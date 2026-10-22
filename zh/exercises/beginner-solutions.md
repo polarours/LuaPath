@@ -4,7 +4,22 @@
 
 ---
 
-## 练习 1：字符串分割
+## 练习对照表
+
+| 练习 | 主题 |
+|------|------|
+| [1.6](beginner.md#16-—-词频统计阶段-1中等) | 词频统计 |
+| [1.9](beginner.md#19-—-模块模式阶段-2中等) | 模块模式：mathutils |
+| [1.12](beginner.md#112-—-字符串分割阶段-1简单) | 字符串分割 |
+| [3.1](beginner.md#31-—-全局变量泄漏-简单) | 全局变量泄漏 |
+| [3.2](beginner.md#32-—-稀疏数组的表长度-简单) | 稀疏数组的长度 |
+| [3.7](beginner.md#37-—-循环边界差一-简单) | 循环边界差一 |
+
+其余练习留给读者自行完成。
+
+---
+
+## 练习 1.12：字符串分割
 
 ### 任务
 
@@ -85,7 +100,7 @@ end
 
 ---
 
-## 练习 2：词频统计
+## 练习 1.6：词频统计
 
 ### 任务
 
@@ -162,61 +177,78 @@ end
 
 ---
 
-## 练习 3：Clamp 与 Lerp
+## 练习 1.9：模块模式：mathutils
 
 ### 任务
 
-实现 `clamp` 和 `lerp`，并补齐边界测试。
+编写一个 `mathutils` 模块文件，使用局部变量作为内部实现，通过公共表暴露
+`clamp(val, lo, hi)` 和 `lerp(a, b, t)`。
 
 ### 参考实现
 
 ```lua
-local function clamp(value, min, max)
+-- mathutils.lua
+--
+-- 实现放在局部变量里，只导出公共表：模块外部既拿不到内部实现，也无法替换它。
+
+local M = {}
+
+function M.clamp(value, min, max)
   if value < min then return min end
   if value > max then return max end
   return value
 end
 
+-- 另一种（更简洁的）写法
 local function clamp_alt(value, min, max)
   return math.max(min, math.min(value, max))
 end
 
-local function lerp(a, b, t)
-  t = clamp(t, 0, 1)
+function M.lerp(a, b, t)
+  t = M.clamp(t, 0, 1)
   return a + (b - a) * t
 end
 
-local function inverse_lerp(a, b, value)
+function M.inverse_lerp(a, b, value)
   if a == b then return 0 end
   return (value - a) / (b - a)
 end
 
+return M
+```
+
+### 测试
+
+```lua
+-- test_mathutils.lua
+local M = require("mathutils")
+
 local function test_clamp()
-  assert(clamp(5, 0, 10) == 5, "within bounds")
-  assert(clamp(-5, 0, 10) == 0, "below min")
-  assert(clamp(15, 0, 10) == 10, "above max")
-  assert(clamp(0, 0, 10) == 0, "at min")
-  assert(clamp(10, 0, 10) == 10, "at max")
-  assert(clamp(5, 5, 5) == 5, "min == max")
+  assert(M.clamp(5, 0, 10) == 5, "within bounds")
+  assert(M.clamp(-5, 0, 10) == 0, "below min")
+  assert(M.clamp(15, 0, 10) == 10, "above max")
+  assert(M.clamp(0, 0, 10) == 0, "at min")
+  assert(M.clamp(10, 0, 10) == 10, "at max")
+  assert(M.clamp(5, 5, 5) == 5, "min == max")
   print("✓ clamp tests passed")
 end
 
 local function test_lerp()
-  assert(lerp(0, 100, 0) == 0, "t=0")
-  assert(lerp(0, 100, 1) == 100, "t=1")
-  assert(lerp(0, 100, 0.5) == 50, "t=0.5")
-  assert(lerp(0, 100, 1.5) == 100, "t clamped above")
-  assert(lerp(0, 100, -0.5) == 0, "t clamped below")
-  assert(lerp(10, 20, 0.5) == 15, "non-zero start")
+  assert(M.lerp(0, 100, 0) == 0, "t=0")
+  assert(M.lerp(0, 100, 1) == 100, "t=1")
+  assert(M.lerp(0, 100, 0.5) == 50, "t=0.5")
+  assert(M.lerp(0, 100, 1.5) == 100, "t clamped above")
+  assert(M.lerp(0, 100, -0.5) == 0, "t clamped below")
+  assert(M.lerp(10, 20, 0.5) == 15, "non-zero start")
   print("✓ lerp tests passed")
 end
 
 local function test_inverse_lerp()
-  assert(inverse_lerp(0, 100, 50) == 0.5, "middle")
-  assert(inverse_lerp(0, 100, 0) == 0, "start")
-  assert(inverse_lerp(0, 100, 100) == 1, "end")
-  assert(inverse_lerp(0, 100, 150) == 1.5, "beyond end")
-  assert(inverse_lerp(10, 10, 5) == 0, "same endpoints")
+  assert(M.inverse_lerp(0, 100, 50) == 0.5, "middle")
+  assert(M.inverse_lerp(0, 100, 0) == 0, "start")
+  assert(M.inverse_lerp(0, 100, 100) == 1, "end")
+  assert(M.inverse_lerp(0, 100, 150) == 1.5, "beyond end")
+  assert(M.inverse_lerp(10, 10, 5) == 0, "same endpoints")
   print("✓ inverse_lerp tests passed")
 end
 
@@ -233,7 +265,7 @@ test_inverse_lerp()
 
 ---
 
-## 练习 4：隐式全局变量 Bug
+## 练习 3.1：全局变量泄漏
 
 ### 任务
 
@@ -306,7 +338,7 @@ setmetatable(_G, {
 
 ---
 
-## 练习 5：Off-by-One 循环错误
+## 练习 3.7：循环边界差一
 
 ### 任务
 
@@ -352,7 +384,7 @@ end
 
 ---
 
-## 练习 6：带空洞 table 的长度问题
+## 练习 3.2：稀疏数组的长度
 
 ### 任务
 
@@ -425,41 +457,47 @@ print(list:length())
 ### 1. Lua table 中如何表达可空字段
 
 ```lua
+-- 模式 1：显式的 nil 标记
 local user = {
   name = "Alice",
-  email = nil,
-  _has_email = false,
+  email = nil,  -- 明确表示没有邮箱
+  _has_email = false,  -- 用来区分「未设置」
 }
 
-local NONE = {}
-local user_with_sentinel = {
+-- 模式 2：哨兵值
+local NONE = {}  -- 唯一的哨兵对象
+local user = {
   name = "Alice",
-  email = NONE,
+  email = NONE,  -- 没有邮箱
 }
 
-if user_with_sentinel.email == NONE then
-  print("no email")
+if user.email == NONE then
+  -- 肯定没有邮箱
 end
 
-local user_with_fields = {
+-- 模式 3：单独的存在性映射
+local user = {
   name = "Alice",
   data = {},
   _fields = {
-    email = true,
-    phone = false,
-  },
+    email = true,  -- 字段存在
+    phone = false, -- 字段不存在
+  }
 }
 ```
 
 ### 2. 更易测试的模块 API 风格
 
 ```lua
+-- 最佳：无状态函数，依赖显式传入
 local M = {}
 
 function M.process(data, config)
+  -- 纯函数，容易测试
   return result
 end
 
+-- mymodule.lua 返回 M
 local exported = M
 
 -- 测试用法：
@@ -467,9 +505,10 @@ local M = exported
 local result = M.process(test_data, test_config)
 assert(result == expected)
 
+-- 应避免：隐藏状态
 local state = {}
-function M.process_with_state(data)
-  state.last = data
+function M.process(data)
+  -- 依赖了隐藏状态，难以测试
   return result
 end
 ```
@@ -477,6 +516,7 @@ end
 ### 3. 错误边界应该放在哪里
 
 ```lua
+-- 小脚本：顶层 pcall
 local success, err = pcall(function()
   main()
 end)
@@ -485,21 +525,26 @@ if not success then
   os.exit(1)
 end
 
-function M_process(data)
+-- 大型项目：分层错误边界
+-- 1. 模块层：校验输入并返回错误
+function M.process(data)
   if not data then
     return nil, "data is required"
   end
+  -- ...
 end
 
-local result, process_err = M_process(data)
+-- 2. 服务层：处理模块返回的错误
+local result, err = M.process(data)
 if not result then
-  log_error(process_err)
-  return nil, process_err
+  log_error(err)
+  return nil, err
 end
 
-local service_ok, service_err = pcall(service.run)
-if not service_ok then
-  show_user_friendly_error(service_err)
+-- 3. 应用层：面向用户的错误
+local success, err = pcall(service.run)
+if not success then
+  show_user_friendly_error(err)
 end
 ```
 

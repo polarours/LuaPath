@@ -1,26 +1,25 @@
 # 误以为 0、空字符串、空 table 是假值
 
-Lua 中只有 `nil` 和 `false` 是假值。`0`、`""`（空字符串）和 `{}`（空 table）都是真值，这与许多语言的习惯不同。
+## 错误
+
+误以为 `0`、空字符串 `""` 或空 table `{}` 是假值。在 Lua 中，只有 `false` 和 `nil` 才是假值；`0`、`""`（空字符串）和 `{}`（空 table）都是真值，这与许多语言的习惯不同。
 
 ## 复现代码
 
 ```lua
--- 检查空字符串
-local str = ""
-if str then
-    print("str 为空字符串，但条件为真")
+local count = 0
+if count then
+  print("has count")  -- 会打印！（0 是真值）
 end
 
--- 检查数字零
-local num = 0
-if num then
-    print("num 为 0，但条件为真")
+local name = ""
+if name then
+  print("has name")  -- 会打印！（"" 是真值）
 end
 
--- 检查空 table
 local t = {}
 if t then
-    print("t 是空 table，但条件为真")
+  print("has table")  -- 会打印！（{} 是真值）
 end
 ```
 
@@ -35,23 +34,25 @@ end
 根据需要显式检查具体类型和值：
 
 ```lua
--- 检查字符串是否为空
-local str = ""
-if str ~= "" then
-    print("str 不为空")
+local count = 0
+if count ~= nil then  -- 正确：专门检查 nil
+  print("has count")
 end
 
--- 检查数字是否为零
-local num = 0
-if num ~= 0 then
-    print("num 不为零")
-end
+-- 或者谨慎使用 or 模式
+local value = input or default  -- input 为 false 时会失效！
+local value = input ~= nil and input or default  -- 同样失效：`false or default`
 
--- 检查 table 是否为空
-local t = {}
-if next(t) == nil then
-    print("t 是空 table")
+-- 唯一能保住 false 的写法
+local value = input
+if value == nil then
+  value = default
 end
 ```
 
 > **关键区别：** `if x then` 只能用来判断 `x` 是否为 `nil` 或 `false`，不能用来判断"值是否为空/有意义"。需要根据具体类型做针对性检查。
+
+## 核心要点
+
+只有 `false` 和 `nil` 是假值。`0`、`""`、`{}` 以及函数都是真值。又因为 `false` 是假值，
+以 `or` 结尾的表达式保不住它——要用 `if` 显式检查 `nil`。

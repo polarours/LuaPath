@@ -1,7 +1,7 @@
--- Example 3: Custom Memory Allocator Pattern
+-- Example 35: Custom Memory Allocator Pattern
 -- Chapter: 12-performance
 -- Difficulty: Advanced
--- Lua Version: 5.4+
+-- Lua Version: 5.1+
 --
 -- Demonstrates: object pooling, allocation reduction, GC tuning
 
@@ -21,13 +21,13 @@ function ObjectPool:new(factory, reset, initial_size)
   self.in_use = {}
   self.created = 0
   self.reused = 0
-  
+
   -- Pre-allocate
-  for i = 1, (initial_size or 10) do
+  for _ = 1, (initial_size or 10) do
     table.insert(self.available, self.factory())
     self.created = self.created + 1
   end
-  
+
   return self
 end
 
@@ -35,7 +35,7 @@ end
 -- @return object
 function ObjectPool:acquire()
   local obj
-  
+
   if #self.available > 0 then
     obj = table.remove(self.available)
     self.reused = self.reused + 1
@@ -43,7 +43,7 @@ function ObjectPool:acquire()
     obj = self.factory()
     self.created = self.created + 1
   end
-  
+
   self.in_use[obj] = true
   return obj
 end
@@ -54,7 +54,7 @@ function ObjectPool:release(obj)
   if not self.in_use[obj] then
     return  -- Not in use, ignore
   end
-  
+
   self.in_use[obj] = nil
   self.reset(obj)
   table.insert(self.available, obj)
@@ -152,7 +152,7 @@ local function update_particles(dt)
     p.x = p.x + p.vx * dt
     p.y = p.y + p.vy * dt
     p.vy = p.vy - 9.8 * dt  -- Gravity
-    
+
     if p.life >= p.max_life then
       p.active = false
       particle_pool:release(p)
@@ -169,7 +169,7 @@ math.randomseed(os.time())
 print("\nSpawning 500 particles...")
 for i = 1, 500 do
   spawn_particle(0, 100, math.random() * 100 - 50, math.random() * 50 + 50)
-  
+
   if i % 100 == 0 then
     update_particles(0.016)
   end
@@ -185,10 +185,10 @@ print(string.format("Pool stats - Created: %d, Reused: %d, Reuse ratio: %.2f%%",
 print("\nSimulating 100 frames...")
 for i = 1, 100 do
   update_particles(0.016)
-  
+
   -- Spawn new particles
   if i % 10 == 0 then
-    for j = 1, 50 do
+    for _ = 1, 50 do
       spawn_particle(0, 100, math.random() * 100 - 50, math.random() * 50 + 50)
     end
   end
@@ -202,7 +202,7 @@ print(string.format("Active particles: %d", #active_particles))
 -- Cleanup
 particle_pool:release_all()
 stats = particle_pool:stats()
-print(string.format("After release - Available: %d, In use: %d", 
+print(string.format("After release - Available: %d, In use: %d",
   stats.available, stats.in_use))
 
 print("\n✓ Object pool test completed!")

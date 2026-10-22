@@ -1,4 +1,4 @@
--- Example 11: Module Patterns
+-- Example 23: Module Patterns
 -- Chapter: 06-modules
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

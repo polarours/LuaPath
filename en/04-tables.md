@@ -187,18 +187,27 @@ local t = {1, 2, 3,}  -- Trailing comma is fine
 
 ### Functional Constructor
 
+> **Lua 5.2 note**: table.pack and table.unpack arrived in Lua 5.2. On Lua 5.1 the global unpack() does the same job, and pack can be backported by recording the argument count in a .n field, as below.
+
 ```lua
 -- Create table from function output
 local function make_range(n)
   return {[n] = true}  -- Sparse: only key n exists
 end
 
--- Using table.pack for varargs
+-- table.pack is 5.2+; on 5.1, record the argument count in a .n field.
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+
+-- Using pack for varargs
 local function collect(...)
-  return table.pack(...)
+  return pack(...)
 end
 local t = collect(1, 2, 3)
-print(t.n)  -- 3 (table.pack adds .n field)
+print(t.n)  -- 3 (pack adds .n field)
 ```
 
 ---

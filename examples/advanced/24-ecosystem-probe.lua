@@ -1,4 +1,4 @@
--- Example 27: Ecosystem Dependency Probe
+-- Example 56: Ecosystem Dependency Probe
 -- Chapter: 16-lua-ecosystem
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

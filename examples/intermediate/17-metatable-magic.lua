@@ -1,4 +1,4 @@
--- Example 19: Metatable Magic
+-- Example 29: Metatable Magic
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

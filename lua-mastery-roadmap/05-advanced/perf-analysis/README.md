@@ -23,7 +23,7 @@ A performance analysis toolkit that demonstrates profiling techniques, allocatio
 ## How to Run
 
 ```bash
-lua perf-analysis.lua
+lua 04-perf-analysis.lua
 ```
 
 The script runs multiple benchmarks comparing different Lua coding patterns.
@@ -47,9 +47,10 @@ The script runs multiple benchmarks comparing different Lua coding patterns.
 ## Files
 
 ```
-perf-analysis/
-├── README.md           ← This file
-├── perf-analysis.lua   ← Main benchmarks
-├── benchmarks.lua      ← Individual benchmark cases
-└── results.md          ← Benchmark results and analysis
+05-advanced/perf-analysis/
+├── README.md
+├── README.zh-CN.md
+├── 04-perf-analysis.lua      — Main benchmarks
+└── tests/
+    └── perf_analysis_test.lua  — Individual benchmark cases
 ```

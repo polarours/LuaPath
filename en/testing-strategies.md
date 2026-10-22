@@ -413,3 +413,11 @@ jobs:
 - **Property-based tests complement example-based tests**: Random inputs catch edge cases your examples missed.
 - **CI from day one**: A test runner with proper exit codes is all you need for automated CI.
 - **Test behavior, not implementation**: Write tests that verify what the code does, not how it does it — this gives you freedom to refactor.
+
+
+---
+
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/intermediate/19-test-runner.lua` — A minimal runner with assertions, stubs, spies, mocks, and property-based checks; it also runs a deliberately failing test to prove the runner detects failure

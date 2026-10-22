@@ -317,37 +317,37 @@ Implement testing patterns including mock objects, parameterized tests, and test
 - Topics: mock objects, test doubles, parameterized testing, test fixtures
 - Project: [Testing Patterns](38-advanced/testing-patterns/)
 
-### Stage 40: Modern Patterns
+### Stage 39: Modern Patterns
 **Time**: 8–12 hours
 
 Implement modern Lua patterns including string formatting, iterator composition, and functional programming.
 
 - Topics: advanced string.format, custom iterators, function composition, fluent APIs
-- Project: [Modern Patterns](40-advanced/modern-patterns/)
+- Project: [Modern Patterns](39-advanced/modern-patterns/)
 
-### Stage 41: Mini HTTP Server (Capstone)
+### Stage 40: Mini HTTP Server (Capstone)
 **Time**: 12–16 hours
 
 Build a complete, self-contained HTTP server framework in Lua that combines concepts from all previous stages — modules, metatables, coroutines, error handling, middleware pipelines, and production patterns.
 
 - Topics: HTTP protocol, request/response lifecycle, routing, middleware chains, concurrent connection handling, fluent DSL API
-- Project: [Lua HTTP Server](41-capstone/lua-http-server/)
+- Project: [Lua HTTP Server](40-capstone/lua-http-server/)
 
-### Stage 42: Performance Patterns
+### Stage 41: Performance Patterns
 **Time**: 8–12 hours
 
 Optimize Lua code for cache efficiency, memory alignment, and vectorized operations. Understand how data layout affects CPU cache performance and apply patterns that minimize cache misses.
 
 - Topics: cache locality, array-of-structs vs struct-of-arrays, memory alignment, vectorized iteration, prefetching patterns
-- Project: [Cache-friendly Patterns](42-performance/cache-friendly/)
+- Project: [Cache-friendly Patterns](41-performance/cache-friendly/)
 
-### Stage 43: Toolchain Patterns
+### Stage 42: Toolchain Patterns
 **Time**: 8–12 hours
 
 Integrate Lua into build systems, CI/CD pipelines, and package management workflows. Learn to use Lua as both a build scripting language and a tool for automating development workflows.
 
 - Topics: task-based build systems, CI pipeline hooks, dependency resolution, automated testing workflows
-- Project: [Lua Build System](43-toolchain/lua-build-system/)
+- Project: [Lua Build System](42-toolchain/lua-build-system/)
 
 ## Time Investment by Stage
 
@@ -362,11 +362,11 @@ Integrate Lua into build systems, CI/CD pipelines, and package management workfl
 | 11–20 | Advanced projects | 80–120 |
 | 21–28 | Expert projects | 64–96 |
 | 29–36 | Master projects | 64–96 |
-| 37–40 | Expert projects | 32–48 |
-| 41    | Capstone          | 12–16 |
-| 42    | Performance       | 8–12  |
-| 43    | Toolchain         | 8–12  |
-| **Total** | | **434–700** |
+| 37–39 | Expert projects | 24–36 |
+| 40    | Capstone          | 12–16 |
+| 41    | Performance       | 8–12  |
+| 42    | Toolchain         | 8–12  |
+| **Total** | | **408–600** |
 
 ## How to Use This Roadmap
 

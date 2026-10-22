@@ -94,7 +94,7 @@ end
 function HierarchicalFSM:current() return self._current end
 function HierarchicalFSM:get_history(state_name) return self._history[state_name] end
 
-function main()
+local function main()
     print("=== Hierarchical FSM: Media Player ===\n")
     local player = HierarchicalFSM.new("MediaPlayer")
     player:add_state("Stopped", {

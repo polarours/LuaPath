@@ -140,7 +140,7 @@ end
 
 ## 下一步
 
-1. 按顺序完成[章节](../zh/00-roadmap.md)
-2. 完成[练习](../zh/01-basics.md#练习)
-3. 从[路线图](../lua-mastery-roadmap/00-overview.md)构建项目
-4. 查看[陷阱](../pitfalls/)避免常见错误
+1. 按顺序完成[章节](../00-roadmap.md)
+2. 完成[练习](../01-basics.md#练习)
+3. 从[路线图](../../lua-mastery-roadmap/00-overview.md)构建项目
+4. 查看[陷阱](../../pitfalls/)避免常见错误

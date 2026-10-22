@@ -8,7 +8,7 @@ Implement a generic object pool that reuses expensive objects to reduce allocati
 
 ## Prerequisites
 
-- Stage 5 (Performance)
+- Chapter 12 (Performance)
 - Stage 11 (Cache System)
 
 ## How to Run

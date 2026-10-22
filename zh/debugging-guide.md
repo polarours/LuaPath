@@ -94,6 +94,18 @@ local function divide(a, b)
 end
 ```
 
+### assert 与 if-then-error 的对比
+
+```lua
+-- assert 适合简洁的前置条件检查
+assert(x ~= nil, "x is required")
+
+-- 等价但冗长
+if x == nil then
+  error("x is required")
+end
+```
+
 ---
 
 ## pcall/xpcall 错误隔离
@@ -191,14 +203,25 @@ print("Total calls:", call_count)
 
 ### 1. 调试包装器
 
+> **Lua 5.2 说明**：table.pack 与 table.unpack 是 Lua 5.2 引入的；在 Lua 5.1 上全局 unpack() 起同样作用，而 pack 可以移植为在 .n 字段中记录参数个数，如下所示。
+
 ```lua
+-- table.pack/table.unpack 是 5.2+；在 5.1 上，全局 unpack() 起同样作用，
+-- 而 pack 会在 .n 字段中记录参数个数。
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+local unpack_values = table.unpack or unpack
+
 -- 包装函数以添加调试输出
 local function debug_wrap(fn, name)
   return function(...)
     print("CALL:", name, ...)
-    local results = table.pack(fn(...))
-    print("RETURN:", name, table.unpack(results, 1, results.n))
-    return table.unpack(results, 1, results.n)
+    local results = pack(fn(...))
+    print("RETURN:", name, unpack_values(results, 1, results.n))
+    return unpack_values(results, 1, results.n)
   end
 end
 
@@ -275,6 +298,196 @@ print(string.format("Elapsed: %.6f s", os.clock() - start))
 - **luaprofile**：函数级分析
 - **luatrace**：基于 trace 的分析
 - **perf + FlameGraph**：系统级分析
+
+---
+
+## 高级调试技术
+
+### 条件断点
+
+使用 `debug.sethook` 设置条件断点：
+
+```lua
+local function debug_hook(event, line)
+  if event == "line" and line == 42 then  -- 在第 42 行断下
+    print("Breakpoint hit at line " .. line)
+    -- 检查变量
+    local i = 1
+    while true do
+      local name, value = debug.getlocal(2, i)
+      if not name then break end
+      print("  " .. name .. " = " .. tostring(value))
+      i = i + 1
+    end
+  end
+end
+
+debug.sethook(debug_hook, "line")
+```
+
+### 监视变量
+
+在执行过程中监视变量变化：
+
+```lua
+local function create_watcher(name, get_value)
+  local last_value = nil
+  return function()
+    local current = get_value()
+    if current ~= last_value then
+      print(string.format("[WATCH] %s changed: %s -> %s", 
+        name, tostring(last_value), tostring(current)))
+      last_value = current
+    end
+  end
+end
+
+-- 用法
+local x = 0
+local watcher = create_watcher("x", function() return x end)
+
+x = 10
+watcher()  -- 打印：[WATCH] x changed: nil -> 10
+
+x = 20
+watcher()  -- 打印：[WATCH] x changed: 10 -> 20
+```
+
+### 堆栈跟踪格式化
+
+```lua
+local function format_traceback(level)
+  local trace = {}
+  local level = level or 2
+  
+  while true do
+    local info = debug.getinfo(level, "nSl")
+    if not info then break end
+    
+    local source = info.source or "?"
+    local linedefined = info.linedefined or "?"
+    local what = info.what or "?"
+    local name = info.name or "<anonymous>"
+    
+    trace[#trace + 1] = string.format("%s:%d in function '%s'", 
+      source, linedefined, name)
+    
+    level = level + 1
+  end
+  
+  return table.concat(trace, "\n")
+end
+```
+
+### 内存泄漏检测
+
+跟踪对象的创建与销毁：
+
+```lua
+local object_count = 0
+
+local function create_object()
+  object_count = object_count + 1
+  local obj = {id = object_count}
+  
+  setmetatable(obj, {
+    __gc = function(self)
+      print("[GC] Object " .. self.id .. " collected")
+    end,
+  })
+  
+  return obj
+end
+
+-- 监控
+print("Active objects: " .. object_count)
+collectgarbage()
+print("After GC: " .. object_count)
+```
+
+---
+
+## 调试模式
+
+### 守卫模式
+
+```lua
+local function guard(condition, message)
+  if not condition then
+    error(message or "assertion failed", 2)
+  end
+end
+
+-- 用法
+local function process(data)
+  guard(type(data) == "table", "data must be a table")
+  guard(#data > 0, "data must not be empty")
+  -- 处理数据...
+end
+```
+
+### 调试输出级别
+
+```lua
+local DEBUG_LEVEL = 1  -- 0=关闭, 1=基础, 2=详细, 3=冗长
+
+local function debug_print(level, ...)
+  if level <= DEBUG_LEVEL then
+    print(string.format("[DEBUG %d]", level), ...)
+  end
+end
+
+-- 用法
+debug_print(1, "Starting process")
+debug_print(2, "Input data:", data)
+debug_print(3, "Internal state:", state)
+```
+
+### 错误上下文收集器
+
+```lua
+local function with_context(fn, context)
+  local ok, result = pcall(fn)
+  if not ok then
+    local info = debug.getinfo(2, "nSl")
+    return nil, string.format("[%s] %s (at %s:%d)", 
+      context, result, info.source, info.currentline)
+  end
+  return result
+end
+
+-- 用法
+local result, err = with_context(function()
+  return risky_operation()
+end, "database.query")
+```
+
+---
+
+## 工具与 IDE
+
+### ZeroBrane Studio
+
+- 完整的 Lua IDE，内置调试器
+- 设置断点、单步执行代码
+- 检查变量和调用栈
+- 支持 LuaJIT
+
+### VS Code 与 Lua 扩展
+
+- 语法高亮和自动补全
+- 通过 `lua-debug` 扩展提供调试支持
+- 集成终端运行脚本
+
+### 命令行调试
+
+```bash
+# 带调试钩子运行
+lua5.4 -e "debug.sethook(function(e,l) print(e,l) end, 'call')" script.lua
+
+# 检查语法
+luac5.4 -p script.lua
+```
 
 ---
 

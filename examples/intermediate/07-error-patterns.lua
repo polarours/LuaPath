@@ -1,4 +1,4 @@
--- Example 7: Error Handling Patterns
+-- Example 19: Error Handling Patterns
 -- Chapter: 07-error-handling
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

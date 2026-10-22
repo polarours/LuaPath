@@ -466,10 +466,14 @@ end, debug.traceback)
 
 ```lua
 -- 不好：难以进行程序化匹配
-if err == "file not found" then ... end  -- 脆弱的字符串匹配
+if err == "file not found" then
+  -- ...
+ end  -- 脆弱的字符串匹配
 
 -- 好：结构化错误
-if err and err.code == "E_FILE_NOT_FOUND" then ... end
+if err and err.code == "E_FILE_NOT_FOUND" then
+  -- ...
+ end
 ```
 
 ---

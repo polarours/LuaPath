@@ -85,11 +85,17 @@ local config = options.debug or false  -- WRONG: always false if options.debug i
 local config = options.debug ~= nil and options.debug or false  -- CORRECT
 
 -- Checking for nil specifically
-if value == nil then ... end      -- Explicit
-if value ~= nil then ... end      -- Explicit negative
+if value == nil then
+  -- ...
+end      -- Explicit
+if value ~= nil then
+  -- ...
+end      -- Explicit negative
 
 -- Don't do this (fails for false, 0, "")
-if value then ... end             -- Only checks truthiness
+if value then
+  -- ...
+end             -- Only checks truthiness
 ```
 
 > **Pitfall**: The `or` pattern (`value or default`) fails when `false` is a meaningful value. Use explicit `nil` checks when `false` is valid input.
@@ -322,7 +328,7 @@ end
 **Detection**: Use `luac -l` or enable strict mode:
 
 ```lua
--- Strict mode (Lua 5.2+)
+-- Strict mode: the metatable trick works on every version from 5.1 on
 setmetatable(_G, {
   __newindex = function(_, name)
     error("Attempt to write to global: " .. name, 2)

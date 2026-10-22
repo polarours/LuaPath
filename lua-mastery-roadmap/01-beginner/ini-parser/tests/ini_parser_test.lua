@@ -1,5 +1,5 @@
 -- tests/ini_parser_test.lua — Unit tests for INI parser
--- Run from project root with: lua lua-mastery-roadmap/01-beginner/ini-parser/tests/ini_parser_test.lua
+-- Run from the project directory with: lua tests/ini_parser_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
 -- the test works regardless of the absolute path on disk.
@@ -18,7 +18,7 @@ local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -28,29 +28,7 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_table(actual, expected, msg)
-  total = total + 1
-  if type(actual) == "table" and type(expected) == "table" then
-    local match = true
-    for k, v in pairs(expected) do
-      if actual[k] ~= v then
-        match = false
-        break
-      end
-    end
-    if match then
-      pass = pass + 1
-    else
-      fail = fail + 1
-      print("FAIL: " .. msg)
-    end
-  else
-    fail = fail + 1
-    print("FAIL: " .. msg .. " (type mismatch)")
-  end
-end
-
-function assert_error(fn, msg)
+local function assert_error(fn, msg)
   total = total + 1
   local ok = pcall(fn)
   if not ok then

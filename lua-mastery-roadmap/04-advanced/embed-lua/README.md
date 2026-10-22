@@ -23,12 +23,12 @@ A complete example of embedding the Lua VM in a C host application. This project
 ## How to Build
 
 ```bash
-gcc -o embed_lua embed-lua.c -llua -lm
+gcc -o embed_lua 05-embed-lua.c -llua -lm
 ```
 
 On macOS with Homebrew:
 ```bash
-gcc -o embed_lua embed-lua.c -I/usr/local/include/lua5.4 -L/usr/local/lib -llua -lm
+gcc -o embed_lua 05-embed-lua.c -I/usr/local/include/lua5.4 -L/usr/local/lib -llua -lm
 ```
 
 ## How to Run
@@ -61,7 +61,7 @@ The host application exposes a logger and metrics table to Lua scripts.
 ```
 embed-lua/
 ├── README.md        ← This file
-├── embed-lua.c      ← C host application
+├── 05-embed-lua.c   ← C host application
 ├── script.lua       ← Lua script loaded by the host
 └── Makefile         ← Build instructions
 ```

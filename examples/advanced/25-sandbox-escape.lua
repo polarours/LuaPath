@@ -1,4 +1,4 @@
--- Example 28: Sandbox Escape Attempts
+-- Example 57: Sandbox Escape Attempts
 -- Chapter: 17-embedding-patterns
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

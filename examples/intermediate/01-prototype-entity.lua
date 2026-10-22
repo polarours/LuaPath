@@ -1,4 +1,4 @@
--- Example 1: Prototype-based Entity System
+-- Example 13: Prototype-based Entity System
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -15,13 +15,13 @@ function Entity:new(def)
   local instance = setmetatable({}, self)
   instance.id = tostring(self):match("table: 0x(.+)")
   instance.active = true
-  
+
   if def then
     for k, v in pairs(def) do
       instance[k] = v
     end
   end
-  
+
   return instance
 end
 
@@ -73,5 +73,5 @@ print(string.format("Player type: %s", player.type))
 print(string.format("Entity ID: %s", player.id))
 
 -- Verify prototype chain
-print(string.format("Player.__index == Player: %s", getmetatable(player).__index == Player))
-print(string.format("Entity in metatable chain: %s", getmetatable(getmetatable(player).__index) == Entity))
+print(string.format("Player.__index == Player: %s", tostring(getmetatable(player).__index == Player)))
+print(string.format("Entity in metatable chain: %s", tostring(getmetatable(getmetatable(player).__index) == Entity)))

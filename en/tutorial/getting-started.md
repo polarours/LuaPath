@@ -140,7 +140,7 @@ end
 
 ## Next Steps
 
-1. Complete the [chapters](../en/00-roadmap.md) in order
-2. Work through the [exercises](../en/01-basics.md#exercises)
-3. Build projects from the [roadmap](../lua-mastery-roadmap/00-overview.md)
-4. Check the [pitfalls](../pitfalls/) to avoid common mistakes
+1. Complete the [chapters](../00-roadmap.md) in order
+2. Work through the [exercises](../01-basics.md#exercises)
+3. Build projects from the [roadmap](../../lua-mastery-roadmap/00-overview.md)
+4. Check the [pitfalls](../../pitfalls/) to avoid common mistakes

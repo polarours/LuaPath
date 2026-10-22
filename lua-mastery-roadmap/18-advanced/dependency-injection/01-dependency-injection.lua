@@ -2,7 +2,7 @@
   Example: Dependency Injection
   Chapter: Stage 18 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: IoC container, service registration, lifecycle management, circular detection
 ]]
 

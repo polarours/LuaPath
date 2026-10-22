@@ -270,7 +270,9 @@ end
 function Pool:destroy()
   -- Stop reaper
   if self._reaper then
-    coroutine.close(self._reaper)
+    -- coroutine.close only arrived in 5.4; on 5.1 and LuaJIT the reaper
+    -- coroutine is dropped and collected with the pool instead.
+    if coroutine.close then coroutine.close(self._reaper) end
     self._reaper = nil
   end
   -- Dispose all idle objects
@@ -281,6 +283,8 @@ function Pool:destroy()
   self._active = {}
 end
 ```
+
+> **Lua 5.4 note**: coroutine.close() arrived in Lua 5.4. On Lua 5.1 the reaper coroutine is dropped and collected with the pool instead.
 
 **Usage example:**
 ```lua

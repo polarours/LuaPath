@@ -1,4 +1,4 @@
--- Example 20: Error Recovery
+-- Example 30: Error Recovery
 -- Chapter: 07-error-handling
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -32,7 +32,7 @@ local function main()
   -- 2. Retry pattern
   local function retry(fn, max_attempts)
     local last_error
-    for attempt = 1, max_attempts do
+    for _ = 1, max_attempts do
       local ok, result = pcall(fn)
       if ok then
         return result
@@ -69,8 +69,8 @@ local function main()
     return true
   end
 
-  local ok, errs = validate({name = "Alice", age = -5})
-  if not ok then
+  local valid, errs = validate({name = "Alice", age = -5})
+  if not valid then
     print("Validation errors:")
     for _, e in ipairs(errs) do
       print("  - " .. e)

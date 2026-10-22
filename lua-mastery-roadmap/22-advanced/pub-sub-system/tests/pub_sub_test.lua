@@ -1,5 +1,5 @@
 -- tests/pub_sub_test.lua — Unit tests for pub-sub system
--- Run from project root with: lua tests/pub_sub_test.lua
+-- Run from the project directory with: lua tests/pub_sub_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
 -- the test works regardless of the absolute path on disk.
@@ -17,7 +17,7 @@ local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -27,7 +27,7 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1
@@ -64,8 +64,8 @@ assert_true(#received >= 0, "Wildcard subscription works")
 unsub()
 
 print("\n4. Unsubscribe")
-local unsub = ps:subscribe("once", function() end)
-unsub()
+local unsub_once = ps:subscribe("once", function() end)
+unsub_once()
 ps:publish("once", "data")
 -- Should not receive after unsubscribe
 

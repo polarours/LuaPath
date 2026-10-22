@@ -13,12 +13,12 @@ local function shallow_copy(original)
   if type(original) ~= "table" then
     return original
   end
-  
+
   local copy = {}
   for key, value in pairs(original) do
     copy[key] = value
   end
-  
+
   return copy
 end
 
@@ -31,28 +31,28 @@ local function deep_copy(original, seen)
   if type(original) ~= "table" then
     return original
   end
-  
+
   -- Handle circular references
   seen = seen or {}
   if seen[original] then
     return seen[original]
   end
-  
+
   local copy = {}
   seen[original] = copy
-  
+
   for key, value in pairs(original) do
     local key_copy = deep_copy(key, seen)
     local value_copy = deep_copy(value, seen)
     copy[key_copy] = value_copy
   end
-  
+
   -- Copy metatable
   local mt = getmetatable(original)
   if mt then
     setmetatable(copy, deep_copy(mt, seen))
   end
-  
+
   return copy
 end
 
@@ -88,8 +88,8 @@ local circular = {x = 1}
 circular.self = circular
 
 local circular_copy = deep_copy(circular)
-print(string.format("  Original has circular ref: %s", circular.self == circular))
-print(string.format("  Copy has circular ref: %s", circular_copy.self == circular_copy))
-print(string.format("  Copy is not original: %s", circular_copy ~= circular))
+print(string.format("  Original has circular ref: %s", tostring(circular.self == circular)))
+print(string.format("  Copy has circular ref: %s", tostring(circular_copy.self == circular_copy)))
+print(string.format("  Copy is not original: %s", tostring(circular_copy ~= circular)))
 
 print("\n✓ All copy tests completed!")

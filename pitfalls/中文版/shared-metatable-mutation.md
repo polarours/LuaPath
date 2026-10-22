@@ -39,5 +39,5 @@ obj.custom_data = {}  -- 实例特定的数据
 
 ## 相关概念
 
-- [05-metatables.md](../zh/05-metatables.md) — 元表与元方法
-- [13-patterns.md](../zh/13-patterns.md) — 设计模式
+- [05-metatables.md](../../zh/05-metatables.md) — 元表与元方法
+- [13-patterns.md](../../zh/13-patterns.md) — 设计模式

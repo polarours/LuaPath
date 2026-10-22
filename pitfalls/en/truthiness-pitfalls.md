@@ -39,9 +39,15 @@ end
 
 -- Or use the or-pattern carefully
 local value = input or default  -- Fails when input is false!
-local value = input ~= nil and input or default  -- Correct
+local value = input ~= nil and input or default  -- Also fails: `false or default`
+
+-- The only form that keeps a false value
+local value = input
+if value == nil then
+  value = default
+end
 ```
 
 ## Key Takeaway
 
-Only `false` and `nil` are falsey. `0`, `""`, `{}`, and functions are all truthy.
+Only `false` and `nil` are falsey. `0`, `""`, `{}`, and functions are all truthy. And because `false` is falsey, an expression ending in `or` cannot preserve it — check for `nil` with an `if`.

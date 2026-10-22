@@ -26,8 +26,14 @@
 ```lua
 -- 危险：执行用户输入
 local user_input = io.read()
-local fn = load(user_input)  -- 可能执行任何操作！
-fn()
+-- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+local fn
+if loadstring then
+  fn = loadstring(user_input)
+else
+  fn = load(user_input)
+end
+fn()  -- 可能执行任何操作！
 
 -- 安全：验证并限制
 local function safe_execute(code)
@@ -37,7 +43,16 @@ local function safe_execute(code)
   end
   
   local env = {print = print, math = math}
-  local fn = load(code, "user", "t", env)
+  -- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+  -- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+  -- loadstring() 配合 setfenv()。
+  local fn
+  if loadstring then
+    fn = loadstring(code, "user")
+    if fn then setfenv(fn, env) end
+  else
+    fn = load(code, "user", "t", env)
+  end
   if not fn then
     return nil, "无效代码"
   end
@@ -45,6 +60,8 @@ local function safe_execute(code)
   return fn()
 end
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### 路径遍历
 
@@ -267,13 +284,26 @@ local function load_plugin_sandboxed(plugin_code, api)
   env.getmetatable = nil
   
   -- 编译插件代码
-  local fn, err = load(plugin_code, "plugin", "t", env)
+  -- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+  -- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+  -- loadstring() 配合 setfenv()。
+  local fn, err
+  if loadstring then
+    fn, err = loadstring(plugin_code, "plugin")
+    if fn then setfenv(fn, env) end
+  else
+    fn, err = load(plugin_code, "plugin", "t", env)
+  end
   if not fn then
     return nil, "插件编译错误: " .. err
   end
   
   -- 设置环境
-  setmetatable(env, {__index = _G})
+  --
+  -- 回退目标只有安全的标准库。如果回退到 _G 就会破坏沙箱：查找 `os`
+  -- 时 env 中没有命中，接着就会通过 __index 解析到 _G.os，于是上面
+  -- 移除的那些全局变量又能访问到了。
+  setmetatable(env, {__index = {string = string, math = math, table = table}})
   
   -- 执行插件
   local ok, result = pcall(fn)
@@ -284,6 +314,8 @@ local function load_plugin_sandboxed(plugin_code, api)
   return result
 end
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### 权限系统
 
@@ -428,6 +460,15 @@ error("服务不可用")
 
 ---
 
+## 示例代码
+
+本章可运行示例：
+- `examples/advanced/27-security-audit.lua` — 字节码加载拒绝、带写入守卫的沙箱化 `_ENV`、不可达的危险全局变量与资源上限，每一项都针对真实攻击尝试进行验证
+- `examples/advanced/21-sandbox-demo.lua` — 恶意输入进入沙箱时的行为
+- `examples/advanced/25-sandbox-escape.lua` — 针对朴素白名单沙箱与加固沙箱的四次逃逸尝试
+
+---
+
 ## 延伸阅读
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
@@ -435,4 +476,4 @@ error("服务不可用")
 
 ---
 
-[返回 README](README.md)
+[返回 README](../README.md)

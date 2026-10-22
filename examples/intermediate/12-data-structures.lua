@@ -1,4 +1,4 @@
--- Example 12: Data Structures
+-- Example 24: Data Structures
 -- Chapter: 04-tables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

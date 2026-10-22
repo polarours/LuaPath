@@ -490,3 +490,11 @@ Check Lua version at compile time:
 - **Tie lifetimes explicitly**: If C allocates memory that Lua manages, use `__gc` finalizers.
 - **One state per thread**: `lua_State` is not thread-safe; use one per OS thread.
 - **Prefer embedding over raw C API when possible**: If you need Lua-C interop for a non-C language, look for an existing binding library first.
+
+
+---
+
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/intermediate/20-interop-boundary.lua` — The boundary contract seen from the Lua side: which representation each value takes, what "absent" means, how holes in a table cross over, and whether yielding across a `pcall` is safe

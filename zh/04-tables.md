@@ -1,4 +1,4 @@
-# 04 — Table
+# 04 — 表
 
 > **阶段**: A（核心语言素养）  
 > **前置条件**: 第 03 章 — 函数  
@@ -187,18 +187,27 @@ local t = {1, 2, 3,}  -- 尾随逗号没有问题
 
 ### 函数式构造
 
+> **Lua 5.2 说明**：table.pack 与 table.unpack 是 Lua 5.2 引入的；在 Lua 5.1 上全局 unpack() 起同样作用，而 pack 可以移植为在 .n 字段中记录参数个数，如下所示。
+
 ```lua
 -- 从函数输出创建 table
 local function make_range(n)
   return {[n] = true}  -- 稀疏：仅键 n 存在
 end
 
--- 使用 table.pack 处理可变参数
+-- table.pack 是 5.2+；在 5.1 上，通过在 .n 字段中记录参数个数来实现。
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+
+-- 使用 pack 处理可变参数
 local function collect(...)
-  return table.pack(...)
+  return pack(...)
 end
 local t = collect(1, 2, 3)
-print(t.n)  -- 3（table.pack 添加了 .n 字段）
+print(t.n)  -- 3（pack 添加了 .n 字段）
 ```
 
 ---
@@ -800,4 +809,4 @@ Lua 参考手册明确说明排序不是稳定的。相等元素的相对顺序�
 
 - [Lua 5.4 参考手册 — 第 3.4 节](https://www.lua.org/manual/5.4/manual.html#3.4)
 - [Lua 编程（第 4 版）— 第 7 章](https://www.lua.org/pil/)
-- [下一章: 05 — Metatable](05-metatables.md)
+- [下一章: 05 — 元表](05-metatables.md)

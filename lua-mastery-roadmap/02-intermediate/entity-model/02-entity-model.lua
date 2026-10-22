@@ -4,7 +4,7 @@
   Demonstrates: Prototype inheritance via metatables, read-only overlays,
                 set-based tags, clone/merge/equals on entity objects
 ]]
--- Lua Version: 5.4
+-- Lua Version: 5.1+
 
 local Entity = {}
 Entity.__index = Entity
@@ -84,6 +84,10 @@ local function ReadOnly_new(entity)
     }
     return setmetatable(proxy, mt)
 end
+
+-- Exported so the test suite can exercise the read-only overlay instead of
+-- taking the main demo's word for it.
+Entity.ReadOnly_new = ReadOnly_new
 
 -- Demo
 local function main()

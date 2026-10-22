@@ -83,8 +83,9 @@ for i = 1, 10000 do
   t[i] = i
 end
 
--- GOOD: Pre-allocate (5.3+: table.create)
-local t = table.create(10000)
+-- GOOD: Pre-allocate. table.create arrived in Lua 5.5; on 5.1 to 5.4
+-- the table grows as it fills.
+local t = table.create and table.create(10000) or {}
 for i = 1, 10000 do
   t[i] = i
 end
@@ -505,7 +506,6 @@ print("p99: " .. samples[99])
 
 - Integer arithmetic is faster (native int64)
 - Bitwise operators are native (faster than `bit32`)
-- `table.create` for pre-allocation
 - `math.type` for number subtype checking
 
 ### Lua 5.4
@@ -513,6 +513,12 @@ print("p99: " .. samples[99])
 - Generational GC mode (better for allocation-heavy workloads)
 - `__close` for deterministic resource cleanup
 - Integer division is slightly optimized
+
+### Lua 5.5
+
+- `table.create` for pre-allocating a table of a known size
+- `math.atan2`, `math.log10` and the hyperbolic functions are gone: they
+  were deprecated in 5.4 and removed in 5.5
 
 ### LuaJIT
 
@@ -582,7 +588,7 @@ The first iterations are interpreted (not JIT-compiled). Warmup allows the JIT t
 
 ### Intermediate (1–2 hours)
 
-4. **Table Pre-allocation**: Compare incremental table growth vs `table.create` for building a 100K-element array. Measure time and GC count.
+4. **Table Pre-allocation**: Compare incremental table growth vs `table.create` (Lua 5.5+) for building a 100K-element array. Measure time and GC count.
 
 5. **Closure Avoidance**: Refactor a closure-heavy function to minimize closure creation. Benchmark before/after.
 

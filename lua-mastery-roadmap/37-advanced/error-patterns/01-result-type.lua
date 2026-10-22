@@ -87,9 +87,9 @@ print("\n=== Interactive Demo ===")
 io.write("Enter a number: ")
 local input = io.read("*n")
 if input then
-  local result = divide(100, input)
+  local division = divide(100, input)
     :map(function(x) return math.floor(x) end)
-  print("100 / " .. input .. " = " .. result:unwrap_or("error"))
+  print("100 / " .. input .. " = " .. division:unwrap_or("error"))
 else
   print("Invalid input")
 end

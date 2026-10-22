@@ -1,5 +1,5 @@
 -- tests/entity_model_test.lua — Unit tests for entity model
--- Run from project root with: lua tests/entity_model_test.lua
+-- Run from the project directory with: lua tests/entity_model_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
 -- the test works regardless of the absolute path on disk.
@@ -17,7 +17,7 @@ local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -27,7 +27,7 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1
@@ -37,7 +37,7 @@ function assert_true(val, msg)
   end
 end
 
-function assert_false(val, msg)
+local function assert_false(val, msg)
   total = total + 1
   if not val then
     pass = pass + 1
@@ -92,9 +92,13 @@ assert_true(base:has_tag("basic"), "Base tag preserved")
 assert_true(base:has_tag("special"), "Other tag added")
 -- Note: merge copies all fields including id, so base.id becomes "2"
 
-print("\n8. Read-only proxy check")
-print("  (Read-only proxy functionality verified in main demo)")
-pass = pass + 1
+print("\n8. Read-only overlay")
+local frozen = Entity.ReadOnly_new(Entity.new("3", "Frozen", "unit", { "basic" }))
+assert_eq(frozen.name, "Frozen", "Read-only overlay delegates reads")
+local write_blocked = pcall(function() frozen.name = "Hacked" end)
+assert_true(not write_blocked, "Read-only overlay blocks direct writes")
+local method_blocked = pcall(function() frozen:add_tag("cheat") end)
+assert_true(not method_blocked, "Read-only overlay blocks mutating methods")
 
 print("\n=== Results: " .. pass .. "/" .. total .. " passed ===")
 if fail > 0 then

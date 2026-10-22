@@ -231,13 +231,13 @@ stylua --check src/
 
 ### Version Differences
 
-| Feature | 5.1 | 5.3 | 5.4 | LuaJIT |
-|---------|-----|-----|-----|--------|
-| Integers | No | Yes | Yes | No |
-| Bitwise ops | No | Yes | Yes | Yes |
-| Generational GC | No | No | Yes | No |
-| `goto` | No | Yes | Yes | Yes |
-| `_ENV` | No | Yes | Yes | Partial |
+| Feature | 5.1 | 5.3 | 5.4 | 5.5 | LuaJIT |
+|---------|-----|-----|-----|-----|--------|
+| Integers | No | Yes | Yes | Yes | No |
+| Bitwise ops | No | Yes | Yes | Yes | Yes |
+| Generational GC | No | No | Yes | Yes | No |
+| `goto` | No | Yes | Yes | Yes | Yes |
+| `_ENV` | No | Yes | Yes | Yes | No |
 
 ### Compatibility Libraries
 
@@ -245,8 +245,18 @@ stylua --check src/
 -- Lua 5.1 compatibility for 5.2+
 local unpack = unpack or table.unpack
 
--- Bitwise operations for 5.1
-local bit = require("bit32") or require("bit")
+-- Bitwise operations. require() raises when the module is missing, it does
+-- not return nil, so the module has to be chosen by version:
+--   LuaJIT            -> the "bit" library
+--   Lua 5.2 and 5.3   -> the deprecated "bit32" module
+--   PUC Lua 5.1       -> no bitwise operators at all
+--   Lua 5.4 and later -> the operators & | ~ << >> are built in
+local bit
+if type(jit) == "table" then
+  bit = require("bit")
+elseif _VERSION == "Lua 5.2" or _VERSION == "Lua 5.3" then
+  bit = require("bit32")
+end
 
 -- Select version at runtime
 local function is_lua51()
@@ -356,8 +366,8 @@ end
 ```
 
 A non-finite number makes `value ~= value` true, which is how you detect NaN
-without a `math.isnan`. Both of those are cases where a naive encoder silently
-produces invalid JSON.
+without any library support. Both of those are cases where a naive encoder
+silently produces invalid JSON.
 
 ### Reporting The Difference Honestly
 

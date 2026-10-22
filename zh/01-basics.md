@@ -85,11 +85,17 @@ local config = options.debug or false  -- 错误：当 options.debug 为 false �
 local config = options.debug ~= nil and options.debug or false  -- 正确
 
 -- 显式检查 nil
-if value == nil then ... end      -- 显式判断
-if value ~= nil then ... end      -- 显式否定
+if value == nil then
+  -- ...
+ end      -- 显式判断
+if value ~= nil then
+  -- ...
+ end      -- 显式否定
 
 -- 不要这样做（对 false、0、"" 会失败）
-if value then ... end             -- 只检查真值
+if value then
+  -- ...
+ end             -- 只检查真值
 ```
 
 > **陷阱**：`or` 模式（`value or default`）在 `false` 是有意义的值时会失败。当 `false` 是有效输入时，请使用显式的 `nil` 检查。
@@ -322,7 +328,7 @@ end
 **检测方法**：使用 `luac -l` 或启用严格模式：
 
 ```lua
--- 严格模式（Lua 5.2+）
+-- 严格模式：这个元表技巧从 5.1 开始就都能用
 setmetatable(_G, {
   __newindex = function(_, name)
     error("Attempt to write to global: " .. name, 2)

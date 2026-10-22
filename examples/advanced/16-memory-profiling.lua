@@ -1,4 +1,4 @@
--- Example 16: Memory Profiling
+-- Example 48: Memory Profiling
 -- Chapter: 12-performance
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -6,6 +6,16 @@
 
 local MemoryProfiler = {}
 MemoryProfiler.__index = MemoryProfiler
+
+-- table.pack/table.unpack arrived in Lua 5.2. On 5.1 the equivalents are the
+-- global unpack() and a hand-rolled pack that records the argument count in
+-- the .n field, which is exactly what table.pack does.
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+local unpack_values = table.unpack or unpack
 
 function MemoryProfiler.new()
   local self = setmetatable({}, MemoryProfiler)
@@ -18,7 +28,7 @@ end
 function MemoryProfiler:snapshot(label)
   collectgarbage("collect")
   collectgarbage("collect")
-  
+
   local mem = collectgarbage("count") * 1024  -- Convert to bytes
   table.insert(self.snapshots, {
     label = label,
@@ -33,25 +43,25 @@ end
 function MemoryProfiler:count_objects()
   local counts = {}
   local seen = {}
-  
+
   local function scan(val)
     if type(val) ~= "table" or seen[val] then return end
     seen[val] = true
-    
+
     local t = type(val)
     counts[t] = (counts[t] or 0) + 1
-    
-    for k, v in pairs(val) do
+
+    for _, v in pairs(val) do
       if type(v) == "table" then
         scan(v)
       end
     end
   end
-  
+
   -- Scan known roots
   scan(_G)
   scan(getmetatable(getmetatable({})))
-  
+
   return counts
 end
 
@@ -59,38 +69,38 @@ end
 function MemoryProfiler:track(name, fn)
   collectgarbage("collect")
   local before = collectgarbage("count") * 1024
-  
-  local results = table.pack(fn())
-  
+
+  local results = pack(fn())
+
   collectgarbage("collect")
   local after = collectgarbage("count") * 1024
-  
+
   local allocation = after - before
   table.insert(self.allocations, {
     name = name,
     allocation = allocation,
     time = os.clock(),
   })
-  
-  return table.unpack(results, 1, results.n)
+
+  return unpack_values(results, 1, results.n)
 end
 
 -- Print summary
 function MemoryProfiler:summary()
   print("\n=== Memory Profile Summary ===\n")
-  
+
   -- Snapshots
   print("Snapshots:")
   for i, snap in ipairs(self.snapshots) do
     if i > 1 then
       local delta = snap.memory - self.snapshots[i-1].memory
-      print(string.format("  %s: %.2f KB (delta: %.2f KB)", 
+      print(string.format("  %s: %.2f KB (delta: %.2f KB)",
         snap.label, snap.memory / 1024, delta / 1024))
     else
       print(string.format("  %s: %.2f KB", snap.label, snap.memory / 1024))
     end
   end
-  
+
   -- Allocations
   print("\nAllocations:")
   local total = 0
@@ -99,7 +109,7 @@ function MemoryProfiler:summary()
     total = total + alloc.allocation
   end
   print(string.format("  Total: %.2f KB", total / 1024))
-  
+
   -- Object counts
   print("\nObject Counts:")
   for i, snap in ipairs(self.snapshots) do
@@ -114,12 +124,12 @@ end
 -- Main demonstration
 local function main()
   print("=== Memory Profiling Example ===\n")
-  
+
   local profiler = MemoryProfiler.new()
-  
+
   -- Baseline
   profiler:snapshot("baseline")
-  
+
   -- Allocate some tables
   profiler:track("allocate tables", function()
     local t = {}
@@ -128,9 +138,9 @@ local function main()
     end
     return t
   end)
-  
+
   profiler:snapshot("after tables")
-  
+
   -- Create closures
   profiler:track("create closures", function()
     local closures = {}
@@ -140,9 +150,9 @@ local function main()
     end
     return closures
   end)
-  
+
   profiler:snapshot("after closures")
-  
+
   -- Create strings
   profiler:track("create strings", function()
     local strings = {}
@@ -151,15 +161,15 @@ local function main()
     end
     return strings
   end)
-  
+
   profiler:snapshot("after strings")
-  
+
   -- Print summary
   profiler:summary()
-  
+
   -- Demonstrate optimization
   print("\n=== Optimization Techniques ===\n")
-  
+
   -- Technique 1: Table reuse
   print("1. Table Reuse:")
   local t = {}
@@ -169,7 +179,7 @@ local function main()
       t.y = i * 2
     end
   end)
-  
+
   -- Technique 2: String building
   print("2. String Building:")
   profiler:track("string concat", function()
@@ -179,7 +189,7 @@ local function main()
     end
     return result
   end)
-  
+
   profiler:track("table.concat", function()
     local parts = {}
     for i = 1, 100 do
@@ -187,7 +197,7 @@ local function main()
     end
     return table.concat(parts)
   end)
-  
+
   -- Technique 3: Weak references
   print("3. Weak References:")
   local cache = setmetatable({}, {__mode = "k"})
@@ -197,11 +207,11 @@ local function main()
       cache[key] = string.rep("data", 100)
     end
   end)
-  
+
   -- Final summary
   profiler:snapshot("final")
   profiler:summary()
-  
+
   print("\n=== Done ===")
 end
 

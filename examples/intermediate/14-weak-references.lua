@@ -1,4 +1,4 @@
--- Example 14: Weak References
+-- Example 26: Weak References
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -149,8 +149,12 @@ local function demo_observer_pattern()
 
   -- Create observers
   do
-    local a = setmetatable({_name = "observer_A"}, {__index = {handle = function(self, e) print("    A got: " .. e) end}})
-    local b = setmetatable({_name = "observer_B"}, {__index = {handle = function(self, e) print("    B got: " .. e) end}})
+    local a = setmetatable({_name = "observer_A"}, {__index = {
+      handle = function(self, e) print("    A got: " .. e) end,
+    }})
+    local b = setmetatable({_name = "observer_B"}, {__index = {
+      handle = function(self, e) print("    B got: " .. e) end,
+    }})
     signal:on(a, a.handle)
     signal:on(b, b.handle)
 
@@ -229,7 +233,7 @@ local function demo_memoization()
   print("  Key insight: different objects with same data must be computed separately")
 end
 
-function main()
+local function main()
   print("Weak References Examples")
   print("=======================")
 

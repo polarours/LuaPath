@@ -13,7 +13,7 @@
 
 1. **理解 C API 栈协议** — 正确地压入、弹出和索引值
 2. **编写安全集成到 Lua 中的 C 函数**
-3. **使用 userdata 和 metatable 将 C 数据结构绑定到 Lua**
+3. **使用用户数据和元表将 C 数据结构绑定到 Lua**
 4. **跨 Lua/C 边界处理错误**而不崩溃
 5. **在 C 宿主应用程序中嵌入 Lua**并正确管理生命周期
 
@@ -201,11 +201,11 @@ lua_rawseti(L, 1, 2);   // Set t[2] without __newindex
 
 ---
 
-## Userdata
+## 用户数据
 
-Userdata 允许 Lua 的垃圾回收器管理 C 数据。
+用户数据允许 Lua 的垃圾回收器管理 C 数据。
 
-### 轻量级 userdata（Light Userdata）
+### 轻量级用户数据（Light 用户数据）
 
 ```c
 // Pointer-sized, not GC-managed
@@ -214,7 +214,7 @@ lua_pushlightuserdata(L, ptr);
 // Caller is responsible for freeing ptr
 ```
 
-### 完整 userdata（Full Userdata）
+### 完整用户数据（Full 用户数据）
 
 ```c
 // GC-managed block of memory
@@ -256,7 +256,7 @@ static int l_point_distance(lua_State *L) {
 }
 ```
 
-### 为 userdata 设置 metatable
+### 为用户数据设置元表
 
 ```c
 // Create metatable
@@ -336,7 +336,7 @@ int ref = luaL_ref(L, LUA_REGISTRYINDEX); // Get unique integer key
 lua_rawgeti(L, LUA_REGISTRYINDEX, ref);  // Push stored value
 
 // Remove reference
-lua_unref(L, LUA_REGISTRYINDEX, ref);
+luaL_unref(L, LUA_REGISTRYINDEX, ref);
 ```
 
 ### 命名引用
@@ -430,7 +430,7 @@ static int good_func(lua_State *L) {
     lua_pushnumber(L, 1);
     lua_pushnumber(L, 2);
     lua_pushnumber(L, 3);
-    lua_settop(L, -2);  // Keep only top value
+    lua_settop(L, 1);   // 丢弃多余的两个值；只返回一个
     return 1;
 }
 ```
@@ -452,7 +452,7 @@ static int good_func(lua_State *L) {
 }
 ```
 
-### 5. 忘记设置 metatable
+### 5. 忘记设置元表
 
 ```c
 // BUG: Userdata has no methods
@@ -543,7 +543,7 @@ static int risky_func(lua_State *L) {
 
 ### Lua 5.4
 
-- `lua_newuserdatauv` 用于带用户值的 userdata
+- `lua_newuserdatauv` 用于带用户值的用户数据
 - `lua_resetthread` 用于协程重置
 - `luaL_loadbufferx` 带模式参数
 - 改进的错误消息
@@ -574,7 +574,7 @@ static int risky_func(lua_State *L) {
 <details>
 <summary>3. 什么是注册表（Registry），为什么要使用它？</summary>
 
-注册表是 `LUA_REGISTRYINDEX` 中的一个隐藏表，用于存储 C 端数据。它可以被状态中的任何 C 函数访问，提供了一个稳定的地方来存储回调、userdata 引用和其他持久化数据。
+注册表是 `LUA_REGISTRYINDEX` 中的一个隐藏表，用于存储 C 端数据。它可以被状态中的任何 C 函数访问，提供了一个稳定的地方来存储回调、用户数据引用和其他持久化数据。
 </details>
 
 <details>
@@ -584,9 +584,9 @@ static int risky_func(lua_State *L) {
 </details>
 
 <details>
-<summary>5. 轻量级 userdata 和完整 userdata 有什么区别？</summary>
+<summary>5. 轻量级用户数据和完整用户数据有什么区别？</summary>
 
-轻量级 userdata 只是一个指针 — Lua 不管理其内存。完整 userdata 是由 Lua 管理的内存块，具有 GC、metatable 支持和正确的生命周期管理。
+轻量级用户数据只是一个指针 — Lua 不管理其内存。完整用户数据是由 Lua 管理的内存块，具有 GC、元表支持和正确的生命周期管理。
 </details>
 
 ---
@@ -596,7 +596,7 @@ static int risky_func(lua_State *L) {
 - **栈协议**: 所有数据交换都通过 push/pop/index 完成
 - **C 函数**: 返回压入栈的值的数量
 - **`luaL_check*`**: 始终验证参数（不要使用 `lua_to*`）
-- **Userdata**: 使用 GC 和 metatable 将 C 数据绑定到 Lua
+- **用户数据**: 使用 GC 和元表将 C 数据绑定到 Lua
 - **注册表（Registry）**: C 端引用的稳定存储
 - **`lua_pcall`**: 跨 Lua/C 边界的错误安全处理
 - **切勿使用 C 异常**跨越 Lua 边界
@@ -616,7 +616,7 @@ static int risky_func(lua_State *L) {
 
 ### 中级（1–2 小时）
 
-4. **Point 绑定**: 实现完整的 Point userdata，包含 `new(x,y)`、`add(other)`、`distance(other)` 和 `__tostring`。
+4. **Point 绑定**: 实现完整的 Point 用户数据，包含 `new(x,y)`、`add(other)`、`distance(other)` 和 `__tostring`。
 
 5. **数组绑定**: 创建一个 C 支持的数组类型，包含 `get(i)`、`set(i, v)`、`length()` 以及 `__index`/`__newindex` 元方法。
 
@@ -633,7 +633,8 @@ static int risky_func(lua_State *L) {
 ## 示例代码
 
 本章的可运行示例：
-- `examples/advanced/01-ecs-system.lua` — 使用类似 userdata 的模式
+- `examples/advanced/01-ecs-system.lua` — 使用类似用户数据的模式
+- `examples/projects/05-c-stack-host/05-c-stack-host.lua` — 编译并运行 C API 示例，对宿主进程的栈报告做断言
 - `examples/projects/` — 嵌入项目的目标目录
 
 ---

@@ -28,7 +28,13 @@
 ```lua
 -- 动态编译并执行
 local code = 'return 1 + 2'
-local fn, err = load(code)
+-- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+local fn, err
+if loadstring then
+  fn, err = loadstring(code)
+else
+  fn, err = load(code)
+end
 if fn then
   local result = fn()
   print(result)  -- 3
@@ -37,6 +43,8 @@ else
 end
 ```
 
+> **Lua 5.2 说明**：load() 从 Lua 5.2 起才支持编译字符串；在 Lua 5.1 上请用 loadstring()。
+
 ### 环境控制
 
 `load` 可以为加载的代码设置环境：
@@ -44,13 +52,30 @@ end
 ```lua
 -- 受限环境
 local restricted = {print = print, math = math}
-local fn = load("return math.sqrt(16)", "chunk", "t", restricted)
+-- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+-- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+-- loadstring() 配合 setfenv()。
+local fn
+if loadstring then
+  fn = loadstring("return math.sqrt(16)", "chunk")
+  if fn then setfenv(fn, restricted) end
+else
+  fn = load("return math.sqrt(16)", "chunk", "t", restricted)
+end
 print(fn())  -- 4.0
 
 -- 代码无法访问受限环境之外的全局变量
-local fn2 = load("return os.execute('rm -rf /')", "chunk", "t", restricted)
+local fn2
+if loadstring then
+  fn2 = loadstring("return os.execute('rm -rf /')", "chunk")
+  if fn2 then setfenv(fn2, restricted) end
+else
+  fn2 = load("return os.execute('rm -rf /')", "chunk", "t", restricted)
+end
 -- 调用 fn2 会失败（os 不在 restricted 中）
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### `loadstring`（Lua 5.1）
 
@@ -77,9 +102,13 @@ local fn = load and load("return 42") or loadstring("return 42")
 local function generate_function(name, params, body)
   local param_str = table.concat(params, ", ")
   local code = string.format(
-    "local function %s(%s)\n%s\nend",
-    name, param_str, body
+    "local function %s(%s)\n%s\nend\nreturn %s",
+    name, param_str, body, name
   )
+  -- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+  if loadstring then
+    return loadstring(code)()
+  end
   return load(code)()
 end
 
@@ -106,6 +135,10 @@ local function generate_accessors(fields)
     )
   end
   code = code .. "return M"
+  -- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+  if loadstring then
+    return loadstring(code)()
+  end
   return load(code)()
 end
 
@@ -146,16 +179,18 @@ print(query("users")({status = "active"}))
 
 ### 构建器模式 DSL
 
+先用 `create_builder()` 拿到一个构建器，再用 `:set()` 逐项写入——它返回自身，因此可以链式调用——最后用 `:build()` 取出结果表。
+
 ```lua
 local function create_builder()
   local builder = {}
   local data = {}
-  
+
   function builder:set(key, value)
     data[key] = value
     return builder  -- 支持链式调用
   end
-  
+
   function builder:build()
     local result = {}
     for k, v in pairs(data) do
@@ -163,7 +198,7 @@ local function create_builder()
     end
     return result
   end
-  
+
   return builder
 end
 
@@ -223,6 +258,88 @@ end
 
 ---
 
+## 高级模式
+
+### 基于属性的访问
+
+使用 `__index` 和 `__newindex` 实现基于属性的访问：
+
+```lua
+local function create_attrs(defaults)
+  local attrs = {}
+  for k, v in pairs(defaults) do
+    attrs[k] = v
+  end
+  
+  return setmetatable({}, {
+    __index = function(_, k)
+      return attrs[k]
+    end,
+    __newindex = function(_, k, v)
+      if attrs[k] ~= nil then
+        error("Attribute '" .. k .. "' is read-only")
+      end
+      rawset(_, k, v)
+    end,
+  })
+end
+
+local obj = create_attrs({name = "test", value = 42})
+print(obj.name)  -- "test"
+-- obj.name = "new"  -- 错误：只读
+```
+
+### 构建器模式与链式调用
+
+```lua
+local function builder()
+  local data = {}
+  
+  return setmetatable(data, {
+    __call = function(_, key, value)
+      data[key] = value
+      return data  -- 支持链式调用
+    end,
+  })
+end
+
+-- 链式调用特意写成一行：拆成多行后 `f()\n(g)()` 会产生歧义，
+-- Lua 5.1 无法解析这种写法。
+local config = builder()("host", "localhost")("port", 8080)("debug", true)
+
+print(config.host, config.port, config.debug)
+```
+
+### 算术运算的元方法
+
+```lua
+local Vector = {}
+Vector.__index = Vector
+
+function Vector.new(x, y)
+  return setmetatable({x = x or 0, y = y or 0}, Vector)
+end
+
+function Vector.__add(a, b)
+  return Vector.new(a.x + b.x, a.y + b.y)
+end
+
+function Vector.__mul(v, scalar)
+  return Vector.new(v.x * scalar, v.y * scalar)
+end
+
+function Vector:__tostring()
+  return string.format("Vector(%g, %g)", self.x, self.y)
+end
+
+local v1 = Vector.new(1, 2)
+local v2 = Vector.new(3, 4)
+print(v1 + v2)  -- Vector(4, 6)
+print(v1 * 3)   -- Vector(3, 6)
+```
+
+---
+
 ## 常见陷阱
 
 ### 1. `load` 的安全风险
@@ -230,22 +347,51 @@ end
 ```lua
 -- 危险：不要加载不受信任的代码
 local user_input = io.read()
-local fn = load(user_input)  -- 可能执行任何操作！
+-- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+local fn
+if loadstring then
+  fn = loadstring(user_input)  -- 可能执行任何操作！
+else
+  fn = load(user_input)  -- 可能执行任何操作！
+end
+fn()
 
 -- 安全：使用受限环境
 local safe_env = {print = print, math = math}
-local fn = load(user_code, "user", "t", safe_env)
+-- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+-- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+-- loadstring() 配合 setfenv()。
+local fn
+if loadstring then
+  fn = loadstring(user_input, "user")
+  if fn then setfenv(fn, safe_env) end
+else
+  fn = load(user_input, "user", "t", safe_env)
+end
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### 2. 调试信息丢失
 
 ```lua
 -- 运行时生成的代码缺少调试信息
-local fn = load("return 1/0")  -- 错误消息没有行号
+-- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+local fn
+if loadstring then
+  fn = loadstring("return 1/0")
+else
+  fn = load("return 1/0")
+end
 fn()  -- 错误消息缺少上下文
 
 -- 更好：包含调试信息
-local fn = load("return 1/0", "=generated", "t")
+local fn
+if loadstring then
+  fn = loadstring("return 1/0", "=generated")
+else
+  fn = load("return 1/0", "=generated", "t")
+end
 ```
 
 ### 3. 性能开销

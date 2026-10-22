@@ -2,7 +2,7 @@
   Example: Concurrency Patterns
   Chapter: Stage 25 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Actor model, CSP channels, async/await simulation with coroutines
 ]]
 
@@ -142,47 +142,59 @@ end
 ------------------------------------------------------------
 -- 3. ASYNC/AWAIT SIMULATION
 ------------------------------------------------------------
+--- Start a function as a coroutine -- the "async" half.
 local function async(fn)
-    local co = coroutine.create(fn)
-    return co
+    return coroutine.create(fn)
 end
 
+--- Wait for a coroutine to finish -- the "await" half.
+--
+-- await has to be called from inside a coroutine: while the operation is
+-- still running it yields, handing control back to the caller so that other
+-- work can proceed. A plain function cannot yield, which is exactly why
+-- async/await needs coroutines in the first place.
 local function await(co, callback)
-    local function step()
+    while true do
         local ok, result = coroutine.resume(co)
         if not ok then
             error(result)
         end
-        if coroutine.status(co) == "suspended" then
-            coroutine.yield(result)
-        else
+        if coroutine.status(co) == "dead" then
             callback(result)
+            return result
         end
+        -- Still running: report the progress and keep waiting.
+        coroutine.yield(result)
     end
-    step()
 end
 
+--- An operation that reports progress before it produces a result.
+-- It returns a plain function; async() is what turns it into a coroutine.
 local function asyncOperation(value)
-    return coroutine.create(function()
-        coroutine.yield(value * 2)
+    return function()
+        coroutine.yield("working on " .. tostring(value))
         return value * 2
-    end)
+    end
 end
 
 local function demo_async_await()
     print("=== Async/Await Simulation ===")
-    local function runAsync()
-        local co = coroutine.create(function()
-            local op = asyncOperation(21)
-            local _, val = coroutine.resume(op)
-            print(string.format("[async] operation returned: %d", val))
-            return val
-        end)
 
-        local _, finalVal = coroutine.resume(co)
-        print(string.format("[async] final: %s", tostring(finalVal)))
+    local awaiting = coroutine.create(function()
+        return await(async(asyncOperation(21)), function(final)
+            print(string.format("[async] final: %s", tostring(final)))
+        end)
+    end)
+
+    while coroutine.status(awaiting) ~= "dead" do
+        local ok, progress = coroutine.resume(awaiting)
+        if not ok then
+            error(progress)
+        end
+        if coroutine.status(awaiting) ~= "dead" then
+            print(string.format("[async] progress: %s", tostring(progress)))
+        end
     end
-    runAsync()
     print()
 end
 

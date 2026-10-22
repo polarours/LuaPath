@@ -8,7 +8,7 @@ Build a composable data pipeline with map, filter, reduce, and chaining operator
 
 ## Prerequisites
 
-- Stage 03 (Functions)
+- Chapter 03 (Functions)
 - Stage 11 (Cache System)
 
 ## How to Run

@@ -1,4 +1,4 @@
--- Example 13: Version Compatibility Patterns
+-- Example 25: Version Compatibility Patterns
 -- Chapter: 16-lua-ecosystem
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -13,7 +13,6 @@ local function main()
     print("=== Version Compatibility Patterns ===\n")
 
     -- 1. Version detection
-    local version = _VERSION:match("%d+%.%d+")
     local major = tonumber(_VERSION:match("%d+"))
     local minor = tonumber(_VERSION:match("%d+%.(%d+)"))
 
@@ -122,8 +121,8 @@ local function main()
     print("\n--- Conditional Require ---")
 
     local function safe_require(name)
-        local ok, mod = pcall(require, name)
-        if ok then
+        local req_ok, mod = pcall(require, name)
+        if req_ok then
             return mod
         else
             print("  (skipped: " .. name .. ")")

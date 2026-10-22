@@ -2,7 +2,7 @@
   Example: State Machine
   Chapter: 12 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.3+
+  Lua Version: 5.1+
   Demonstrates: FSM design, guard conditions, entry/exit callbacks, metatables, traffic light demo
 ]]
 
@@ -76,7 +76,7 @@ end
 function FSM:current() return self._current end
 
 -- Traffic light demo
-function traffic_light_demo()
+local function traffic_light_demo()
     print("=== Traffic Light FSM ===\n")
 
     local light = FSM.new("TrafficLight")
@@ -118,7 +118,7 @@ function traffic_light_demo()
 end
 
 -- Game state demo
-function game_state_demo()
+local function game_state_demo()
     print("=== Game State FSM ===\n")
 
     local game = FSM.new("Game")
@@ -148,7 +148,7 @@ function game_state_demo()
     print("=== Done ===")
 end
 
-function main()
+local function main()
     traffic_light_demo()
     game_state_demo()
 end

@@ -18,12 +18,27 @@ print(debug)  -- true! (should be false)
 
 `or` returns the first truthy value. `false` is falsey, so `or` falls through to the default. This silently overrides intentional `false` values.
 
+Any expression that ends in `or` loses `false`, which is why the usual repair `value ~= nil and value or default` breaks too: its `and` produces `false`, and the trailing `or` replaces that with the default. The value has to be tested with an `if`, not folded into an expression.
+
 ## The Fix
 
+The obvious repair does not work either — it still ends in `or`:
+
 ```lua
--- Explicit nil check preserves false
+-- Still wrong: `false or true` is true again
 local options = {debug = false}
 local debug = options.debug ~= nil and options.debug or true
+print(debug)  -- true! The and/or idiom loses false as well.
+```
+
+The fix is an explicit `nil` check, with no `or` at the end:
+
+```lua
+local options = {debug = false}
+local debug = options.debug
+if debug == nil then
+  debug = true
+end
 print(debug)  -- false (correct!)
 
 -- Or use a helper function
@@ -37,4 +52,4 @@ local debug = with_default(options.debug, true)  -- false
 
 ## Key Takeaway
 
-`or` only checks truthiness. When `false` is a valid value, use explicit `nil` checks or a helper function.
+`or` only checks truthiness, and so does `value ~= nil and value or default`. When `false` is a valid value, use an explicit `nil` check or a helper function.

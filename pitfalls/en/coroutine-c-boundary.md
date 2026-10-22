@@ -25,6 +25,23 @@ local co = coroutine.create(function()
 end)
 ```
 
+## Reproduction
+
+A coroutine body that reaches into a C function is where the boundary shows up:
+
+```lua
+-- io.read is a C function and may not be able to yield
+local co = coroutine.create(function()
+  print(io.read())  -- crashes if called while yielding
+end)
+
+-- some C functions do not support yielding across the call
+local co = coroutine.create(function()
+  local result = some_c_function()  -- may crash
+  coroutine.yield(result)
+end)
+```
+
 ## Why It's Wrong
 
 Standard Lua 5.1 does not allow `coroutine.yield` inside C function boundaries (called via C API). LuaJIT and Lua 5.2+ relaxed this in specific cases, but:

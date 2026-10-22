@@ -1,4 +1,4 @@
--- Example 4: Iterator Patterns
+-- Example 36: Iterator Patterns
 -- Chapter: 04-tables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

@@ -26,8 +26,14 @@ After this chapter, you will be able to:
 ```lua
 -- DANGEROUS: Executing user input
 local user_input = io.read()
-local fn = load(user_input)  -- Could execute anything!
-fn()
+-- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+local fn
+if loadstring then
+  fn = loadstring(user_input)
+else
+  fn = load(user_input)
+end
+fn()  -- Could execute anything!
 
 -- SAFE: Validate and restrict
 local function safe_execute(code)
@@ -37,7 +43,16 @@ local function safe_execute(code)
   end
   
   local env = {print = print, math = math}
-  local fn = load(code, "user", "t", env)
+  -- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+  -- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+  -- followed by setfenv() on the compiled chunk.
+  local fn
+  if loadstring then
+    fn = loadstring(code, "user")
+    if fn then setfenv(fn, env) end
+  else
+    fn = load(code, "user", "t", env)
+  end
   if not fn then
     return nil, "Invalid code"
   end
@@ -45,6 +60,8 @@ local function safe_execute(code)
   return fn()
 end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### Path Traversal
 
@@ -267,13 +284,27 @@ local function load_plugin_sandboxed(plugin_code, api)
   env.getmetatable = nil
   
   -- Compile plugin code
-  local fn, err = load(plugin_code, "plugin", "t", env)
+  -- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+  -- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+  -- followed by setfenv() on the compiled chunk.
+  local fn, err
+  if loadstring then
+    fn, err = loadstring(plugin_code, "plugin")
+    if fn then setfenv(fn, env) end
+  else
+    fn, err = load(plugin_code, "plugin", "t", env)
+  end
   if not fn then
     return nil, "Plugin compile error: " .. err
   end
   
   -- Set up environment
-  setmetatable(env, {__index = _G})
+  --
+  -- The fallback is the safe standard library only. A fallback to _G would
+  -- undo the sandbox: a lookup of `os` would miss in env and then resolve
+  -- through __index to _G.os, making the globals removed above reachable
+  -- again.
+  setmetatable(env, {__index = {string = string, math = math, table = table}})
   
   -- Execute plugin
   local ok, result = pcall(fn)
@@ -284,6 +315,8 @@ local function load_plugin_sandboxed(plugin_code, api)
   return result
 end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### Permission System
 
@@ -428,6 +461,15 @@ error("Service unavailable")
 
 ---
 
+## Example Code
+
+Runnable examples for this chapter:
+- `examples/advanced/27-security-audit.lua` — Bytecode loading rejection, a sandboxed `_ENV` with a write guard, unreachable dangerous globals, and resource limits, each exercised against a real attempt
+- `examples/advanced/21-sandbox-demo.lua` — Sandbox behavior when hostile input reaches it
+- `examples/advanced/25-sandbox-escape.lua` — Four escape attempts against a naive allow-list sandbox versus a hardened one
+
+---
+
 ## Further Reading
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
@@ -435,4 +477,4 @@ error("Service unavailable")
 
 ---
 
-[Back to README](README.md)
+[Back to README](../README.md)

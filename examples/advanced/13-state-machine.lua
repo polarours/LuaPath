@@ -1,4 +1,4 @@
--- Example 13: State Machine Patterns
+-- Example 45: State Machine Patterns
 -- Chapter: 13-patterns
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -43,7 +43,7 @@ local function main()
         yellow = { timeout = { target = "red",    action = function() print("  -> RED light") end } },
     }, "red")
 
-    for i = 1, 6 do
+    for _ = 1, 6 do
         traffic_light:fire("timeout")
     end
 
@@ -123,8 +123,8 @@ local function main()
 
     local co = coroutine.create(traffic_coroutine)
     for i = 1, 8 do
-        local ok, state = coroutine.resume(co)
-        if ok then
+        local tick_ok, state = coroutine.resume(co)
+        if tick_ok then
             print("  tick " .. i .. ": " .. state)
         end
     end
@@ -166,8 +166,8 @@ local function main()
     local tick = 0
     while coroutine.status(game_co) ~= "dead" do
         tick = tick + 1
-        local ok, event = coroutine.resume(game_co)
-        if ok and type(event) == "table" then
+        local resume_ok, event = coroutine.resume(game_co)
+        if resume_ok and type(event) == "table" then
             print(string.format("  tick %2d: %-12s (%s)", tick, event.msg, event.msg))
         end
     end

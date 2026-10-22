@@ -1,4 +1,4 @@
--- Example 11: Event System
+-- Example 43: Event System
 -- Chapter: 13-patterns
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -39,8 +39,18 @@ function M.new_bus()
     end
 
     -- Subscribe for one emission only
+    --
+    -- Inside Neovim, vim.tbl_extend merges the caller's options with the
+    -- defaults. Outside it, there is no `vim` global at all -- reading it
+    -- directly would be an undefined global access, so it is looked up in
+    -- _G explicitly.
     function bus:once(topic, fn, opts)
-        return self:on(topic, fn, vim and vim.tbl_extend("force", opts or {}, { once = true }) or { once = true, priority = (opts or {}).priority })
+        local neovim = rawget(_G, "vim")
+        local defaults = { once = true, priority = (opts or {}).priority }
+        if neovim then
+            defaults = neovim.tbl_extend("force", opts or {}, defaults)
+        end
+        return self:on(topic, fn, defaults)
     end
 
     -- Unsubscribe by id

@@ -354,19 +354,23 @@ end
 某些 C 函数不能 yield。如果协程在 C 函数内部 yield，程序会崩溃：
 
 ```lua
--- 错误：io.read 是 C 函数，不能在其中 yield
+-- 在 5.1 和 LuaJIT 上已破坏：yield 不能跨过 C 调用
 local co = coroutine.create(function()
-  print(io.read())  -- 如果在内部 yield 可能崩溃
+  local ok, err = pcall(function()
+    coroutine.yield("inside pcall")
+  end)
+  print(ok, err)  -- false, "attempt to yield across metamethod/C-call boundary"
 end)
 
--- 安全：使用 Lua 层级的 I/O 或在 C 调用之外 yield
+-- 安全：在 C 调用之外 yield
 local co = coroutine.create(function()
   local line = io.read()  -- I/O 在 yield 之前完成
   coroutine.yield(line)   -- 此处 yield 是安全的
 end)
 ```
 
-> **Lua 5.4 说明**：5.4 中更多 C 函数支持 yield，但并非全部。请查阅文档。
+> **Lua 5.4 说明**：5.4 让 `pcall` 可以 yield，所以第一个示例在那里能跑。
+> LuaJIT 继续遵循 5.1 的规则。
 
 ### 2. 忘记重新入队
 
@@ -470,7 +474,7 @@ end
 
 -- 差：状态埋在协程内部
 local function worker()
-  local queue = ...  -- 这从哪来的？
+  local queue = nil   -- 这从哪来的？
   local running = true  -- 怎么停止？
 end
 ```
@@ -592,7 +596,7 @@ C 函数没有可以被挂起的 Lua 栈。Lua 只能在 Lua 层级的调用边�
 <details>
 <summary>5. 如何停止一个永远循环的协程？</summary>
 
-没有内置的取消机制。设置一个标志（共享的 upvalue 或 table 字段），协程每次迭代检查它。或者使用 `coroutine.close`（5.4+）来强制关闭。
+没有内置的取消机制。设置一个标志（共享的上值或 table 字段），协程每次迭代检查它。或者使用 `coroutine.close`（5.4+）来强制关闭。
 </details>
 
 ---

@@ -1,4 +1,4 @@
--- Example 12: Proxy Tables
+-- Example 44: Proxy Tables
 -- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -40,7 +40,7 @@ local function main()
     print("tostring:", tostring(config))
     print("pairs:", (function()
         local items = {}
-        for k, v in pairs(config) do items[#items+1] = k end
+        for k in pairs(config) do items[#items+1] = k end
         return table.concat(items, ", ")
     end)())
 

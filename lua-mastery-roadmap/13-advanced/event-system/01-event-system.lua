@@ -2,7 +2,7 @@
   Example: Event System
   Chapter: 13 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.3+
+  Lua Version: 5.1+
   Demonstrates: pub/sub, priority handlers, once-handlers, wildcard topics, error isolation
 ]]
 
@@ -69,7 +69,7 @@ function EventBus:emit(topic, ...)
 
     if self._handlers[topic] then collect(self._handlers[topic]) end
 
-    for pattern, entries in pairs(self._wildcards) do
+    for _, entries in pairs(self._wildcards) do
         local wp = entries[next(entries)] and entries[next(entries)].pattern
         if wp and topic_matches(wp, topic_parts) then
             for _, e in pairs(entries) do results[#results + 1] = e.entry end
@@ -106,7 +106,7 @@ function EventBus:handler_count(topic)
     return count
 end
 
-function main()
+local function main()
     print("=== Event System ===\n")
     local bus = EventBus.new()
 

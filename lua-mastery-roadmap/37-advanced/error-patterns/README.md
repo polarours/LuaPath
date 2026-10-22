@@ -5,8 +5,8 @@
 
 ## Prerequisites
 
-- Stage 07: Error Handling
-- Stage 15: Advanced Metaprogramming
+- Chapter 07: Error Handling
+- Chapter 15: Advanced Metaprogramming
 
 ## Learning Objectives
 

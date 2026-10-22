@@ -12,7 +12,7 @@ local function trim(s)
   if type(s) ~= "string" then
     return s
   end
-  
+
   -- Match from first non-space to last non-space
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end

@@ -6,22 +6,22 @@ Comprehensive comparison of behavior across Lua versions.
 
 ## Quick Comparison Table
 
-| Feature | 5.1 | 5.2 | 5.3 | 5.4 | LuaJIT |
-|---------|-----|-----|-----|-----|--------|
-| **Number Types** | float | float | int + float | int + float | float + FFI |
-| **Integer Division** | ✗ | ✗ | `//` | `//` | `//` (ext) |
-| **Bitwise Operators** | ✗ | ✗ | ✓ | ✓ | ✓ (ext) |
-| **`_ENV`** | ✗ | ✓ | ✓ | ✓ | Partial |
-| **`setfenv`/`getfenv`** | ✓ | ✗ | ✗ | ✗ | ✓ |
-| **Generational GC** | ✗ | ✗ | ✗ | ✓ | ✗ |
-| **To-Be-Closed Vars** | ✗ | ✗ | ✗ | ✓ | ✗ |
-| **Ephemeron Tables** | ✗ | ✓ | ✓ | ✓ | ✓ |
-| **`goto` Statement** | ✗ | ✓ | ✓ | ✓ | ✗ |
-| **Bitwise Library** | ✗ | `bit32` | operators | operators | `bit.*` |
-| **`__len` Metamethod** | ✗ | ✓ (tables) | ✓ | ✓ | ✓ |
-| **Package System** | `module` | `require` | `require` | `require` | `require` |
-| **FFI** | ✗ | ✗ | ✗ | ✗ | ✓ |
-| **JIT Compilation** | ✗ | ✗ | ✗ | ✗ | ✓ |
+| Feature | 5.1 | 5.2 | 5.3 | 5.4 | 5.5 | LuaJIT |
+|---------|-----|-----|-----|-----|-----|--------|
+| **Number Types** | float | float | int + float | int + float | int + float | float + FFI |
+| **Integer Division** | ✗ | ✗ | `//` | `//` | `//` | ✗ |
+| **Bitwise Operators** | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ (ext) |
+| **`_ENV`** | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **`setfenv`/`getfenv`** | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ |
+| **Generational GC** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
+| **To-Be-Closed Vars** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
+| **Ephemeron Tables** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **`goto` Statement** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Bitwise Library** | ✗ | `bit32` | `bit32` | ✗ | ✗ | `bit.*` |
+| **`__len` Metamethod** | ✗ | ✓ (tables) | ✓ | ✓ | ✓ | ✗ |
+| **Package System** | `module` | `require` | `require` | `require` | `require` | `module` + `require` |
+| **FFI** | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
+| **JIT Compilation** | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 ---
 
@@ -42,9 +42,12 @@ print(9007199254740993 == 9007199254740992)  -- true (precision loss!)
 ### Lua 5.3+
 
 ```lua
--- Dual representation
-print(type(42))       -- "integer"
-print(type(3.14))     -- "float"
+-- Dual representation. Note that type() still says "number" for
+-- both: it is math.type() that tells the two apart.
+print(type(42))       -- "number"
+print(type(3.14))     -- "number"
+print(math.type(42))  -- "integer"   (5.3+ only)
+print(math.type(3.14))-- "float"     (5.3+ only)
 print(42 == 42.0)     -- true (coerced for comparison)
 
 -- Integer division
@@ -371,7 +374,7 @@ end
 ## `goto` Statement (Lua 5.2+)
 
 ```lua
--- Lua 5.2+ only
+-- Lua 5.2+ and LuaJIT 2.1
 local function find_needle(haystack)
   for i = 1, #haystack do
     if haystack[i] == "needle" then
@@ -395,6 +398,7 @@ end
 |---------|--------|----------|
 | 5.1 | ✗ | ✓ |
 | 5.2+ | ✓ | ✓ |
+| LuaJIT 2.1 | ✗ | ✓ |
 
 ```lua
 -- 5.2+ only

@@ -1,4 +1,4 @@
--- Example 10: Metamethods Deep Dive
+-- Example 22: Metamethods Deep Dive
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -119,12 +119,12 @@ local function main()
   print("1. Vector Arithmetic:")
   local v1 = Vector:new(3, 4)
   local v2 = Vector:new(1, 2)
-  print(string.format("  v1 = %s", v1))
-  print(string.format("  v2 = %s", v2))
-  print(string.format("  v1 + v2 = %s", v1 + v2))
-  print(string.format("  v1 - v2 = %s", v1 - v2))
-  print(string.format("  v1 * 2 = %s", v1 * 2))
-  print(string.format("  2 * v2 = %s", 2 * v2))
+  print(string.format("  v1 = %s", tostring(v1)))
+  print(string.format("  v2 = %s", tostring(v2)))
+  print(string.format("  v1 + v2 = %s", tostring(v1 + v2)))
+  print(string.format("  v1 - v2 = %s", tostring(v1 - v2)))
+  print(string.format("  v1 * 2 = %s", tostring(v1 * 2)))
+  print(string.format("  2 * v2 = %s", tostring(2 * v2)))
   print(string.format("  v1 == v2: %s", tostring(v1 == v2)))
   print(string.format("  v2 < v1: %s", tostring(v2 < v1)))
   print(string.format("  #v1 (length): %d", #v1))
@@ -136,16 +136,16 @@ local function main()
   local sb2 = StringBuilder:new()
   sb2:append("World"):append("!")
   local combined = sb .. " " .. sb2
-  print(string.format("  Result: %s", combined))
+  print(string.format("  Result: %s", tostring(combined)))
 
   -- 3. Money class
   print("\n3. Money Class:")
   local a = Money:new(29.99, "USD")
   local b = Money:new(15.50, "USD")
-  print(string.format("  a = %s", a))
-  print(string.format("  b = %s", b))
-  print(string.format("  a + b = %s", a + b))
-  print(string.format("  a - b = %s", a - b))
+  print(string.format("  a = %s", tostring(a)))
+  print(string.format("  b = %s", tostring(b)))
+  print(string.format("  a + b = %s", tostring(a + b)))
+  print(string.format("  a - b = %s", tostring(a - b)))
   print(string.format("  a == b: %s", tostring(a == b)))
   print(string.format("  b < a: %s", tostring(b < a)))
 

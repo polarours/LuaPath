@@ -362,20 +362,51 @@ set(42)
 print(get())    -- 42
 ```
 
-### Closures in Loops — The Classic Bug
+### Closures in Loops — Capturing Variables, Not Values
 
-Capturing a loop variable captures the **variable**, not the value at capture time:
+A `for` loop gives **every iteration its own copy** of the control variable, so each closure sees its own value:
 
 ```lua
--- BUG: All functions share the same `i`
+-- Every iteration has its own `i` — this is not a bug
 local functions = {}
 for i = 1, 5 do
   functions[i] = function() return i end
 end
-print(functions[1]())  -- 5 (not 1!)
-print(functions[3]())  -- 5 (not 3!)
+print(functions[1]())  -- 1
+print(functions[3]())  -- 3
+```
 
--- FIX 1: Create a new variable per iteration
+Closures capture the **variable**, not the value at capture time. The trap is capturing a variable that lives *outside* the loop and is reassigned inside it:
+
+```lua
+-- BUG: all three closures share the same outer `i`
+local i = 0
+local functions = {}
+for k = 1, 3 do
+  i = k
+  functions[k] = function() return i end
+end
+print(functions[1]())  -- 3 (not 1!)
+print(functions[3]())  -- 3
+```
+
+A hand-rolled counter has the same problem:
+
+```lua
+-- BUG: all three closures share the same outer `i`
+local i = 1
+local functions = {}
+while i <= 3 do
+  functions[#functions + 1] = function() return i end
+  i = i + 1
+end
+print(functions[1]())  -- 4 (not 1!)
+```
+
+To capture the current value, bind it to a fresh local:
+
+```lua
+-- Belt and braces: a fresh local per iteration
 local functions = {}
 for i = 1, 5 do
   local j = i  -- New upvalue per iteration
@@ -383,13 +414,15 @@ for i = 1, 5 do
 end
 print(functions[1]())  -- 1
 
--- FIX 2: Use a factory function
+-- Or use a factory function
 local functions = {}
 for i = 1, 5 do
   functions[i] = (function(n) return function() return n end end)(i)
 end
 print(functions[1]())  -- 1
 ```
+
+> **Version note**: sharing one loop variable was Lua **5.0** behaviour. Lua 5.1 changed the scope of the `for` statement's implicit variables, so every iteration gets its own copy — there is no 5.1-vs-5.3/5.4 difference.
 
 ### Upvalue Lifetime
 
@@ -556,7 +589,7 @@ obj.triple()    -- ERROR: self is nil
 
 ### 2. Capturing Loop Variables
 
-See [Closures in Loops](#closures-in-loops--the-classic-bug) above. The fix: create a local copy per iteration.
+See [Closures in Loops](#closures-in-loops--capturing-variables-not-values) above. Closures capture the variable, not the value — bind the value to a fresh local if you need it.
 
 ### 3. Returning Temporary Tables from Hot Paths
 
@@ -608,10 +641,18 @@ function process_order(order, user, payment, inventory, shipping)
 end
 
 -- GOOD: single responsibility
-function validate_order(order) ... end
-function charge_payment(payment) ... end
-function update_inventory(inventory) ... end
-function schedule_shipment(shipping) ... end
+function validate_order(order)
+  -- ...
+end
+function charge_payment(payment)
+  -- ...
+end
+function update_inventory(inventory)
+  -- ...
+end
+function schedule_shipment(shipping)
+  -- ...
+end
 function process_order(order)
   validate_order(order)
   charge_payment(order.payment)
@@ -752,9 +793,9 @@ The third value is discarded. `local x, y = f()` where `f` returns three values 
 </details>
 
 <details>
-<summary>3. Why does <code>for i = 1, 5 do fns[i] = function() return i end end</code> give all 5s?</summary>
+<summary>3. Does <code>for i = 1, 5 do fns[i] = function() return i end end</code> make all closures return 5?</summary>
 
-All closures capture the same variable `i`, not its value at capture time. When the loop finishes, `i` is 5, so all closures return 5. Fix: create a local copy (`local j = i`) inside the loop body.
+No. Since Lua 5.1 the `for` statement gives every iteration its own copy of the control variable, so `fns[1]()` returns 1 and `fns[5]()` returns 5. (Sharing one variable was Lua 5.0 behaviour.) Closures do capture the **variable** rather than its value — the real trap is a variable declared *outside* the loop and reassigned inside it: every such closure then observes its final value. Fix: create a local copy (`local j = i`) inside the loop body.
 </details>
 
 <details>
@@ -777,7 +818,7 @@ Use `:` when the function operates on an object and needs implicit `self` (OOP m
 - **Multiple returns**: only the last expression expands; use `_` to discard
 - **Varargs**: `...` captures extra args; `{...}` allocates a table — avoid in hot paths
 - **Method syntax**: `:` passes `self` implicitly; `.` requires explicit passing
-- **Closures**: capture variables by reference, not value; classic loop bug shares one variable
+- **Closures**: capture variables by reference, not value; a variable shared across iterations is seen by every closure
 - **Tail calls**: `return f(...)` reuses the stack; enables trampolining
 - **Guard clauses**: flatten nesting; return early on failure
 

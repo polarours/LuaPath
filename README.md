@@ -20,8 +20,8 @@ Design principles:
 | Category | Count |
 |----------|-------|
 | Documentation | 22 chapters × 2 languages (EN + ZH) |
-| Pitfalls | 20 articles × 2 languages (EN + ZH) |
-| Examples | 59 runnable examples |
+| Pitfalls | 18 articles × 2 languages (EN + ZH) |
+| Examples | 64 runnable examples |
 | Glossary | 151 terms (EN + ZH) |
 | Roadmap stages | 42 (beginner → advanced) |
 
@@ -32,25 +32,25 @@ LuaPath/
 ├── en/                          22 English chapters (00–18, 3 cross-cutting)
 ├── zh/                          22 Chinese chapters (mirrors /en)
 ├── pitfalls/
-│   ├── en/                      20 English gotcha articles
-│   └── 中文版/                   20 Chinese gotcha articles
+│   ├── en/                      18 English gotcha articles
+│   └── 中文版/                   18 Chinese gotcha articles
 ├── lua-mastery-roadmap/
 │   ├── 00-overview.md           Staged learning path
 │   ├── 01-beginner/             Stage 1 projects
 │   ├── 02-intermediate/         Stage 2 projects
 │   ├── ...                      Stages 3-42 projects
-│   └── 43-toolchain/            Stage 43 projects
+│   └── 42-toolchain/            Stage 42 projects
 ├── examples/
 │   ├── beginner/                12 beginner examples
-│   ├── intermediate/             18 intermediate examples
-│   ├── advanced/                25 advanced examples
-│   └── projects/                4 stage projects (runnable)
-├── exercises/                   Graded exercises (beginner → advanced)
+│   ├── intermediate/            20 intermediate examples
+│   ├── advanced/                27 advanced examples
+│   └── projects/                5 stage projects (runnable)
+├── en/exercises/ + zh/exercises/  Graded exercises (beginner → advanced)
 ├── references/                  Quick reference, version differences, playground guide
 ├── scripts/                     Validation and testing tools
-├── GLOSSARY.md                  151 technical terms
+├── GLOSSARY.md + GLOSSARY.zh-CN.md  151 technical terms (EN + ZH)
 ├── CONTRIBUTING.md              Contribution guidelines
-└── Makefile                     CI: validate, lint, check-links, parity, test
+└── Makefile                     CI: validate, lint, check-*, parity, test
 ```
 
 ## Start Here
@@ -100,6 +100,7 @@ LuaPath/
 - Lua 5.1
 - Lua 5.3
 - Lua 5.4
+- Lua 5.5
 - LuaJIT
 
 Notes:
@@ -107,7 +108,12 @@ Notes:
 - 5.1 differs in environment model (`setfenv`, `getfenv`) and lacks native bitwise operators.
 - 5.3 introduces integers + bitwise operators.
 - 5.4 introduces to-be-closed variables and generational GC mode.
+- 5.5 is the current release; the material targets it unchanged.
 - LuaJIT: JIT compiler + trace optimizer, FFI for C interop, baseline close to 5.1 with extensions.
+
+Every example and stage declares the versions it supports with a `-- Lua Version:`
+header, and CI runs the whole example and roadmap suite on each version listed
+above. A version claim is enforced by the build, not aspirational.
 
 ## How to Use This Repository
 

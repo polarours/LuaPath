@@ -203,14 +203,25 @@ print("Total calls:", call_count)
 
 ### 1. Debug Wrapper
 
+> **Lua 5.2 note**: table.pack and table.unpack arrived in Lua 5.2. On Lua 5.1 the global unpack() does the same job, and pack can be backported by recording the argument count in a .n field, as below.
+
 ```lua
+-- table.pack/table.unpack are 5.2+; on 5.1 the global unpack() does the
+-- same job, and pack records the argument count in a .n field.
+local pack = table.pack or function(...)
+  local packed = { ... }
+  packed.n = select("#", ...)
+  return packed
+end
+local unpack_values = table.unpack or unpack
+
 -- Wrap a function to add debug output
 local function debug_wrap(fn, name)
   return function(...)
     print("CALL:", name, ...)
-    local results = table.pack(fn(...))
-    print("RETURN:", name, table.unpack(results, 1, results.n))
-    return table.unpack(results, 1, results.n)
+    local results = pack(fn(...))
+    print("RETURN:", name, unpack_values(results, 1, results.n))
+    return unpack_values(results, 1, results.n)
   end
 end
 

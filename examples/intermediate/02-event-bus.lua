@@ -1,4 +1,4 @@
--- Example 2: Event Bus with Unsubscribe
+-- Example 14: Event Bus with Unsubscribe
 -- Chapter: 13-patterns
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -25,11 +25,11 @@ function EventBus:on(event, callback)
   if not self.handlers[event] then
     self.handlers[event] = {}
   end
-  
+
   local sub_id = tostring(callback) .. tostring(os.time())
   self.handlers[event][sub_id] = callback
   self.subscriptions[sub_id] = event
-  
+
   return sub_id
 end
 
@@ -41,11 +41,11 @@ function EventBus:on_weak(event, callback)
   if not self.handlers[event] then
     self.handlers[event] = setmetatable({}, {__mode = "v"})
   end
-  
+
   local sub_id = tostring(callback) .. tostring(os.time())
   self.handlers[event][sub_id] = callback
   self.subscriptions[sub_id] = event
-  
+
   return sub_id
 end
 
@@ -57,12 +57,12 @@ function EventBus:off(sub_id)
   if not event then
     return false
   end
-  
+
   if self.handlers[event] then
     self.handlers[event][sub_id] = nil
   end
   self.subscriptions[sub_id] = nil
-  
+
   return true
 end
 
@@ -74,14 +74,14 @@ function EventBus:emit(event, ...)
   if not handlers then
     return
   end
-  
+
   -- Copy handlers to avoid issues with modifications during iteration
   local to_call = {}
   for sub_id, handler in pairs(handlers) do
     to_call[sub_id] = handler
   end
-  
-  for sub_id, handler in pairs(to_call) do
+
+  for _, handler in pairs(to_call) do
     -- Check if handler is still valid (for weak tables)
     if type(handler) == "function" then
       local success, err = pcall(handler, ...)
@@ -99,7 +99,7 @@ function EventBus:count(event)
   if not self.handlers[event] then
     return 0
   end
-  
+
   local count = 0
   for _, _ in pairs(self.handlers[event]) do
     count = count + 1
@@ -135,7 +135,7 @@ print("\nEmitting 'update' event:")
 bus:emit("update", 0.016)
 
 -- Unsubscribe
-print(string.format("\nUnsubscribing handler 1: %s", bus:off(sub1)))
+print(string.format("\nUnsubscribing handler 1: %s", tostring(bus:off(sub1))))
 print(string.format("Subscribers to 'update': %d", bus:count("update")))
 
 -- Emit again

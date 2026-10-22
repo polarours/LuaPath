@@ -1,28 +1,31 @@
-# Advanced Stage (continued)
+# Stage 9: CLI Frameworks
 
-**Stage Level**: 41-43
+**Stage**: 9 | **Time**: 8–12 hours
 **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
 
 ## Overview
 
-Advanced CLI frameworks and toolchain integration for production Lua systems.
+Create a command-line argument parser with flags, options, help generation, and version output.
 
-## Projects
+- Topics: argument parsing, help text generation, subcommands, exit codes
+
+## Project
 
 | Project | Description | Skills |
 |---------|-------------|--------|
-| [CLI Framework](cli-framework/) | Command-line application framework | argument parsing, exit codes |
-| [Lua Package Manager](lua-package-manager/) | Lua package management | module resolution, path setup |
-| | | |
+| CLI Framework | A command-line argument parser handling flags, positional arguments, options with values, automatic help generation, and version output. | Command-line argument parsing; Automatic help text generation; Flag vs option distinction |
 
 ## Prerequisites
 
-- Completion of all previous stages
-- Understanding of Lua module system and C API
+- Completion of the previous stage
+- The chapters listed above
 
 ## How to Run
 
 ```bash
-cd <project-name>/
-lua <project-name>.lua
+cd cli-framework
+lua 01-cli-framework.lua --help
+lua 01-cli-framework.lua --name Alice --verbose file.txt
 ```
+
+Change into the project directory, then run the command above.

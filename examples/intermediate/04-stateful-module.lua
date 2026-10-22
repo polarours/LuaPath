@@ -1,4 +1,4 @@
--- Example 4: Module Pattern with State
+-- Example 16: Module Pattern with State
 -- Chapter: 06-modules
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -40,11 +40,11 @@ function Counter.inc(name, amount)
   if not data then
     return nil
   end
-  
+
   amount = amount or 1
   data.value = data.value + amount
   table.insert(data.history, {op = "inc", by = amount, at = os.time()})
-  
+
   return data.value
 end
 
@@ -65,11 +65,11 @@ function Counter.reset(name, to)
   if not data then
     return nil
   end
-  
+
   to = to or 0
   data.value = to
   table.insert(data.history, {op = "reset", to = to, at = os.time()})
-  
+
   return data.value
 end
 
@@ -81,7 +81,7 @@ function Counter.history(name)
   if not data then
     return {}
   end
-  
+
   -- Return copy to prevent external modification
   local copy = {}
   for i, entry in ipairs(data.history) do

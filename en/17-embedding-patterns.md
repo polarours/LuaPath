@@ -149,13 +149,25 @@ end
 -- Execute in sandbox
 local function run_sandboxed(code, options)
   local env = create_sandbox(options)
-  local fn, err = load(code, "sandbox", "t", env)
+  
+  -- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+  -- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+  -- followed by setfenv() on the compiled chunk.
+  local fn, err
+  if loadstring then
+    fn, err = loadstring(code, "sandbox")
+    if fn then setfenv(fn, env) end
+  else
+    fn, err = load(code, "sandbox", "t", env)
+  end
   if not fn then
     return nil, "Compile error: " .. err
   end
   
-  setmetatable(env, {__index = _G})
-  setfenv(fn, env)  -- Lua 5.1
+  -- No __index = _G fallback here: create_sandbox() already puts every
+  -- global the chunk may use into env. A fallback to the real globals
+  -- would defeat the sandbox -- a lookup of `os` would miss in env and
+  -- then resolve through __index to _G.os, making removed names reachable.
   
   local ok, result = pcall(fn)
   if not ok then
@@ -164,6 +176,8 @@ local function run_sandboxed(code, options)
   return result
 end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### Resource Limits
 
@@ -300,7 +314,7 @@ end
 ### 2. Coroutine Stack Issues
 
 ```lua
--- BAD: Deep recursion in coroutines
+-- BAD: Deep recursion -- and a coroutine body has the same C stack
 local function deep(n)
   if n > 1000 then return end
   deep(n + 1)  -- Stack overflow risk
@@ -430,7 +444,16 @@ local function create_sandbox_with_limits(max_time, max_memory)
     local start_time = os.clock()
     local start_mem = collectgarbage("count")
     
-    local fn, err = load(code, "sandbox", "t", env)
+    -- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+    -- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+    -- followed by setfenv() on the compiled chunk.
+    local fn, err
+    if loadstring then
+      fn, err = loadstring(code, "sandbox")
+      if fn then setfenv(fn, env) end
+    else
+      fn, err = load(code, "sandbox", "t", env)
+    end
     if not fn then
       return nil, "Compile error: " .. err
     end
@@ -463,6 +486,8 @@ local function create_sandbox_with_limits(max_time, max_memory)
   return run_with_limits
 end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### Bidirectional Communication
 

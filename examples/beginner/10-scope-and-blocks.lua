@@ -171,7 +171,7 @@ local function demo_practical()
   end
 end
 
-function main()
+local function main()
   print("Scope and Blocks Examples")
   print("========================")
 

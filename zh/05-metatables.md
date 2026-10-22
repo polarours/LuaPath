@@ -1,4 +1,4 @@
-# 05 — Metatable
+# 05 — 元表
 
 > **阶段**：B（元层与架构）  
 > **前置要求**：第 04 章 — Table  
@@ -11,17 +11,17 @@
 
 完成本章后，你将能够：
 
-1. **解释 metatable 分派机制**以及每个 metamethod 的触发时机
-2. **实现运算符重载**，使用算术和比较 metamethod
+1. **解释元表分派机制**以及每个元方法的触发时机
+2. **实现运算符重载**，使用算术和比较元方法
 3. **构建基于原型的 OOP**，带有正确的继承链
 4. **使用代理模式**实现只读 table、验证和日志记录
-5. **避免 metamethod 陷阱**，包括递归、共享原型和性能问题
+5. **避免元方法陷阱**，包括递归、共享原型和性能问题
 
 ---
 
-## 什么是 Metatable？
+## 什么是元表？
 
-每个 table（和 userdata）都可以有一个关联的 **metatable** — 一个控制其行为的 table。Metatable 定义了 **metamethod**：Lua 在响应操作时自动调用的特殊键。
+每个 table（和用户数据）都可以有一个关联的 **元表** — 一个控制其行为的 table。元表定义了 **元方法**：Lua 在响应操作时自动调用的特殊键。
 
 ```lua
 local t = {}
@@ -34,7 +34,7 @@ setmetatable(t, mt)
 print(t)  -- "MyTable"
 ```
 
-Metatable 不会改变 table 的数据 — 它们改变的是 table **对操作的响应方式**。
+元表不会改变 table 的数据 — 它们改变的是 table **对操作的响应方式**。
 
 ---
 
@@ -43,7 +43,7 @@ Metatable 不会改变 table 的数据 — 它们改变的是 table **对操作�
 读取 `obj.key` 时，Lua 按照以下顺序分派：
 
 1. 检查 `key` 是否作为原始字段存在 → 返回它
-2. 如果不存在，检查 metatable 中是否有 `__index`
+2. 如果不存在，检查元表中是否有 `__index`
 3. `__index` 可以是一个 **table**（在该 table 中查找 `key`）或一个 **函数**（用 `(obj, key)` 调用它）
 
 ```lua
@@ -136,9 +136,9 @@ player.hp = 100       -- OK
 
 ## 算术运算符
 
-算术操作的 metamethod：
+算术操作的元方法：
 
-| Metamethod | 操作 | 签名 |
+| 元方法 | 操作 | 签名 |
 |------------|------|------|
 | `__add` | `a + b` | `(a, b) -> result` |
 | `__sub` | `a - b` | `(a, b) -> result` |
@@ -188,19 +188,19 @@ print(a * 3)    -- Vector(3.0, 6.0)
 print(-a)       -- Vector(-1.0, -2.0)
 ```
 
-> **版本说明（5.4）**：算术 metamethod 仅在两个操作数都是 table 或其中一个操作数有 metamethod 时才调用。混合数字 + table 的算术需要显式处理。
+> **版本说明（5.4）**：算术元方法仅在两个操作数都是 table 或其中一个操作数有元方法时才调用。混合数字 + table 的算术需要显式处理。
 
 ---
 
 ## 比较运算符
 
-| Metamethod | 操作 |
+| 元方法 | 操作 |
 |------------|------|
 | `__eq` | `a == b` |
 | `__lt` | `a < b` |
 | `__le` | `a <= b` |
 
-> **规则**：`__eq` 仅在两个操作数都是 table（或都是完全 userdata）且具有相同 metatable 时才调用。
+> **规则**：`__eq` 仅在两个操作数都是 table（或都是完全用户数据）且具有相同元表时才调用。
 
 ```lua
 local Money = {}
@@ -311,7 +311,7 @@ print(fib(30))  -- 832040（已缓存，速度快）
 
 ## 拼接：`__concat`
 
-`..` 运算符调用的 metamethod：
+`..` 运算符调用的元方法：
 
 ```lua
 local Tagged = {}
@@ -347,7 +347,7 @@ print(t1 .. t2)               -- "status:ok code:200"
 
 ## 终结器：`__gc`
 
-控制 table/userdata 被垃圾回收时的清理行为：
+控制 table/用户数据被垃圾回收时的清理行为：
 
 ```lua
 -- Lua 5.2+：table 可以有 __gc
@@ -374,11 +374,11 @@ collectgarbage()  -- 强制 GC 以查看消息
 - **永远不要依赖 `__gc` 进行确定性释放。** GC 的时机是不可预测的。
 - `__gc` 无法阻止对象销毁 — 它作为回收过程的一部分运行。
 - 对于确定性清理，请使用显式的 `close()` 方法或 Lua 5.4 的 `<close>` 变量属性。
-- 在 Lua 5.1 中，table 不能有 `__gc`（仅限 userdata）。
+- 在 Lua 5.1 中，table 不能有 `__gc`（仅限用户数据）。
 
 ---
 
-## 受保护的 Metatable：`__metatable`
+## 受保护的元表：`__metatable`
 
 控制 `getmetatable()` 返回的内容：
 
@@ -393,7 +393,7 @@ print(getmetatable(t))     -- "no access"（不是真正的 metatable）
 -- setmetatable(t, {})     -- ERROR: cannot change protected metatable
 ```
 
-这可以防止外部代码篡改 metatable。
+这可以防止外部代码篡改元表。
 
 ---
 
@@ -431,7 +431,7 @@ end
 
 ## 原始访问：`rawget` / `rawset`
 
-绕过 metatable 分派：
+绕过元表分派：
 
 ```lua
 local t = {}
@@ -598,7 +598,7 @@ function Entity.new(id)
 end
 ```
 
-### 3. Metamethod 中的递归
+### 3. 元方法中的递归
 
 ```lua
 -- BUG：__index 调用 self[k] 又触发 __index
@@ -675,7 +675,7 @@ Class.__index = Class
 -- 实例共享 Class.x、Class.y — 变异 bug！
 ```
 
-### 2. 记录 Metamethod 契约
+### 2. 记录元方法契约
 
 ```lua
 --- 加法运算（不可变操作）
@@ -687,7 +687,7 @@ function Vector.__add(a, b)
 end
 ```
 
-### 3. 在 Metamethod 中优先使用 `rawget`/`rawset`
+### 3. 在元方法中优先使用 `rawget`/`rawset`
 
 ```lua
 -- 在 __index 和 __newindex 中始终使用原始访问
@@ -707,7 +707,7 @@ end
 -- t = setmetatable(t, new_mt)  -- 危险，破坏类型假设
 ```
 
-### 5. 保持 Metatable 轻量
+### 5. 保持元表轻量
 
 ```lua
 -- 好：小而专注的 metatable
@@ -726,24 +726,24 @@ local mt = {
 
 ### Lua 5.1
 
-- `__gc` 仅对 userdata 有效，对 table 无效
-- `__ipairs` 是自定义迭代 metamethod（不是 `__pairs`）
+- `__gc` 仅对用户数据有效，对 table 无效
+- `__ipairs` 是自定义迭代元方法（不是 `__pairs`）
 - 使用 `setfenv`/`getfenv` 进行环境操作
-- 没有 `__eq` metamethod（使用原始相等比较）
+- 没有 `__eq` 元方法（使用原始相等比较）
 
 ### Lua 5.2/5.3
 
-- `__gc` 对 table 有效（在 table 变为可达之前设置 metatable）
+- `__gc` 对 table 有效（在 table 变为可达之前设置元表）
 - `__pairs` 取代 `__ipairs`（已弃用）
-- 可用 `__eq` metamethod
+- 可用 `__eq` 元方法
 - 通过 `rawequal()` 进行原始相等比较
 
 ### Lua 5.4
 
-- `__close` metamethod 用于 to-be-closed 变量（RAII）
-- `__warn` metamethod 用于警告消息
-- `__type` metamethod 自定义 `type()` 输出
-- `__name` metamethod 用于 `pairs()` 迭代顺序提示
+- `__close` 元方法用于 to-be-closed 变量（RAII）
+- `__warn` 元方法用于警告消息
+- `__type` 元方法自定义 `type()` 输出
+- `__name` 元方法用于 `pairs()` 迭代顺序提示
 
 ```lua
 -- Lua 5.4：自定义类型名
@@ -756,10 +756,10 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 
 ### LuaJIT
 
-- 某些 metamethod 被高效追踪，其他可能中断 JIT 追踪
-- 算术 metamethod 通常优化良好
+- 某些元方法被高效追踪，其他可能中断 JIT 追踪
+- 算术元方法通常优化良好
 - 使用函数分派的 `__index` 可能抑制追踪编译
-- 保持 metamethod 密集的代码路径简单以获得最佳 JIT 性能
+- 保持元方法密集的代码路径简单以获得最佳 JIT 性能
 
 ---
 
@@ -780,7 +780,7 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 <details>
 <summary>3. 为什么必须在 <code>__newindex</code> 中使用 <code>rawset</code>？</summary>
 
-如果 `__newindex` 执行 `self[k] = v` 且 `k` 是新键，它会再次触发 `__newindex`（无限递归）。`rawset` 直接写入 table 而不经过 metamethod。
+如果 `__newindex` 执行 `self[k] = v` 且 `k` 是新键，它会再次触发 `__newindex`（无限递归）。`rawset` 直接写入 table 而不经过元方法。
 </details>
 
 <details>
@@ -792,21 +792,21 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 <details>
 <summary>5. 对设置了 <code>__metatable</code> 的 table 调用 <code>getmetatable()</code> 会发生什么？</summary>
 
-它返回 `__metatable` 的值而非实际的 metatable。这会向外部代码隐藏真正的 metatable。
+它返回 `__metatable` 的值而非实际的元表。这会向外部代码隐藏真正的元表。
 </details>
 
 ---
 
 ## 关键要点
 
-- **Metatable 控制行为**，而非数据 — 它们定义 table 如何响应操作
+- **元表控制行为**，而非数据 — 它们定义 table 如何响应操作
 - **`__index`** 处理缺失键的读取；`__newindex` 处理缺失键的写入
-- **算术 metamethod** 为自定义类型启用运算符重载
-- **`rawget`/`rawset`** 绕过 metamethod — 对避免递归至关重要
+- **算术元方法** 为自定义类型启用运算符重载
+- **`rawget`/`rawset`** 绕过元方法 — 对避免递归至关重要
 - **基于原型的 OOP** 使用 `__index` 链实现继承
 - **代理模式** 支持只读视图、验证和日志记录
 - **永远不要依赖 `__gc`** 进行确定性资源管理
-- **稳定的 table 形状** 减少 metatable 分派开销
+- **稳定的 table 形状** 减少元表分派开销
 
 ---
 
@@ -816,9 +816,9 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 
 1. **只读 Table**：实现 `readonly(t)` 返回一个代理 table，任何写入尝试都会引发错误。支持 `pairs`、`ipairs` 和 `#`。
 
-2. **字符串 Metatable**：创建一个 `String` 包装器，使用 `__add` 进行拼接，`__len` 获取长度，`__tostring` 显示。
+2. **字符串元表**：创建一个 `String` 包装器，使用 `__add` 进行拼接，`__len` 获取长度，`__tostring` 显示。
 
-3. **Clamp 函数**：重载 `math.clamp` 使其同时适用于数字和自定义 `Clamped` 类型，使用 metamethod。
+3. **Clamp 函数**：实现 `clamp(x, lo, hi)`，使其同时适用于数字和自定义 `Clamped` 类型——用元方法让自定义类型也支持比较运算符。
 
 ### 中级（1–2 小时）
 
@@ -832,7 +832,7 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 
 7. **观察者模式**：构建一个响应式 table，字段变更时触发回调函数。支持嵌套字段观察。
 
-8. **表达式 AST**：使用运算符 metamethod 创建一个小型表达式求值器。`local expr = (Var("x") + 3) * Var("y")` 应产生一个可调用对象，给定环境 table 后进行求值。
+8. **表达式 AST**：使用运算符元方法创建一个小型表达式求值器。`local expr = (Var("x") + 3) * Var("y")` 应产生一个可调用对象，给定环境 table 后进行求值。
 
 ---
 
@@ -841,7 +841,7 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 本章可运行示例：
 - `examples/intermediate/01-prototype-entity.lua` — 基于原型的 OOP
 - `examples/intermediate/05-readonly-table.lua` — 只读代理模式
-- `examples/advanced/01-ecs-system.lua` — 基于 metatable 的组件系统
+- `examples/advanced/01-ecs-system.lua` — 基于元表的组件系统
 - `examples/advanced/05-metatable-oop.lua` — 带继承的完整 OOP 体系
 - `examples/advanced/07-weak-tables.lua` — __mode 缓存与终结器
 - `examples/advanced/12-proxy-table.lua` — 只读、校验、日志代理

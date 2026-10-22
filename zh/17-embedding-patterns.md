@@ -149,13 +149,25 @@ end
 -- 在沙箱中执行
 local function run_sandboxed(code, options)
   local env = create_sandbox(options)
-  local fn, err = load(code, "sandbox", "t", env)
+  
+  -- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+  -- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+  -- loadstring() 配合 setfenv()。
+  local fn, err
+  if loadstring then
+    fn, err = loadstring(code, "sandbox")
+    if fn then setfenv(fn, env) end
+  else
+    fn, err = load(code, "sandbox", "t", env)
+  end
   if not fn then
     return nil, "Compile error: " .. err
   end
   
-  setmetatable(env, {__index = _G})
-  setfenv(fn, env)  -- Lua 5.1
+  -- 这里不能有 __index = _G 回退：create_sandbox() 已经把脚本可能用到的
+  -- 全局函数都放进了 env。回退到真实的全局环境会破坏沙箱——查找 `os`
+  -- 时 env 中没有命中，接着就会通过 __index 解析到 _G.os，于是被
+  -- 排除的名字又能访问到了。
   
   local ok, result = pcall(fn)
   if not ok then
@@ -164,6 +176,8 @@ local function run_sandboxed(code, options)
   return result
 end
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### 资源限制
 
@@ -300,7 +314,7 @@ end
 ### 2. 协程栈问题
 
 ```lua
--- 差：协程中的深度递归
+-- 差：深度递归——协程体同样占用 C 栈
 local function deep(n)
   if n > 1000 then return end
   deep(n + 1)  -- 栈溢出风险
@@ -327,6 +341,219 @@ function helper() end  -- 全局！
 local M = {}
 function M.helper() end
 return M
+```
+
+---
+
+## 高级嵌入模式
+
+### 资源管理
+
+用 `__gc` 元方法实现自动清理：
+
+```lua
+local Resource = {}
+Resource.__index = Resource
+
+function Resource.new(handle)
+  return setmetatable({handle = handle, closed = false}, Resource)
+end
+
+function Resource:__gc()
+  if not self.closed then
+    print("[GC] Auto-closing resource: " .. tostring(self.handle))
+    -- 关闭资源
+    self.closed = true
+  end
+end
+
+function Resource:close()
+  if not self.closed then
+    print("Closing resource: " .. tostring(self.handle))
+    self.closed = true
+  end
+end
+
+-- 用法
+local r = Resource.new("file.txt")
+r:close()  -- 显式关闭
+-- 如果没有关闭，__gc 会负责清理
+```
+
+### 插件架构
+
+设计一个带生命周期钩子的插件系统：
+
+```lua
+local PluginManager = {}
+PluginManager.__index = PluginManager
+
+function PluginManager.new()
+  return setmetatable({
+    plugins = {},
+    hooks = {
+      init = {},
+      start = {},
+      stop = {},
+      destroy = {},
+    },
+  }, PluginManager)
+end
+
+function PluginManager:register(plugin)
+  table.insert(self.plugins, plugin)
+  if plugin.init then
+    self.hooks.init[#self.hooks.init + 1] = plugin.init
+  end
+  if plugin.start then
+    self.hooks.start[#self.hooks.start + 1] = plugin.start
+  end
+  if plugin.stop then
+    self.hooks.stop[#self.hooks.stop + 1] = plugin.stop
+  end
+end
+
+function PluginManager:run_hook(hook_name, ...)
+  for _, hook in ipairs(self.hooks[hook_name] or {}) do
+    hook(...)
+  end
+end
+```
+
+### 带限制的脚本沙箱
+
+```lua
+local function create_sandbox_with_limits(max_time, max_memory)
+  local env = {
+    print = print,
+    error = error,
+    assert = assert,
+    type = type,
+    tostring = tostring,
+    tonumber = tonumber,
+    pairs = pairs,
+    ipairs = ipairs,
+    pcall = pcall,
+    xpcall = xpcall,
+    math = math,
+    string = string,
+    table = table,
+  }
+  
+  local function run_with_limits(code)
+    local start_time = os.clock()
+    local start_mem = collectgarbage("count")
+    
+    -- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+    -- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+    -- loadstring() 配合 setfenv()。
+    local fn, err
+    if loadstring then
+      fn, err = loadstring(code, "sandbox")
+      if fn then setfenv(fn, env) end
+    else
+      fn, err = load(code, "sandbox", "t", env)
+    end
+    if not fn then
+      return nil, "Compile error: " .. err
+    end
+    
+    -- 设置时间检查钩子
+    debug.sethook(function()
+      if os.clock() - start_time > max_time then
+        error("Time limit exceeded")
+      end
+    end, "", 1000)
+    
+    local ok, result = pcall(fn)
+    
+    -- 移除钩子
+    debug.sethook()
+    
+    -- 检查内存
+    local mem_used = collectgarbage("count") - start_mem
+    if mem_used > max_memory then
+      return nil, "Memory limit exceeded"
+    end
+    
+    if not ok then
+      return nil, "Runtime error: " .. tostring(result)
+    end
+    
+    return result
+  end
+  
+  return run_with_limits
+end
+```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
+
+### 双向通信
+
+```lua
+local function create_host_script_bridge()
+  local bridge = {
+    host_to_script = {},
+    script_to_host = {},
+  }
+  
+  -- 主机向脚本发送消息
+  function bridge:send_to_script(msg)
+    self.host_to_script[#self.host_to_script + 1] = msg
+  end
+  
+  -- 脚本向主机发送消息
+  function bridge:send_to_host(msg)
+    self.script_to_host[#self.script_to_host + 1] = msg
+  end
+  
+  -- 主机取出脚本发来的消息
+  function bridge:receive_from_script()
+    return table.remove(self.script_to_host, 1)
+  end
+  
+  -- 脚本取自主机发来的消息
+  function bridge:receive_from_host()
+    return table.remove(self.host_to_script, 1)
+  end
+  
+  return bridge
+end
+```
+
+### 版本兼容性包装器
+
+```lua
+local function create_compat_wrapper()
+  local compat = {}
+  
+  -- Lua 5.1 兼容性
+  compat.unpack = unpack or table.unpack
+  
+  -- Lua 5.3+ 整数支持
+  compat.is_integer = math.type and function(x)
+    return math.type(x) == "integer"
+  end or function(x)
+    return x == math.floor(x)
+  end
+  
+  -- 位运算
+  compat.band = bit32 and bit32.band or function(a, b)
+    -- 没有 bit32 时的 Lua 5.1 兜底实现
+    local result = 0
+    for i = 0, 31 do
+      if a % 2 == 1 and b % 2 == 1 then
+        result = result + 2^i
+      end
+      a = math.floor(a / 2)
+      b = math.floor(b / 2)
+    end
+    return result
+  end
+  
+  return compat
+end
 ```
 
 ---

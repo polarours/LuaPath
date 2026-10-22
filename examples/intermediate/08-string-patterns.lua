@@ -1,4 +1,4 @@
--- Example 8: String Pattern Matching
+-- Example 20: String Pattern Matching
 -- Chapter: 09-standard-library
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

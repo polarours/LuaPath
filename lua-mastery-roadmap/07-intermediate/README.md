@@ -1,26 +1,30 @@
-# Intermediate Stage (continued)
+# Stage 7: Configuration Systems
 
-**Stage Level**: 31-35
+**Stage**: 7 | **Time**: 8–12 hours
 **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
 
 ## Overview
 
-Advanced configuration systems and templating patterns for production Lua applications.
+Design robust configuration loading with validation, defaults, and environment-aware overrides.
 
-## Projects
+- Topics: file I/O, validation patterns, environment variables, layered config
+
+## Project
 
 | Project | Description | Skills |
 |---------|-------------|--------|
-| | | |
+| Config System | Read and write INI-style config files with sections, key-value pairs, default values, and environment variable overrides. | INI file format parsing and writing; Environment variable integration; Schema-based validation with defaults |
 
 ## Prerequisites
 
-- Completion of previous stages
-- Understanding of Lua modules and file I/O
+- Completion of the previous stage
+- The chapters listed above
 
 ## How to Run
 
 ```bash
-cd <project-name>/
-lua <project-name>.lua
+cd config-system
+lua 01-config-system.lua
 ```
+
+Change into the project directory, then run the command above.

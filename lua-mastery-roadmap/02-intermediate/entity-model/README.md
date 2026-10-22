@@ -22,7 +22,7 @@ A prototype-based entity system inspired by game engine architectures. This proj
 ## How to Run
 
 ```bash
-lua entity-model.lua
+lua 02-entity-model.lua
 ```
 
 The script creates sample entities, applies prototypes, and demonstrates read-only behavior.
@@ -46,8 +46,10 @@ The script creates sample entities, applies prototypes, and demonstrates read-on
 ## Files
 
 ```
-entity-model/
-├── README.md          ← This file
-├── entity-model.lua   ← Main implementation
-└── examples.lua       ← Usage patterns and test cases
+02-intermediate/entity-model/
+├── README.md
+├── README.zh-CN.md
+├── 02-entity-model.lua      — Main implementation
+└── tests/
+    └── entity_model_test.lua  — Usage patterns and test cases
 ```

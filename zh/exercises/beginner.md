@@ -2,6 +2,9 @@
 
 涵盖路线图阶段 1–8（核心语言能力到模板引擎）。
 
+> **参考解答**：练习 1.6、1.9、1.12、3.1、3.2、3.7 的参考解答见
+> [beginner-solutions.md](beginner-solutions.md)，其余练习留给读者自行完成。
+
 ---
 
 ## 1. 概念巩固
@@ -49,10 +52,10 @@ local f = word_freq("the cat and the dog")
 ```
 **提示**：使用 `string.gmatch` 提取单词；使用 `string.lower` 标准化。
 
-### 1.7 — Metatable：委托（阶段 2）[中等]
+### 1.7 — 元表：委托（阶段 2）[中等]
 创建 `parent = {name = "default"}` 和 `child = setmetatable({}, {__index = parent})`。验证 `child.name` 返回 `"default"`，然后设置 `child.name = "override"` 并确认 parent 未被改变。
 
-### 1.8 — Metatable：自定义 `__add`（阶段 2）[中等]
+### 1.8 — 元表：自定义 `__add`（阶段 2）[中等]
 创建 `Vec2.new(x, y)` 并实现 `__add`（逐元素相加）和 `__tostring`。
 ```lua
 print(Vec2.new(1,2) + Vec2.new(3,4))  --> Vec2(4, 6)
@@ -61,8 +64,8 @@ print(Vec2.new(1,2) + Vec2.new(3,4))  --> Vec2(4, 6)
 ### 1.9 — 模块模式（阶段 2）[中等]
 编写一个 `mathutils` 模块文件，使用局部变量作为内部实现，通过公共表暴露 `clamp(val, lo, hi)` 和 `lerp(a, b, t)`。
 
-### 1.10 — Coroutine：生产者-消费者（阶段 3）[中等]
-创建一个 yield 数字 1–5 的 coroutine。在循环中 resume 它，将值收集到一个表中。期望结果：`{1, 2, 3, 4, 5}`。
+### 1.10 — 协程：生产者-消费者（阶段 3）[中等]
+创建一个 yield 数字 1–5 的协程。在循环中 resume 它，将值收集到一个表中。期望结果：`{1, 2, 3, 4, 5}`。
 
 ### 1.11 — 错误处理：安全解析（阶段 2）[中等]
 编写 `safe_parse(s)` 在 `pcall` 内调用 `tonumber`。返回 `(number, nil)` 或 `(nil, error_msg)`。
@@ -70,6 +73,16 @@ print(Vec2.new(1,2) + Vec2.new(3,4))  --> Vec2(4, 6)
 print(safe_parse("42"))  --> 42    nil
 print(safe_parse("abc")) --> nil   "not a valid number"
 ```
+
+### 1.12 — 字符串分割（阶段 1）[简单]
+编写 `split(s, sep)` 返回 `s` 按 `sep` 切分后的片段列表。`sep` 是 Lua 模式串，默认为空白字符。第一个参数不是字符串时应当报错。连续分隔符之间的空片段会被丢弃。
+```lua
+local parts = split("a,b,c", ",")
+print(#parts)            --> 3
+print(parts[2])         --> b
+print(#split("one two")) --> 2
+```
+**提示**：用 `string.find(sep, start)` 定位每个分隔符，并维护一个递增的起始下标。
 
 ---
 
@@ -140,7 +153,7 @@ print(#t)  -- 不可靠
 ```
 **任务**：编写 `safe_length(t)` 统计非 nil 的整数键数量。在 `{1, nil, 3}` 和 `{nil, 2, nil, 4}` 上进行测试。
 
-### 3.3 — 死亡 Coroutine Resume [中等]
+### 3.3 — 死亡协程 Resume [中等]
 ```lua
 local co = coroutine.create(function()
   coroutine.yield("first"); coroutine.yield("second")
@@ -151,7 +164,7 @@ coroutine.resume(co)  --> 错误：无法 resume 已终止的 coroutine
 ```
 **修复**：编写 `safe_resume(co, ...)` 返回 `nil, "dead coroutine"` 而不是崩溃。
 
-### 3.4 — Metatable 共享状态 [中等]
+### 3.4 — 元表共享状态 [中等]
 ```lua
 local User = {}; User.__index = User
 function User.new(name) return setmetatable({name=name}, User) end
@@ -170,13 +183,27 @@ end
 ```
 **修复**：先收集需要删除的键，循环结束后再删除。
 
-### 3.6 — 闭包捕获循环变量 [简单]
+### 3.6 — 闭包捕获共享变量 [简单]
 ```lua
+local i = 0
 local funcs = {}
-for i = 1, 5 do funcs[i] = function() return i end end
-print(funcs[1]())  --> 5 — 错误！
+for k = 1, 3 do
+  i = k
+  funcs[k] = function() return i end
+end
+print(funcs[1]())  --> 3 — 错误！
 ```
-**修复**：让每个函数捕获自己的 `i` 副本。解释为什么会出现这个 bug。
+**任务**：解释为什么三个闭包都返回 3，然后修复它，让每个函数捕获各自的值。附加题：检查 `for i = 1, 5 do funcs[i] = function() return i end end` 是否有同样的问题 —— 没有，因为每次迭代都会得到 `i` 的独立副本。
+
+### 3.7 — 循环边界差一 [简单]
+```lua
+function render_list(items)
+  for i = 1, #items - 1 do
+    print(i .. ". " .. items[i])
+  end
+end
+```
+**任务**：最后一个元素永远不会被打印。修正边界，然后写一个使用 `ipairs` 的版本，并解释它为什么不会越界。
 
 ---
 
@@ -184,7 +211,7 @@ print(funcs[1]())  --> 5 — 错误！
 
 1. **可空字段**：比较 `nil`、哨兵值（`cjson.null`）和包装器 `{value=x, is_null=true}` 用于可空表字段。在序列化和迭代方面的权衡是什么？
 
-2. **模块 API 风格**：返回函数表 vs metatable 类 vs 导出到 `_G` —— 哪种最容易测试？为什么？
+2. **模块 API 风格**：返回函数表 vs 元表类 vs 导出到 `_G` —— 哪种最容易测试？为什么？
 
 3. **错误处理边界**：在小型脚本中，是每个函数都验证输入，还是在顶层使用 `pcall` 捕获所有错误？在规模化时会有什么变化？
 
@@ -192,4 +219,4 @@ print(funcs[1]())  --> 5 — 错误！
 
 5. **模板方法**：基于模式的字符串处理 vs 两阶段（解析为 AST，然后求值）。简单方法在什么情况下会失效？
 
-6. **Coroutine vs 回调**：在什么场景下 coroutine 比回调能简化事件驱动系统？各举一个场景。
+6. **协程 vs 回调**：在什么场景下协程比回调能简化事件驱动系统？各举一个场景。

@@ -2,7 +2,7 @@
   Example: Rate Limiter
   Chapter: Stage 16 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Token bucket algorithm, sliding window log, time-based rate limiting
 ]]
 

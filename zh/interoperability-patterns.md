@@ -178,9 +178,9 @@ mylib.configure { host = "api.example.com", port = 8080 }
 
 ---
 
-## Userdata 与元表
+## 用户数据与元表
 
-Userdata 让 C 可以将结构化数据附加到 Lua 值上,而 Lua 端无法伪造:
+用户数据让 C 可以将结构化数据附加到 Lua 值上,而 Lua 端无法伪造:
 
 ```c
 // Counter userdata,拥有私有状态
@@ -461,7 +461,7 @@ if not ok then print(err) end
 ### 命名约定
 
 - C 函数: `l_<module>_<name>`
-- Userdata 元表: `<Module>.<Name>`
+- 用户数据元表: `<Module>.<Name>`
 - 常量: `LUA_<CONSTANT>` 风格
 
 ### 线程安全
@@ -474,7 +474,7 @@ if not ok then print(err) end
 
 1. **注册一个 C 模块**: 编写一个 C 模块,通过 Lua C API 暴露 `math_extra.gcd(a, b)` 和 `math_extra.lcm(a, b)`。从 Lua 测试它。
 
-2. **带元表的 Userdata**: 实现一个 `Vector` userdata (x, y, z),从 C 提供 `__add`、`__mul` 和 `__len` 元方法。
+2. **带元表的用户数据**: 实现一个 `Vector` 用户数据 (x, y, z),从 C 提供 `__add`、`__mul` 和 `__len` 元方法。
 
 3. **双向桥接**: 实现一个 C 函数,接收 Lua 回调并存入注册表,然后从另一个 C 函数回拨它。
 
@@ -485,8 +485,16 @@ if not ok then print(err) end
 ## 关键要点
 
 - **Lua C API 基于栈**: Lua 和 C 之间的所有通信都通过虚拟栈进行。
-- **Userdata + 元表 = 不透明对象**: 这是向 Lua 公开 C struct 的安全方式。
+- **用户数据 + 元表 = 不透明对象**: 这是向 Lua 公开 C struct 的安全方式。
 - **向上传播错误**: 要么使用 `luaL_error()`,要么返回 `nil, err`——永远不要静默吞掉错误。
 - **显式绑定生命周期**: 如果 C 分配由 Lua 管理的内存,使用 `__gc` 终结器。
 - **每个线程一个状态**: `lua_State` 不是线程安全的;每个 OS 线程使用一个。
 - **尽可能优先选择嵌入而非原始 C API**: 如果需要非 C 语言的 Lua-C 互操作,先寻找现有的绑定库。
+
+
+---
+
+## 示例代码
+
+本章可运行示例：
+- `examples/intermediate/20-interop-boundary.lua` — 从 Lua 一侧观察到的边界契约：每种值采用何种表示、"缺失"意味着什么、table 中的空洞如何跨界，以及在 `pcall` 上跨越 yield 是否安全

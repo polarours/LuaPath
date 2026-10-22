@@ -381,14 +381,17 @@ print(code)  -- 42
 ### 2. locale 相关的字符串操作
 
 ```lua
--- 排序依赖 locale
+-- 排序比较的是字节，与 locale 无关
 local items = {"c", "a", "B", "b", "A"}
 table.sort(items)
--- 结果取决于 locale！可能不是 ASCII 顺序
+-- 始终是 A, B, a, b, c —— 字节值的顺序
 
--- 如需 ASCII 顺序，使用字节比较
+-- 同样的结果，写明一点
 table.sort(items, function(a, b) return a:byte() < b:byte() end)
 ```
+
+> `table.sort` 用 `strcmp` 比较字符串，所以结果不依赖 locale。
+> 真正会随 locale 变的是 `string.format("%f")` 和 `os.date`，它们跟随 C 库的规则。
 
 ### 3. 在逻辑层中使用阻塞 I/O
 
@@ -422,6 +425,8 @@ f:close()
 ```
 
 ### 5. UTF-8 字节与码点
+
+> **Lua 5.3 说明**：utf8 库是 Lua 5.3 引入的，因此该示例需要 Lua 5.3+，无法在 Lua 5.1 上运行。
 
 ```lua
 local s = "你好"
@@ -460,6 +465,8 @@ end
 ```
 
 ### 3. 记录文本编码
+
+> **Lua 5.3 说明**：utf8.codes 是 Lua 5.3 引入的，因此该示例需要 Lua 5.3+，无法在 Lua 5.1 上运行。
 
 ```lua
 --- 解析 UTF-8 字符串并返回码点

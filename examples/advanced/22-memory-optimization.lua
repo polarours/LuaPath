@@ -1,4 +1,4 @@
--- Example 25: Memory Optimization
+-- Example 54: Memory Optimization
 -- Chapter: 12-performance
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -47,17 +47,17 @@ local function main()
 
   -- 2. String concatenation
   print("\n--- String Building ---")
-  local function concat_bad(n)
+  local function concat_bad(count)
     local s = ""
-    for i = 1, n do
+    for i = 1, count do
       s = s .. tostring(i)
     end
     return s
   end
 
-  local function concat_good(n)
+  local function concat_good(count)
     local parts = {}
-    for i = 1, n do
+    for i = 1, count do
       parts[i] = tostring(i)
     end
     return table.concat(parts)

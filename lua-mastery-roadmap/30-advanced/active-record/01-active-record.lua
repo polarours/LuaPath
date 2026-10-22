@@ -60,10 +60,16 @@ function ActiveRecord:delete()
     return false
 end
 
-function ActiveRecord:tostring()
+-- __tostring, not tostring: Lua's tostring() looks for the __tostring
+-- metamethod. A plain method named "tostring" would never be called by it.
+--
+-- Metamethods are looked up with a raw access on the metatable, so the
+-- subclass has to put __tostring in its own metatable -- it does not follow
+-- the metatable's __index chain.
+function ActiveRecord.__tostring(self)
     local parts = { string.format("id=%s", tostring(self.id)) }
     for k, v in pairs(self) do
-        if not string.startswith(k, "_") and k ~= "id" then
+        if k:sub(1, 1) ~= "_" and k ~= "id" then
             table.insert(parts, string.format("%s=%s", k, tostring(v)))
         end
     end
@@ -95,9 +101,15 @@ end
 -- Concrete model using the base class
 local User = setmetatable({}, { __index = ActiveRecord })
 
+-- Shared metatable for User instances. __tostring has to live here directly:
+-- metamethod lookup is a raw get on the metatable and does not follow the
+-- metatable's own __index chain.
+local user_mt = { __index = User }
+user_mt.__tostring = ActiveRecord.__tostring
+
 function User.new(data)
     local self = ActiveRecord.new(data)
-    setmetatable(self, { __index = User })
+    setmetatable(self, user_mt)
     return self
 end
 

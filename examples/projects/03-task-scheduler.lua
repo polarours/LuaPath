@@ -1,4 +1,4 @@
--- Example 03: Cooperative Task Scheduler
+-- Example 62: Cooperative Task Scheduler
 -- Project: 03-task-scheduler
 -- Chapter: 08-coroutines
 -- Difficulty: Intermediate-Advanced

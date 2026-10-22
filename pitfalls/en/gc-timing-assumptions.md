@@ -7,16 +7,16 @@ Garbage collection runs asynchronously. Assuming objects are collected immediate
 ```lua
 local function create_temp()
   local data = {}
-  for i = 1, 100000 do
+  for i = 1, 10000 do
     data[i] = string.rep("x", 1000)
   end
   return data -- caller must hold reference
 end
 
 local function process()
-  for i = 1, 1000 do
+  for i = 1, 50 do
     create_temp() -- return value ignored, but GC hasn't freed it yet
-    -- memory keeps growing
+    -- the heap climbs until the collector catches up
   end
 end
 
@@ -33,7 +33,39 @@ end})
 
 obj = nil
 collectgarbage("collect")
--- __gc might NOT have run yet — finalizers are deferred
+-- On Lua 5.2 and later the finalizer has run by now. On Lua 5.1 and on
+-- LuaJIT a table has no finalizer at all, so nothing is ever printed.
+```
+
+## Reproduction
+
+Dropping the last reference does not run the finalizer on the spot:
+
+```lua
+local function create_resource()
+  local data = string.rep("x", 1000000)
+  return setmetatable({}, {
+    __gc = function(self)
+      print("Released resource")
+    end,
+  })
+end
+
+local r = create_resource()
+r = nil
+-- "Released resource" is not necessarily printed right away!
+-- GC timing is not deterministic
+```
+
+The one finalizer the Lua 5.1 baseline does have belongs to userdata — a
+file handle is the everyday example:
+
+```lua
+local handle = assert(io.open("resource.tmp", "w"))
+handle:write("data")
+handle = nil
+-- The handle is closed when the collector gets to it, not here.
+collectgarbage("collect")
 ```
 
 ## Why It's Wrong
@@ -41,9 +73,14 @@ collectgarbage("collect")
 Lua's garbage collector is a mark-and-sweep collector that runs incrementally. Key facts:
 
 - Setting a reference to `nil` does **not** immediately free the object
-- `collectgarbage("collect")` triggers a full cycle, but **finalizers** (`__gc`) run in a separate phase
-- Finalized objects survive one extra GC cycle before collection
-- In Lua 5.1, finalizers run at the **end** of the collection cycle — not during
+- `collectgarbage("collect")` triggers a full cycle, but the collector may
+  not reach the object in that cycle
+- **Only userdata had a finalizer in Lua 5.1.** A table with a `__gc`
+  metatable was never finalized at all. Lua 5.2 gave tables finalizers;
+  LuaJIT still follows the 5.1 rule
+- On Lua 5.4 and later, one `collectgarbage("collect")` runs the pending
+  finalizers. On Lua 5.2 and 5.3 they may need another cycle
+- A finalized object survives one extra cycle before it is actually freed
 
 ## The Fix
 
@@ -54,7 +91,6 @@ local resource = {
   data = {},
   close = function(self)
     self.data = nil
-    collectgarbage("collect")
   end,
 }
 
@@ -63,7 +99,8 @@ resource:close()
 resource = nil
 ```
 
-For finalizers, account for the delay:
+If you do rely on a finalizer, account for the delay — and check the
+version, because on Lua 5.1 and LuaJIT a table finalizer never runs:
 
 ```lua
 local obj = setmetatable({}, {
@@ -74,7 +111,9 @@ local obj = setmetatable({}, {
 
 obj = nil
 collectgarbage("collect")
-collectgarbage("collect") -- second pass to finalize
+-- Lua 5.4 and later: the finalizer has run by now.
+-- Lua 5.2 and 5.3: it may need one more cycle.
+-- Lua 5.1 and LuaJIT: a table has no finalizer; nothing will ever run.
 ```
 
 Monitor memory proactively:
@@ -93,4 +132,4 @@ print("after:", mem_usage())
 
 ## Key Takeaway
 
-Never rely on GC timing for correctness. Use explicit `close()`/`dispose()` patterns for finite resources (files, sockets, FFI allocations). Treat `collectgarbage()` as a hint, not a guarantee.
+Never rely on GC timing for correctness. Use explicit `close()`/`dispose()` patterns for finite resources (files, sockets, FFI allocations). Treat `collectgarbage()` as a hint, not a guarantee — and remember that on Lua 5.1 and LuaJIT only userdata is ever finalized.

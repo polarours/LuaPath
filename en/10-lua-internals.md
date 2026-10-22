@@ -330,8 +330,9 @@ for i = 1, 10000 do
   t[i] = i  -- Table grows incrementally
 end
 
--- Better: pre-allocate
-local t = table.create(10000)  -- 5.3+ only
+-- Better: pre-allocate. table.create arrived in Lua 5.5; on 5.1 to 5.4
+-- the array part grows as the table fills.
+local t = table.create and table.create(10000) or {}
 for i = 1, 10000 do
   t[i] = i
 end
@@ -381,16 +382,17 @@ print(x == x + 1)  -- true! (precision loss)
 ### 4. Closure Over Loop Variable (Revisited)
 
 ```lua
--- Classic: all closures share one variable
+-- Every iteration gets its own copy of `i` — not a bug (Lua 5.1+)
 local fns = {}
 for i = 1, 5 do
-  fns[i] = function() return i end  -- All return 5
+  fns[i] = function() return i end  -- Returns 1, 2, 3, 4, 5
 end
 
--- Fix: local copy per iteration
+-- The real trap: a variable declared *outside* the loop
+local shared = 0
 for i = 1, 5 do
-  local j = i
-  fns[i] = function() return j end
+  shared = i
+  fns[i] = function() return shared end  -- All return 5
 end
 ```
 
@@ -590,6 +592,7 @@ Lua deduplicates identical strings. This saves memory but means creating many un
 Runnable examples for this chapter:
 - `examples/advanced/01-ecs-system.lua` — Performance-conscious table usage
 - `examples/advanced/03-object-pool.lua` — GC-aware object reuse
+- `examples/advanced/26-internals-probe.lua` — String interning, upvalue capture, table layout, and GC accounting, all measured on the running interpreter
 
 ---
 

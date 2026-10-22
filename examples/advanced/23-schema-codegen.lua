@@ -1,4 +1,4 @@
--- Example 26: Schema Validator Code Generation
+-- Example 55: Schema Validator Code Generation
 -- Chapter: 15-advanced-metaprogramming
 -- Difficulty: Advanced
 -- Lua Version: 5.1+

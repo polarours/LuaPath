@@ -1,4 +1,4 @@
--- Example 16: Weak References
+-- Example 28: Weak References
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

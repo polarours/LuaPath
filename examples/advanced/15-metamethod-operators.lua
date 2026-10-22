@@ -1,4 +1,4 @@
--- Example 15: Metamethod Operators
+-- Example 47: Metamethod Operators
 -- Chapter: 05-metatables
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -307,7 +307,7 @@ local function demo_probability()
   print("  not fair = " .. tostring(fair:not_p()))
 end
 
-function main()
+local function main()
   print("Metamethod Operators Examples")
   print("=============================")
 

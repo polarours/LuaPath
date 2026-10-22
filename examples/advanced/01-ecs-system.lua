@@ -1,7 +1,7 @@
--- Example 1: ECS (Entity Component System) Implementation
+-- Example 33: ECS (Entity Component System) Implementation
 -- Chapter: 13-patterns
 -- Difficulty: Advanced
--- Lua Version: 5.3+
+-- Lua Version: 5.1+
 --
 -- Demonstrates: SoA layout, system iteration, performance-conscious design
 
@@ -96,7 +96,7 @@ end
 function ECS:query(...)
   local types = {...}
   local indices = {}
-  
+
   -- Find entities that have all required components
   for id in pairs(self.entities) do
     local has_all = true
@@ -110,7 +110,7 @@ function ECS:query(...)
       table.insert(indices, id)
     end
   end
-  
+
   local i = 0
   return function()
     i = i + 1
@@ -145,7 +145,7 @@ end
 --- Run all systems
 -- @param dt delta time
 function ECS:update(dt)
-  for name, system in pairs(self.systems) do
+  for _, system in pairs(self.systems) do
     system(self, dt)
   end
 end
@@ -157,8 +157,8 @@ print("==================")
 local world = ECS:new()
 
 -- Register systems
-world:register_system("movement", function(world, dt)
-  for entity in world:query("Position", "Velocity") do
+world:register_system("movement", function(w, dt)
+  for entity in w:query("Position", "Velocity") do
     local pos = entity.Position
     local vel = entity.Velocity
     pos.x = pos.x + vel.x * dt
@@ -166,11 +166,11 @@ world:register_system("movement", function(world, dt)
   end
 end)
 
-world:register_system("render", function(world, dt)
-  for entity in world:query("Position", "Sprite") do
+world:register_system("render", function(w, dt)
+  for entity in w:query("Position", "Sprite") do
     local pos = entity.Position
     local sprite = entity.Sprite
-    print(string.format("Rendering %s at (%.2f, %.2f)", 
+    print(string.format("Rendering %s at (%.2f, %.2f)",
       sprite.name, pos.x, pos.y))
   end
 end)

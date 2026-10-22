@@ -11,20 +11,20 @@
 -- @return array of moving averages
 local function moving_average(values, n)
   local result = {}
-  
+
   for i = 1, #values do
     local sum = 0
     local count = 0
-    
+
     -- Sum values in window [i-n+1, i]
     for j = math.max(1, i - n + 1), i do
       sum = sum + values[j]
       count = count + 1
     end
-    
+
     result[i] = sum / count
   end
-  
+
   return result
 end
 

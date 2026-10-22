@@ -64,11 +64,17 @@ print(table.concat(stringx.split("a,b,c", ","), "|"))  -- "a|b|c"
 ```lua
 -- 好：基于 table 的模块
 local M = {}
-function M.process() ... end
+function M.process()
+  -- ...
+ end
 return M
 
 -- 差：全局函数
-function process() ... end  -- 污染全局命名空间
+```
+```lua
+function process()
+  -- ...
+ end  -- 污染全局命名空间
 ```
 
 ---
@@ -135,11 +141,15 @@ print("mymod loading...")
 local dep = require("dependency")
 
 -- 2. 定义本地辅助函数
-local function internal_helper() ... end
+local function internal_helper()
+  -- ...
+end
 
 -- 3. 定义公共 API
 local M = {}
-function M.do_something() ... end
+function M.do_something()
+  -- ...
+ end
 
 -- 4. 可选：运行初始化
 M._initialized = true
@@ -152,7 +162,7 @@ return M
 
 ## 封装模式
 
-### 使用 upvalue 实现私有状态
+### 使用上值实现私有状态
 
 ```lua
 -- counter.lua
@@ -226,14 +236,24 @@ return M
 ```lua
 -- 好：少量、定义明确的函数
 local M = {}
-function M.process(config) ... end
-function M.validate(config) ... end
+function M.process(config)
+  -- ...
+ end
+function M.validate(config)
+  -- ...
+ end
 return M
 
 -- 差：暴露一切
+```
+```lua
 local M = {}
-M.process = function() ... end
-M._internal_helper = function() ... end  -- 泄露内部实现
+M.process = function()
+  -- ...
+ end
+M._internal_helper = function()
+  -- ...
+ end  -- 泄露内部实现
 M._config = {}  -- 暴露可变内部状态
 return M
 ```
@@ -248,6 +268,8 @@ function M.mul(a, b) return a * b end
 return M
 
 -- 有状态服务模块（需要初始化）
+```
+```lua
 local M = {}
 local connection = nil
 
@@ -310,6 +332,8 @@ function a_func() return b.b_func() end
 return a
 
 -- b.lua
+```
+```lua
 local a = require("a")  -- a 只加载了一部分（可能为 nil 或不完整！）
 function b_func() return a.a_func() end
 return b
@@ -322,8 +346,12 @@ return b
 ```lua
 -- shared.lua
 local M = {}
-function M.a_func() ... end
-function M.b_func() ... end
+function M.a_func()
+  -- ...
+ end
+function M.b_func()
+  -- ...
+ end
 return M
 ```
 
@@ -344,14 +372,20 @@ return a
 ```lua
 -- common.lua（无依赖）
 local M = {}
-function M.shared_func() ... end
+function M.shared_func()
+  -- ...
+ end
 return M
 
 -- a.lua
+```
+```lua
 local common = require("common")
 return { a_func = common.shared_func }
 
 -- b.lua
+```
+```lua
 local common = require("common")
 return { b_func = common.shared_func }
 ```
@@ -429,14 +463,18 @@ package.loaded["my_module"] = nil
 
 ### 4. require 返回多个值
 
-`require` 只返回模块的第一个值：
+只有模块的第一个值会被缓存，而在 Lua 5.1 上这也是 `require` 唯一返回的值：
 
 ```lua
 -- mymod.lua
 return "value1", "value2"  -- 只有 "value1" 被缓存
 
+```
+```lua
 local v1, v2 = require("mymod")
--- v1 = "value1", v2 = nil！
+-- 在 Lua 5.1 和 LuaJIT 上：v1 = "value1"，v2 = nil
+-- 在 Lua 5.2 及之后：v2 是加载器数据（模块被从哪里加载的路径），
+-- 而不是模块的第二个值
 ```
 
 ---
@@ -448,12 +486,18 @@ local v1, v2 = require("mymod")
 ```lua
 -- 好
 local M = {}
-M.process = function() ... end
+M.process = function()
+  -- ...
+ end
 return M
 
 -- 对简单模块也可以
+```
+```lua
 return {
-  process = function() ... end,
+  process = function()
+    -- ...
+   end,
 }
 ```
 
@@ -525,7 +569,7 @@ module("mymod", package.seeall)  -- 不要使用这个
 ### Lua 5.2/5.3
 
 - `package.searchers` 替代了 `package.loaders`
-- `require` 只返回第一个值
+- `require` 返回模块和加载器数据（模块的路径）
 - `table.pack`/`table.unpack` 可用
 - `module()` 已移除
 
@@ -604,7 +648,7 @@ module("mymod", package.seeall)  -- 不要使用这个
 
 5. **延迟加载器**：实现一个模块代理，在对模块的首次函数调用之前延迟 `require`。
 
-6. **有状态模块**：构建一个 `cache` 模块，提供 `get`、`set`、`invalidate` 和 `clear` 操作。使用私有 upvalue 进行存储。
+6. **有状态模块**：构建一个 `cache` 模块，提供 `get`、`set`、`invalidate` 和 `clear` 操作。使用私有上值进行存储。
 
 ### 高级（2–4 小时）
 

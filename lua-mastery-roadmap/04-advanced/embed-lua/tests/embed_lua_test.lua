@@ -1,5 +1,5 @@
 -- tests/embed_lua_test.lua — Unit tests for the embed_lua C host
--- Run from project root with: lua lua-mastery-roadmap/04-advanced/embed-lua/tests/embed_lua_test.lua
+-- Run from the project directory with: lua tests/embed_lua_test.lua
 --
 -- Tests compile and run the C host binary and verify its output.
 -- This script does NOT require the Lua host to be pre-built; it builds

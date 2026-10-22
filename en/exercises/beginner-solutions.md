@@ -4,7 +4,22 @@ Solutions and explanations for beginner-level exercises.
 
 ---
 
-## Exercise 1: String Split
+## Exercise Reference
+
+| Exercise | Topic |
+|----------|-------|
+| [1.6](beginner.md#16-—-word-frequency-counter-stage-1-medium) | Word Frequency Counter |
+| [1.9](beginner.md#19-—-module-pattern-stage-2-medium) | Module Pattern: mathutils |
+| [1.12](beginner.md#112-—-string-split-stage-1-easy) | String Split |
+| [3.1](beginner.md#31-—-global-variable-leak-easy) | Global Variable Leak |
+| [3.2](beginner.md#32-—-table-length-on-sparse-arrays-easy) | Table Length on Sparse Arrays |
+| [3.7](beginner.md#37-—-off-by-one-loop-bounds-easy) | Off-by-One Loop Bounds |
+
+The remaining exercises are left for the reader to solve.
+
+---
+
+## Exercise 1.12: String Split
 
 ### Task
 Implement `split(s, sep)` without external libraries.
@@ -67,6 +82,7 @@ print("✓ split tests passed")
 ```lua
 -- WRONG: Doesn't handle consecutive separators
 local function split_wrong(s, sep)
+  local result = {}
   for part in s:gmatch("[^" .. sep .. "]+") do
     table.insert(result, part)
   end
@@ -92,7 +108,7 @@ end
 
 ---
 
-## Exercise 2: Word Frequency Counter
+## Exercise 1.6: Word Frequency Counter
 
 ### Task
 Build `count_words(text)` using tables.
@@ -168,7 +184,7 @@ end
 -- With stop words filtering
 local function count_words_filtered(text, stop_words)
   local counts = {}
-  stop_words = stop_words or {"the", "a", "an", "is", "are"}
+  stop_words = stop_words or { the = true, a = true, an = true, is = true, are = true }
   
   for word in text:lower():gmatch("%w+") do
     if not stop_words[word] then
@@ -181,20 +197,28 @@ end
 
 ---
 
-## Exercise 3: Clamp and Lerp
+## Exercise 1.9: Module Pattern: mathutils
 
 ### Task
-Write `clamp` and `lerp` utilities with edge-case tests.
+Write a `mathutils` module file exposing `clamp(val, lo, hi)` and `lerp(a, b, t)`
+using local internals and a public table return.
 
 ### Solution
 
 ```lua
+-- mathutils.lua
+--
+-- The implementation lives in locals; only the public table is exported, so
+-- nothing outside the module can reach -- or replace -- the internals.
+
+local M = {}
+
 --- Clamp value between min and max
 -- @param value number to clamp
 -- @param min minimum bound
 -- @param max maximum bound
 -- @return clamped value
-local function clamp(value, min, max)
+function M.clamp(value, min, max)
   if value < min then return min end
   if value > max then return max end
   return value
@@ -210,8 +234,8 @@ end
 -- @param b end value
 -- @param t interpolation factor (0-1 clamped)
 -- @return interpolated value
-local function lerp(a, b, t)
-  t = clamp(t, 0, 1)
+function M.lerp(a, b, t)
+  t = M.clamp(t, 0, 1)
   return a + (b - a) * t
 end
 
@@ -220,38 +244,46 @@ end
 -- @param b end value
 -- @param value current value
 -- @return t factor (unclamped)
-local function inverse_lerp(a, b, value)
+function M.inverse_lerp(a, b, value)
   if a == b then return 0 end  -- Avoid division by zero
   return (value - a) / (b - a)
 end
 
--- Tests
+return M
+```
+
+### Tests
+
+```lua
+-- test_mathutils.lua
+local M = require("mathutils")
+
 local function test_clamp()
-  assert(clamp(5, 0, 10) == 5, "within bounds")
-  assert(clamp(-5, 0, 10) == 0, "below min")
-  assert(clamp(15, 0, 10) == 10, "above max")
-  assert(clamp(0, 0, 10) == 0, "at min")
-  assert(clamp(10, 0, 10) == 10, "at max")
-  assert(clamp(5, 5, 5) == 5, "min == max")
+  assert(M.clamp(5, 0, 10) == 5, "within bounds")
+  assert(M.clamp(-5, 0, 10) == 0, "below min")
+  assert(M.clamp(15, 0, 10) == 10, "above max")
+  assert(M.clamp(0, 0, 10) == 0, "at min")
+  assert(M.clamp(10, 0, 10) == 10, "at max")
+  assert(M.clamp(5, 5, 5) == 5, "min == max")
   print("✓ clamp tests passed")
 end
 
 local function test_lerp()
-  assert(lerp(0, 100, 0) == 0, "t=0")
-  assert(lerp(0, 100, 1) == 100, "t=1")
-  assert(lerp(0, 100, 0.5) == 50, "t=0.5")
-  assert(lerp(0, 100, 1.5) == 100, "t clamped above")
-  assert(lerp(0, 100, -0.5) == 0, "t clamped below")
-  assert(lerp(10, 20, 0.5) == 15, "non-zero start")
+  assert(M.lerp(0, 100, 0) == 0, "t=0")
+  assert(M.lerp(0, 100, 1) == 100, "t=1")
+  assert(M.lerp(0, 100, 0.5) == 50, "t=0.5")
+  assert(M.lerp(0, 100, 1.5) == 100, "t clamped above")
+  assert(M.lerp(0, 100, -0.5) == 0, "t clamped below")
+  assert(M.lerp(10, 20, 0.5) == 15, "non-zero start")
   print("✓ lerp tests passed")
 end
 
 local function test_inverse_lerp()
-  assert(inverse_lerp(0, 100, 50) == 0.5, "middle")
-  assert(inverse_lerp(0, 100, 0) == 0, "start")
-  assert(inverse_lerp(0, 100, 100) == 1, "end")
-  assert(inverse_lerp(0, 100, 150) == 1.5, "beyond end")
-  assert(inverse_lerp(10, 10, 5) == 0, "same endpoints")
+  assert(M.inverse_lerp(0, 100, 50) == 0.5, "middle")
+  assert(M.inverse_lerp(0, 100, 0) == 0, "start")
+  assert(M.inverse_lerp(0, 100, 100) == 1, "end")
+  assert(M.inverse_lerp(0, 100, 150) == 1.5, "beyond end")
+  assert(M.inverse_lerp(10, 10, 5) == 0, "same endpoints")
   print("✓ inverse_lerp tests passed")
 end
 
@@ -268,7 +300,7 @@ test_inverse_lerp()
 
 ---
 
-## Exercise 4: Accidental Global Bug
+## Exercise 3.1: Global Variable Leak
 
 ### Task
 Fix bug from accidental global variable overwrite.
@@ -348,7 +380,7 @@ setmetatable(_G, {
 
 ---
 
-## Exercise 5: Off-by-One Loop Bug
+## Exercise 3.7: Off-by-One Loop Bounds
 
 ### Task
 Fix off-by-one loop bug in list rendering.
@@ -396,7 +428,7 @@ end
 
 ---
 
-## Exercise 6: Table Length with Holes
+## Exercise 3.2: Table Length on Sparse Arrays
 
 ### Task
 Fix incorrect `#t` usage on table with holes.

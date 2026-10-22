@@ -2,7 +2,7 @@
   Example: Schema Validator
   Chapter: Stage 17 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Recursive validation, type checking, nested schema definitions
 ]]
 

@@ -10,12 +10,12 @@
 -- @return table mapping words to counts
 local function count_words(text)
   local counts = {}
-  
+
   -- Simple word extraction (lowercase, alphanumeric)
   for word in text:lower():gmatch("%w+") do
     counts[word] = (counts[word] or 0) + 1
   end
-  
+
   return counts
 end
 

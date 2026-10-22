@@ -45,5 +45,5 @@ strict()
 
 ## 相关概念
 
-- [01-basics.md](../zh/01-basics.md) — 变量与作用域
-- [06-modules.md](../zh/06-modules.md) — 模块系统
+- [01-basics.md](../../zh/01-basics.md) — 变量与作用域
+- [06-modules.md](../../zh/06-modules.md) — 模块系统

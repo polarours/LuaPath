@@ -20,8 +20,8 @@
 | 类别 | 数量 |
 |------|------|
 | 文档 | 22 章 × 2 种语言（EN + ZH） |
-| 陷阱 | 20 篇 × 2 种语言（EN + ZH） |
-| 示例 | 59 个可运行示例 |
+| 陷阱 | 18 篇 × 2 种语言（EN + ZH） |
+| 示例 | 64 个可运行示例 |
 | 术语表 | 151 术语（EN + ZH） |
 | 路线图阶段 | 42 个（入门 → 高级） |
 
@@ -32,25 +32,25 @@ LuaPath/
 ├── en/                          22 章英文教程 (00–18, 3 跨领域)
 ├── zh/                          22 章中文教程（镜像 /en）
 ├── pitfalls/
-│   ├── en/                      20 篇英文常见错误
-│   └── 中文版/                   20 篇中文常见错误
+│   ├── en/                      18 篇英文常见错误
+│   └── 中文版/                   18 篇中文常见错误
 ├── lua-mastery-roadmap/
 │   ├── 00-overview.md           分阶段学习路径
 │   ├── 01-beginner/             阶段 1 项目
 │   ├── 02-intermediate/         阶段 2 项目
 │   ├── ...                      阶段 3-42 项目
-│   └── 43-toolchain/            阶段 43 项目
+│   └── 42-toolchain/            阶段 42 项目
 ├── examples/
 │   ├── beginner/                12 个入门示例
-│   ├── intermediate/            18 个中级示例
-│   ├── advanced/                25 个高级示例
-│   └── projects/                4 个阶段项目（可运行）
-├── exercises/                   分级练习（入门 → 高级）
+│   ├── intermediate/            20 个中级示例
+│   ├── advanced/                27 个高级示例
+│   └── projects/                5 个阶段项目（可运行）
+├── en/exercises/ + zh/exercises/  分级练习（入门 → 高级）
 ├── references/                  速查表、版本差异
 ├── scripts/                     验证和测试工具
-├── GLOSSARY.md                  151 术语参考
+├── GLOSSARY.md + GLOSSARY.zh-CN.md  151 术语参考（EN + ZH）
 ├── CONTRIBUTING.md              贡献指南
-└── Makefile                     CI：validate、lint、check-links、parity、test
+└── Makefile                     CI：validate、lint、check-*、parity、test
 ```
 
 ## 从这里开始
@@ -100,6 +100,7 @@ LuaPath/
 - Lua 5.1
 - Lua 5.3
 - Lua 5.4
+- Lua 5.5
 - LuaJIT
 
 注意：
@@ -107,7 +108,11 @@ LuaPath/
 - 5.1 在环境模型（`setfenv`、`getfenv`）上不同，且缺少原生位运算符。
 - 5.3 引入整数 + 位运算符。
 - 5.4 引入 to-be-closed 变量和分代 GC 模式。
+- 5.5 是当前版本，本仓库的内容无需改动即可在其上运行。
 - LuaJIT：JIT 编译器 + trace 优化器，FFI 用于 C 互操作，基线接近 5.1 带扩展。
+
+每个示例与阶段都用 `-- Lua Version:` 头声明自己支持的版本，CI 会在上面列出的
+每个版本上运行完整的示例与路线图测试套件。版本声明由构建强制执行，而非一纸承诺。
 
 ## 如何使用本仓库
 

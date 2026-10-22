@@ -2,6 +2,10 @@
 
 Exercises covering roadmap stages 1–8 (Core Language Literacy through Template Engines).
 
+> **Solutions**: worked solutions for exercises 1.6, 1.9, 1.12, 3.1, 3.2 and 3.7
+> are in [beginner-solutions.md](beginner-solutions.md). The remaining exercises are
+> left for the reader.
+
 ---
 
 ## 1. Concept Reinforcement
@@ -70,6 +74,16 @@ Write `safe_parse(s)` calling `tonumber` inside `pcall`. Return `(number, nil)` 
 print(safe_parse("42"))  --> 42    nil
 print(safe_parse("abc")) --> nil   "not a valid number"
 ```
+
+### 1.12 — String Split (Stage 1) [Easy]
+Write `split(s, sep)` returning the pieces of `s` separated by `sep`. `sep` is a Lua pattern and defaults to whitespace. A non-string first argument is an error. Empty pieces between consecutive separators are dropped.
+```lua
+local parts = split("a,b,c", ",")
+print(#parts)            --> 3
+print(parts[2])         --> b
+print(#split("one two")) --> 2
+```
+**Hint**: Locate each separator with `string.find(sep, start)` and keep a running start index.
 
 ---
 
@@ -170,13 +184,27 @@ end
 ```
 **Fix**: Collect keys to remove first, then delete after the loop.
 
-### 3.6 — Closure Captures Loop Variable [Easy]
+### 3.6 — Closure Captures a Shared Variable [Easy]
 ```lua
+local i = 0
 local funcs = {}
-for i = 1, 5 do funcs[i] = function() return i end end
-print(funcs[1]())  --> 5 — WRONG
+for k = 1, 3 do
+  i = k
+  funcs[k] = function() return i end
+end
+print(funcs[1]())  --> 3 — WRONG
 ```
-**Fix**: Make each function capture its own copy of `i`. Explain why the bug occurs.
+**Task**: Explain why all three closures return 3, then fix it so each function captures its own value. Bonus: check whether `for i = 1, 5 do funcs[i] = function() return i end end` has the same problem — it does not, because every iteration gets its own copy of `i`.
+
+### 3.7 — Off-by-One Loop Bounds [Easy]
+```lua
+function render_list(items)
+  for i = 1, #items - 1 do
+    print(i .. ". " .. items[i])
+  end
+end
+```
+**Task**: The last item is never printed. Fix the bounds, then write a second version with `ipairs` and explain why it cannot go out of range.
 
 ---
 

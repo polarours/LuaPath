@@ -1,8 +1,8 @@
 -- tests/logging_test.lua — Unit tests for logging system
--- Run from project root with: lua tests/logging_test.lua
+-- Run from the project directory with: lua tests/logging_test.lua
 
 -- Resolve the implementation directory from this script's own location, so
--- the test works regardless of the absolute path on disk.
+-- the test works regardless of the working directory it is started from.
 local function _script_dir()
   local src = arg and arg[0] or debug.getinfo(1, "S").source
   if src:sub(1, 1) == "@" then src = src:sub(2) end
@@ -11,13 +11,13 @@ end
 package.path = _script_dir() .. "../?.lua;" .. package.path
 
 
-local Logger = dofile("lua-mastery-roadmap/10-advanced/logging-system/01-logging-system.lua")
+local Logger = dofile(_script_dir() .. "../01-logging-system.lua")
 
 local pass = 0
 local fail = 0
 local total = 0
 
-function assert_eq(actual, expected, msg)
+local function assert_eq(actual, expected, msg)
   total = total + 1
   if actual == expected then
     pass = pass + 1
@@ -27,7 +27,7 @@ function assert_eq(actual, expected, msg)
   end
 end
 
-function assert_true(val, msg)
+local function assert_true(val, msg)
   total = total + 1
   if val then
     pass = pass + 1

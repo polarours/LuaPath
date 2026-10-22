@@ -1,27 +1,30 @@
-# Intermediate Stage (continued)
+# Stage 8: Template Engines
 
-**Stage Level**: 36-40
+**Stage**: 8 | **Time**: 8–12 hours
 **Lua Versions**: 5.1, 5.3, 5.4, LuaJIT
 
 ## Overview
 
-Intermediate pattern projects focusing on template systems and advanced text processing.
+Build a simple template engine with variable interpolation, conditionals, and loops. Understand string processing at depth.
 
-## Projects
+- Topics: string patterns, recursive processing, DSL design
+
+## Project
 
 | Project | Description | Skills |
 |---------|-------------|--------|
-| [Template Engine](template-engine/) | Simple text templating | string manipulation, patterns |
-| | | |
+| Template Engine | A simple template engine with variable interpolation, conditionals, and loops. | Template syntax parsing with Lua patterns; Variable interpolation with `{{variable}}`; Conditional blocks with `{%if%}...{%end%}` |
 
 ## Prerequisites
 
-- Completion of previous stages
-- Understanding of Lua string manipulation
+- Completion of the previous stage
+- The chapters listed above
 
 ## How to Run
 
 ```bash
-cd <project-name>/
-lua <project-name>.lua
+cd template-engine
+lua 01-template-engine.lua
 ```
+
+Change into the project directory, then run the command above.

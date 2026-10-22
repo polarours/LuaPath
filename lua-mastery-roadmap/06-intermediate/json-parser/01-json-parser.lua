@@ -55,6 +55,9 @@ end
 
 local function parse_tokens(tokens)
   local pos = 1
+  -- Forward declarations: parse_value() below calls both of them, so they
+  -- have to be locals that exist before it is defined.
+  local parse_object, parse_array
   local function peek() return tokens[pos] end
   local function advance() pos = pos + 1 end
   local function parse_value()

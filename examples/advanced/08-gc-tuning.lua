@@ -1,4 +1,4 @@
--- Example 8: Garbage Collection Tuning
+-- Example 40: Garbage Collection Tuning
 -- Chapter: 12-performance
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -9,13 +9,13 @@
 local M = {}
 
 function M.show_gc_modes()
-    print("=== GC Modes (5.5) ===")
+    print("=== GC Modes ===")
     print("stop/start:       control GC execution")
     print("collect:          run full GC cycle")
     print("count:            memory in KBytes")
     print("step:             run GC step, returns true if cycle finished")
-    print("incremental:      switch to incremental GC (5.5)")
-    print("generational:     switch to generational GC (5.5)")
+    print("incremental:      switch to incremental GC (5.2+)")
+    print("generational:     switch to generational GC (5.2+)")
     print("isrunning:        check if GC is running")
     print()
 end
@@ -26,24 +26,36 @@ function M.monitor_memory(label)
     return count_kb
 end
 
-function M.gc_tuning_demo()
-    print("=== GC Mode Switching (5.5) ===")
+-- The set of collectgarbage options grew across versions. Lua 5.1 supports
+-- only count/collect/step/setpause/setstepmul, and LuaJIT -- being a 5.1
+-- derivative -- supports exactly the same set. Probe instead of assuming, so
+-- this example reports what the *running* runtime can actually do.
+local function gc_mode_supported(mode)
+    return pcall(collectgarbage, mode)
+end
 
-    -- Lua 5.5 uses incremental and generational modes
+function M.gc_tuning_demo()
+    print("=== GC Mode Switching ===")
+
+    local has_incremental = gc_mode_supported("incremental")
+    local has_generational = gc_mode_supported("generational")
+
     -- Incremental: traditional step-based GC
-    collectgarbage("incremental")
-    local mem1 = collectgarbage("count")
-    print(string.format("Incremental mode: %.2f KB", mem1))
+    if has_incremental then
+        collectgarbage("incremental")
+        local mem1 = collectgarbage("count")
+        print(string.format("Incremental mode: %.2f KB", mem1))
+    else
+        print("Incremental mode not available on this runtime")
+    end
 
     -- Generational: short-lived objects collected more frequently
-    local ok, mem2 = pcall(function()
+    if has_generational then
         collectgarbage("generational")
-        return collectgarbage("count")
-    end)
-    if ok then
+        local mem2 = collectgarbage("count")
         print(string.format("Generational mode: %.2f KB", mem2))
     else
-        print("Generational mode not available")
+        print("Generational mode not available on this runtime")
     end
 
     -- Allocate to trigger collection in each mode
@@ -54,26 +66,22 @@ function M.gc_tuning_demo()
     end
 
     collectgarbage("collect")
-    collectgarbage("incremental")
+    if has_incremental then collectgarbage("incremental") end
     local before_inc = collectgarbage("count")
     allocate_burst(3000)
     local after_inc = collectgarbage("count")
+    print(string.format("Incremental burst: %.2f -> %.2f KB (delta %.2f KB)",
+        before_inc, after_inc, after_inc - before_inc))
 
-    collectgarbage("collect")
-    local ok2, before_gen = pcall(function()
+    if has_generational then
+        collectgarbage("collect")
         collectgarbage("generational")
-        return collectgarbage("count")
-    end)
-    if ok2 then
+        local before_gen = collectgarbage("count")
         allocate_burst(3000)
         local after_gen = collectgarbage("count")
-        print(string.format("Incremental burst: %.2f -> %.2f KB (delta %.2f KB)",
-            before_inc, after_inc, after_inc - before_inc))
         print(string.format("Generational burst: %.2f -> %.2f KB (delta %.2f KB)",
             before_gen, after_gen, after_gen - before_gen))
     else
-        print(string.format("Incremental burst: %.2f -> %.2f KB (delta %.2f KB)",
-            before_inc, after_inc, after_inc - before_inc))
         print("Generational mode comparison skipped")
     end
     print("Generational mode is optimized for short-lived objects.")

@@ -2,7 +2,7 @@
   Example: Test Framework
   Chapter: 14 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.3+
+  Lua Version: 5.1+
   Demonstrates: test runner, describe/it/expect, assertions, setup/teardown, nested suites
 ]]
 
@@ -117,7 +117,8 @@ function Expect:to_equal(expected)
     if type(self._value) == "table" then
         for k, v in pairs(expected) do
             if self._value[k] ~= v then
-                error(string.format("Table mismatch at key '%s': expected %s, got %s", k, tostring(v), tostring(self._value[k])))
+                error(string.format("Table mismatch at key '%s': expected %s, got %s",
+                    k, tostring(v), tostring(self._value[k])))
             end
         end
     elseif self._value ~= expected then
@@ -138,7 +139,7 @@ function Framework.summary()
 end
 
 -- Test suite
-function main()
+local function main()
     print("=== Test Framework Demo ===\n")
 
     Framework.describe("Math operations", function()

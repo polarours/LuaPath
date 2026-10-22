@@ -64,11 +64,17 @@ Returning a table creates a clean namespace:
 ```lua
 -- GOOD: Table-based module
 local M = {}
-function M.process() ... end
+function M.process()
+  -- ...
+end
 return M
 
 -- BAD: Global functions
-function process() ... end  -- Pollutes global namespace
+```
+```lua
+function process()
+  -- ...
+end  -- Pollutes global namespace
 ```
 
 ---
@@ -135,11 +141,15 @@ print("mymod loading...")
 local dep = require("dependency")
 
 -- 2. Define local helpers
-local function internal_helper() ... end
+local function internal_helper()
+  -- ...
+end
 
 -- 3. Define public API
 local M = {}
-function M.do_something() ... end
+function M.do_something()
+  -- ...
+end
 
 -- 4. Optional: run initialization
 M._initialized = true
@@ -226,14 +236,24 @@ return M
 ```lua
 -- GOOD: Few, well-defined functions
 local M = {}
-function M.process(config) ... end
-function M.validate(config) ... end
+function M.process(config)
+  -- ...
+end
+function M.validate(config)
+  -- ...
+end
 return M
 
 -- BAD: Expose everything
+```
+```lua
 local M = {}
-M.process = function() ... end
-M._internal_helper = function() ... end  -- Leaks implementation
+M.process = function()
+  -- ...
+end
+M._internal_helper = function()
+  -- ...
+end  -- Leaks implementation
 M._config = {}  -- Mutable internal state exposed
 return M
 ```
@@ -248,6 +268,8 @@ function M.mul(a, b) return a * b end
 return M
 
 -- Stateful service module (requires initialization)
+```
+```lua
 local M = {}
 local connection = nil
 
@@ -310,6 +332,8 @@ function a_func() return b.b_func() end
 return a
 
 -- b.lua
+```
+```lua
 local a = require("a")  -- a is partially loaded (may be nil or incomplete!)
 function b_func() return a.a_func() end
 return b
@@ -322,8 +346,12 @@ return b
 ```lua
 -- shared.lua
 local M = {}
-function M.a_func() ... end
-function M.b_func() ... end
+function M.a_func()
+  -- ...
+end
+function M.b_func()
+  -- ...
+end
 return M
 ```
 
@@ -344,14 +372,20 @@ return a
 ```lua
 -- common.lua (no dependencies)
 local M = {}
-function M.shared_func() ... end
+function M.shared_func()
+  -- ...
+end
 return M
 
 -- a.lua
+```
+```lua
 local common = require("common")
 return { a_func = common.shared_func }
 
 -- b.lua
+```
+```lua
 local common = require("common")
 return { b_func = common.shared_func }
 ```
@@ -429,14 +463,19 @@ package.loaded["my_module"] = nil
 
 ### 4. Returning Multiple Values from require
 
-`require` returns only the first value from the module:
+Only the first value of a module is cached, and on Lua 5.1 that is also
+the only value `require` gives back:
 
 ```lua
 -- mymod.lua
 return "value1", "value2"  -- Only "value1" is cached
 
+```
+```lua
 local v1, v2 = require("mymod")
--- v1 = "value1", v2 = nil!
+-- On Lua 5.1 and LuaJIT: v1 = "value1", v2 = nil
+-- On Lua 5.2 and later: v2 is the loader data -- the path the module was
+-- loaded from -- not a second value of the module
 ```
 
 ---
@@ -448,12 +487,18 @@ local v1, v2 = require("mymod")
 ```lua
 -- GOOD
 local M = {}
-M.process = function() ... end
+M.process = function()
+  -- ...
+end
 return M
 
 -- Also fine for simple modules
+```
+```lua
 return {
-  process = function() ... end,
+  process = function()
+    -- ...
+  end,
 }
 ```
 
@@ -525,7 +570,7 @@ module("mymod", package.seeall)  -- DON'T USE THIS
 ### Lua 5.2/5.3
 
 - `package.searchers` replaces `package.loaders`
-- `require` returns only first value
+- `require` returns the module and the loader data (the module's path)
 - `table.pack`/`table.unpack` available
 - `module()` removed
 

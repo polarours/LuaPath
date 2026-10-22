@@ -5,8 +5,7 @@
 local Balking = {}
 Balking.__index = Balking
 
-function Balking.new(opts)
-    opts = opts or {}
+function Balking.new()
     local self = setmetatable({}, Balking)
     self._ready = false
     self._initialized = false

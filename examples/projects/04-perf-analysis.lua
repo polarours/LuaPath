@@ -1,7 +1,8 @@
--- Project 4: Performance Analysis & Optimization
+-- Example 63: Performance Analysis & Optimization
+-- Project: 04-perf-analysis
 -- Chapter: 12-performance
 -- Difficulty: Advanced
--- Lua Version: 5.4+
+-- Lua Version: 5.1+
 --
 -- Demonstrates: benchmarking, string concat, table access, allocation reuse
 
@@ -34,7 +35,7 @@ print("1) String Concatenation (N = " .. N .. ")")
 
 local function concat_naive()
   local s = ""
-  for i = 1, 200 do s = s .. "x" end
+  for _ = 1, 200 do s = s .. "x" end
 end
 
 local parts = {}

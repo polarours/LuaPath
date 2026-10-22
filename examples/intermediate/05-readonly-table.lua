@@ -1,4 +1,4 @@
--- Example 5: Read-only Table Wrapper
+-- Example 17: Read-only Table Wrapper
 -- Chapter: 05-metatables
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+
@@ -11,12 +11,12 @@
 -- @return read-only proxy table
 local function readonly(t, recursive)
   recursive = recursive or false
-  
+
   local proxy = {}
   local mt = {
     __index = t,
-    __newindex = function(proxy, key, value)
-      error(string.format("Cannot modify read-only table: %s = %s", 
+    __newindex = function(_, key, value)
+      error(string.format("Cannot modify read-only table: %s = %s",
         tostring(key), tostring(value)), 2)
     end,
     __pairs = function()
@@ -29,7 +29,7 @@ local function readonly(t, recursive)
       return tostring(t) .. " (readonly)"
     end,
   }
-  
+
   if recursive then
     -- Wrap nested tables recursively
     local function wrap_nested(orig)
@@ -38,12 +38,12 @@ local function readonly(t, recursive)
       end
       return orig
     end
-    
-    mt.__index = function(proxy, key)
+
+    mt.__index = function(_, key)
       return wrap_nested(t[key])
     end
   end
-  
+
   setmetatable(proxy, mt)
   return proxy
 end
@@ -54,11 +54,11 @@ end
 -- @return protected table
 local function protected(t, writable_keys)
   writable_keys = writable_keys or {}
-  
+
   local proxy = {}
   local mt = {
     __index = t,
-    __newindex = function(proxy, key, value)
+    __newindex = function(_, key, value)
       if not writable_keys[key] then
         error(string.format("Key '%s' is not writable", key), 2)
       end
@@ -68,7 +68,7 @@ local function protected(t, writable_keys)
       return pairs(t)
     end,
   }
-  
+
   setmetatable(proxy, mt)
   return proxy
 end
@@ -91,7 +91,7 @@ local ro_data = readonly(data, true)
 
 print(string.format("Read access: %s = %s", "name", ro_data.name))
 print(string.format("Read access: %s = %s", "version", ro_data.version))
-print(string.format("Nested read: settings.debug = %s", ro_data.settings.debug))
+print(string.format("Nested read: settings.debug = %s", tostring(ro_data.settings.debug)))
 
 -- Test write protection
 print("\nTesting write protection:")
@@ -126,8 +126,13 @@ print(string.format("writable_field = %s", proto.writable_field))
 
 success, err = pcall(function()
   proto.writable_field = "new value"
-  print(string.format("✓ Writable field changed to: %s", proto.writable_field))
 end)
+
+if success then
+  print(string.format("✓ Writable field changed to: %s", proto.writable_field))
+else
+  print(string.format("✗ Writable field was unexpectedly blocked: %s", err))
+end
 
 success, err = pcall(function()
   proto.readonly_field = "attempt"  -- Should fail

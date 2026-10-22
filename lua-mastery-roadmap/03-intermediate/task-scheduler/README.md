@@ -22,7 +22,7 @@ A cooperative task scheduler built entirely on coroutines. This project demonstr
 ## How to Run
 
 ```bash
-lua task-scheduler.lua
+lua 03-task-scheduler.lua
 ```
 
 The script runs a set of example tasks with different priorities and durations.
@@ -46,8 +46,10 @@ The script runs a set of example tasks with different priorities and durations.
 ## Files
 
 ```
-task-scheduler/
-├── README.md            ← This file
-├── task-scheduler.lua   ← Main implementation
-└── examples.lua         ← Sample tasks and scheduling patterns
+03-intermediate/task-scheduler/
+├── README.md
+├── README.zh-CN.md
+├── 03-task-scheduler.lua      — Main implementation
+└── tests/
+    └── task_scheduler_test.lua  — Sample tasks and scheduling patterns
 ```

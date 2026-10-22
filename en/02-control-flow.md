@@ -228,12 +228,15 @@ end
 
 Multiple return values:
 
+> **Lua 5.3 note**: The `//` integer-division operator arrived in Lua 5.3. On Lua 5.1 use `math.floor(a / b)`, as shown below.
+
 ```lua
+-- `//` is 5.3+ syntax; math.floor(a / b) is the 5.1 equivalent.
 local function divmod(a, b)
   if b == 0 then
     return nil, "division by zero"  -- Error convention
   end
-  return a // b, a % b  -- Multiple values
+  return math.floor(a / b), a % b  -- Multiple values
 end
 
 local quotient, remainder = divmod(10, 3)
@@ -578,15 +581,19 @@ end
 
 ```lua
 -- Lua 5.2+
+-- The position has to be carried out of the loops: the for variables are
+-- out of scope by the time the label is reached.
+local found_i, found_j
 for i = 1, n do
   for j = 1, m do
     if matrix[i][j] == target then
+      found_i, found_j = i, j
       goto found
     end
   end
 end
 ::found::
-print("Found at " .. i .. "," .. j)
+print("Found at " .. found_i .. "," .. found_j)
 ```
 
 ### LuaJIT
@@ -714,7 +721,9 @@ local function retry(fn, max_attempts, delay)
       local wait_time = delay * (2 ^ (attempt - 1))  -- Exponential backoff
       print("Attempt " .. attempt .. " failed: " .. last_err)
       print("Retrying in " .. wait_time .. "s...")
-      os.sleep(wait_time)  -- Requires LuaSocket or similar
+      -- Lua has no sleep of its own: socket.sleep() from LuaSocket, or
+      -- os.execute("sleep N") on POSIX. The latter spawns a process.
+      os.execute(string.format("sleep %d", wait_time))
     end
   end
   

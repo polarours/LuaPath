@@ -2,7 +2,7 @@
   Example: Deployment Patterns
   Chapter: Stage 28 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Sandboxing, resource limits, hot-reload, version compatibility
 ]]
 
@@ -10,6 +10,22 @@
 -- 1. SANDBOXING
 ------------------------------------------------------------
 local Sandbox = {}
+
+-- load() accepts a string chunk only from Lua 5.2 on; 5.1 offers
+-- loadstring() instead, and the custom-environment form (5.2+) maps onto
+-- setfenv() there.
+local function loadChunk(src, chunkname, env)
+    if loadstring then
+        local chunk, err = loadstring(src, chunkname)
+        if not chunk then return nil, err end
+        if env then setfenv(chunk, env) end
+        return chunk
+    end
+    if env then
+        return load(src, chunkname, "t", env)
+    end
+    return load(src, chunkname)
+end
 
 function Sandbox.create(permissions)
     local env = {
@@ -45,18 +61,14 @@ function Sandbox.execute(code, permissions)
     setmetatable(env, { __index = function(_, k)
         error("Access denied: " .. k, 2)
     end})
-    local fn, err = load(code, "sandbox", "t", env)
+    local fn, err = loadChunk(code, "sandbox", env)
     if not fn then return nil, err end
     return pcall(fn)
 end
 
 local function demo_sandboxing()
     print("=== Sandboxing ===")
-    local safeEnv = Sandbox.create({
-        print = true, math = true, string = true, table = true,
-    })
-
-    local ok1, err1 = Sandbox.execute(
+    local ok1 = Sandbox.execute(
         'print("Hello from sandbox!")',
         { print = true, math = true }
     )
@@ -138,7 +150,7 @@ end
 function HotReloader:register(name, code)
     local version = (self.versions[name] or 0) + 1
     self.versions[name] = version
-    local fn, err = load(code, name, "t")
+    local fn, err = loadChunk(code, name)
     if not fn then return nil, err end
     local module = fn()
     self.modules[name] = { fn = module, version = version, code = code }
@@ -202,13 +214,21 @@ function VersionCompat.feature(name)
             return utf8 ~= nil
         end,
         generational_gc = function()
-            return collectgarbage("isrunning") ~= nil
+            -- "generational" is the mode that arrived in 5.4. Probing
+            -- "isrunning" instead would report true for any 5.2+ runtime --
+            -- including LuaJIT, which has no generational mode at all.
+            return pcall(collectgarbage, "generational")
         end,
         bitwise_ops = function()
-            return load("return 1 & 2") ~= nil
+            -- `&` is 5.3+ syntax, so the probe compiles at runtime and
+            -- simply fails to compile on older runtimes.
+            return loadChunk("return 1 & 2") ~= nil
         end,
         warnings = function()
-            return load("local w = function() end") ~= nil
+            -- warn() is a 5.4 addition. The previous probe compiled a string
+            -- that was never valid syntax ("function() end" without its
+            -- opening paren), so it reported "false" on every runtime.
+            return type(warn) == "function"
         end,
     }
     local check = features[name]
@@ -224,7 +244,7 @@ local function demo_version_compat()
     print(string.format("  Requires 5.4: %s",
         tostring(VersionCompat.check("5.4"))))
 
-    for _, feat in ipairs({ "utf8", "generational_gc", "bitwise_ops" }) do
+    for _, feat in ipairs({ "utf8", "generational_gc", "bitwise_ops", "warnings" }) do
         print(string.format("  Feature '%s': %s", feat,
             tostring(VersionCompat.feature(feat))))
     end

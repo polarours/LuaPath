@@ -1,4 +1,4 @@
--- Example 9: Coroutine Patterns
+-- Example 21: Coroutine Patterns
 -- Chapter: 08-coroutines
 -- Difficulty: Intermediate
 -- Lua Version: 5.1+

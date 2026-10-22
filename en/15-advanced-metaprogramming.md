@@ -28,7 +28,13 @@ After this chapter, you will be able to:
 ```lua
 -- Compile and execute dynamically
 local code = 'return 1 + 2'
-local fn, err = load(code)
+-- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+local fn, err
+if loadstring then
+  fn, err = loadstring(code)
+else
+  fn, err = load(code)
+end
 if fn then
   local result = fn()
   print(result)  -- 3
@@ -37,6 +43,8 @@ else
 end
 ```
 
+> **Lua 5.2 note**: load() compiles a string only from Lua 5.2 on. On Lua 5.1 use loadstring().
+
 ### Environment Control
 
 `load` can set the environment for the loaded code:
@@ -44,13 +52,30 @@ end
 ```lua
 -- Restricted environment
 local restricted = {print = print, math = math}
-local fn = load("return math.sqrt(16)", "chunk", "t", restricted)
+-- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+-- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+-- followed by setfenv() on the compiled chunk.
+local fn
+if loadstring then
+  fn = loadstring("return math.sqrt(16)", "chunk")
+  if fn then setfenv(fn, restricted) end
+else
+  fn = load("return math.sqrt(16)", "chunk", "t", restricted)
+end
 print(fn())  -- 4.0
 
 -- Code cannot access globals outside the environment
-local fn2 = load("return os.execute('rm -rf /')", "chunk", "t", restricted)
+local fn2
+if loadstring then
+  fn2 = loadstring("return os.execute('rm -rf /')", "chunk")
+  if fn2 then setfenv(fn2, restricted) end
+else
+  fn2 = load("return os.execute('rm -rf /')", "chunk", "t", restricted)
+end
 -- fn2 would fail if called (os is not in restricted)
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### `loadstring` (Lua 5.1)
 
@@ -77,9 +102,13 @@ Generate Lua code from templates:
 local function generate_function(name, params, body)
   local param_str = table.concat(params, ", ")
   local code = string.format(
-    "local function %s(%s)\n%s\nend",
-    name, param_str, body
+    "local function %s(%s)\n%s\nend\nreturn %s",
+    name, param_str, body, name
   )
+  -- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+  if loadstring then
+    return loadstring(code)()
+  end
   return load(code)()
 end
 
@@ -106,6 +135,10 @@ local function generate_accessors(fields)
     )
   end
   code = code .. "return M"
+  -- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+  if loadstring then
+    return loadstring(code)()
+  end
   return load(code)()
 end
 
@@ -268,10 +301,9 @@ local function builder()
   })
 end
 
-local config = builder()
-config("host", "localhost")
-  ("port", 8080)
-  ("debug", true)
+-- The chain is written on one line on purpose: splitting it across lines
+-- makes `f()\n(g)()` ambiguous, and Lua 5.1 rejects that.
+local config = builder()("host", "localhost")("port", 8080)("debug", true)
 
 print(config.host, config.port, config.debug)
 ```
@@ -313,22 +345,51 @@ print(v1 * 3)   -- Vector(3, 6)
 ```lua
 -- DANGEROUS: Never load untrusted code
 local user_input = io.read()
-local fn = load(user_input)  -- Could execute anything!
+-- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+local fn
+if loadstring then
+  fn = loadstring(user_input)  -- Could execute anything!
+else
+  fn = load(user_input)  -- Could execute anything!
+end
+fn()
 
 -- SAFE: Use restricted environment
 local safe_env = {print = print, math = math}
-local fn = load(user_code, "user", "t", safe_env)
+-- The 4-argument load(chunk, chunkname, mode, env) only arrived in 5.2; on
+-- 5.1 (and on LuaJIT, a 5.1 derivative) the equivalent is loadstring()
+-- followed by setfenv() on the compiled chunk.
+local fn
+if loadstring then
+  fn = loadstring(user_input, "user")
+  if fn then setfenv(fn, safe_env) end
+else
+  fn = load(user_input, "user", "t", safe_env)
+end
 ```
+
+> **Lua 5.2 note**: The 4-argument load() arrived in Lua 5.2. On Lua 5.1 use loadstring() followed by setfenv().
 
 ### 2. Debug Information Loss
 
 ```lua
 -- Code generated at runtime lacks debug info
-local fn = load("return 1/0")  -- No line numbers in errors
+-- load(string) only arrived in 5.2; on 5.1, loadstring() compiles a string.
+local fn
+if loadstring then
+  fn = loadstring("return 1/0")
+else
+  fn = load("return 1/0")
+end
 fn()  -- Error message lacks context
 
 -- Better: include debug info
-local fn = load("return 1/0", "=generated", "t")
+local fn
+if loadstring then
+  fn = loadstring("return 1/0", "=generated")
+else
+  fn = load("return 1/0", "=generated", "t")
+end
 ```
 
 ### 3. Performance Overhead

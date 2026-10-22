@@ -1,4 +1,4 @@
--- Example 29: Control Flow Patterns and Iteration Pitfalls
+-- Example 12: Control Flow Patterns and Iteration Pitfalls
 -- Chapter: 02-control-flow
 -- Difficulty: Beginner
 -- Lua Version: 5.1+
@@ -137,9 +137,9 @@ check("pairs returned every key exactly once", #seen == 5)
 section("4. Custom iterators")
 
 -- Form 1: a stateless iterator -- the loop state carries everything.
-local function range(n)
+local function range(bound)
   return function(_, last)
-    if last < n then return last + 1 end
+    if last < bound then return last + 1 end
   end, nil, 0
 end
 local got = {}

@@ -362,20 +362,51 @@ set(42)
 print(get())    -- 42
 ```
 
-### 循环中的闭包 — 经典 Bug
+### 循环中的闭包 — 捕获变量而非值
 
-捕获循环变量捕获的是**变量本身**，而非捕获时的值：
+`for` 循环会让**每次迭代都拥有自己的控制变量副本**，因此每个闭包看到的是各自的值：
 
 ```lua
--- BUG：所有函数共享同一个 `i`
+-- 每次迭代都有独立的 `i` —— 这不是 bug
 local functions = {}
 for i = 1, 5 do
   functions[i] = function() return i end
 end
-print(functions[1]())  -- 5（不是 1！）
-print(functions[3]())  -- 5（不是 3！）
+print(functions[1]())  -- 1
+print(functions[3]())  -- 3
+```
 
--- 修复 1：每次迭代创建新变量
+闭包捕获的是**变量**，而非捕获时的值。真正的陷阱是捕获一个声明在循环**之外**、却在循环内部被重新赋值的变量：
+
+```lua
+-- BUG：三个闭包共享同一个外层 `i`
+local i = 0
+local functions = {}
+for k = 1, 3 do
+  i = k
+  functions[k] = function() return i end
+end
+print(functions[1]())  -- 3（不是 1！）
+print(functions[3]())  -- 3
+```
+
+手写计数器同样会出问题：
+
+```lua
+-- BUG：三个闭包共享同一个外层 `i`
+local i = 1
+local functions = {}
+while i <= 3 do
+  functions[#functions + 1] = function() return i end
+  i = i + 1
+end
+print(functions[1]())  -- 4（不是 1！）
+```
+
+若要捕获当前的值，请把它绑定到一个全新的局部变量：
+
+```lua
+-- 双保险：每次迭代使用一个全新的局部变量
 local functions = {}
 for i = 1, 5 do
   local j = i  -- 每次迭代的新上值
@@ -383,13 +414,15 @@ for i = 1, 5 do
 end
 print(functions[1]())  -- 1
 
--- 修复 2：使用工厂函数
+-- 或者使用工厂函数
 local functions = {}
 for i = 1, 5 do
   functions[i] = (function(n) return function() return n end end)(i)
 end
 print(functions[1]())  -- 1
 ```
+
+> **版本说明**：共享同一个循环变量是 Lua **5.0** 的行为。Lua 5.1 改变了 `for` 语句隐式变量的作用域，因此每次迭代都会得到自己的副本 —— 5.1 与 5.3/5.4 之间并不存在差异。
 
 ### 上值生命周期
 
@@ -556,7 +589,7 @@ obj.triple()    -- ERROR：self 为 nil
 
 ### 2. 捕获循环变量
 
-参见[循环中的闭包](#循环中的闭包--经典-bug)。修复：每次迭代创建局部副本。
+参见[循环中的闭包](#循环中的闭包--捕获变量而非值)。闭包捕获的是变量，而非值 —— 若需要该值，请把它绑定到一个全新的局部变量。
 
 ### 3. 从热路径返回临时 table
 
@@ -608,10 +641,18 @@ function process_order(order, user, payment, inventory, shipping)
 end
 
 -- 好：单一职责
-function validate_order(order) ... end
-function charge_payment(payment) ... end
-function update_inventory(inventory) ... end
-function schedule_shipment(shipping) ... end
+function validate_order(order)
+  -- ...
+ end
+function charge_payment(payment)
+  -- ...
+ end
+function update_inventory(inventory)
+  -- ...
+ end
+function schedule_shipment(shipping)
+  -- ...
+ end
 function process_order(order)
   validate_order(order)
   charge_payment(order.payment)
@@ -752,9 +793,9 @@ print(f())  -- 42
 </details>
 
 <details>
-<summary>3. 为什么 <code>for i = 1, 5 do fns[i] = function() return i end end</code> 返回全是 5？</summary>
+<summary>3. <code>for i = 1, 5 do fns[i] = function() return i end end</code> 会让所有闭包都返回 5 吗？</summary>
 
-所有闭包捕获的是同一个变量 `i`，而非捕获时的值。循环结束时 `i` 为 5，所以所有闭包返回 5。修复：在循环体内创建局部副本（`local j = i`）。
+不会。自 Lua 5.1 起，`for` 语句为每次迭代提供控制变量的独立副本，因此 `fns[1]()` 返回 1，`fns[5]()` 返回 5。（共享同一个变量是 Lua 5.0 的行为。）闭包捕获的确是**变量**而非其值 —— 真正的陷阱是声明在循环*之外*、却在循环内部被重新赋值的变量：所有这样的闭包最终都会看到它的最终值。修复：在循环体内创建局部副本（`local j = i`）。
 </details>
 
 <details>
@@ -777,7 +818,7 @@ print(f())  -- 42
 - **多返回值**：只有最后一个表达式展开；用 `_` 丢弃
 - **可变参数**：`...` 捕获额外参数；`{...}` 分配 table — 热路径中避免
 - **方法语法**：`:` 隐式传递 `self`；`.` 需要显式传递
-- **闭包**：按引用捕获变量，而非值；经典循环 bug 共享一个变量
+- **闭包**：按引用捕获变量，而非值；跨迭代共享的变量会被每个闭包看到
 - **尾调用**：`return f(...)` 复用栈；支持蹦床模式
 - **守卫子句**：扁平化嵌套；失败时提前返回
 

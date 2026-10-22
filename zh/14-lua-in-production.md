@@ -1,7 +1,7 @@
 # 14 — Lua 在生产环境中的应用
 
 > **阶段**: E（性能与生产环境设计）  
-> **前置知识**: 第13章 — 模式匹配  
+> **前置知识**: 第 13 章 — 设计模式  
 > **预计时间**: 2–3小时阅读 + 2–4小时练习  
 > **Lua 版本**: 5.1、5.3、5.4、LuaJIT（差异已标注）
 
@@ -78,7 +78,8 @@ local API = {
 local M = {}
 M.get_player = function() return player end
 return M
-
+```
+```lua
 -- api_v2.lua（增量变更）
 local v1 = require("api_v1")
 local M = setmetatable({}, {__index = v1})
@@ -96,9 +97,24 @@ local function create_sandbox()
     string = string,
     math = math,
     table = table,
+    type = type,
+    tostring = tostring,
+    tonumber = tonumber,
+    pairs = pairs,
+    ipairs = ipairs,
+    error = error,
+    assert = assert,
+    pcall = pcall,
+    xpcall = xpcall,
+    select = select,
+    unpack = unpack or table.unpack,
     -- 不包含 io、os、debug、package
   }
-  return setmetatable(env, {__index = _G})
+  -- 这里故意不使用 __index = _G 回退。上面的白名单已经完整：一旦回退到
+  -- 真实的全局环境，沙箱就会被破坏——查找 `os` 时 env 中没有命中，
+  -- 接着就会通过 __index 解析到 _G.os，于是上面刻意排除的名字
+  -- 又能访问到了。
+  return env
 end
 ```
 
@@ -154,7 +170,16 @@ end
 
 ```lua
 local function run_untrusted(code, sandbox_env, limits)
-  local chunk, err = load(code, "untrusted", "t", sandbox_env)
+  -- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+  -- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+  -- loadstring() 配合 setfenv()。
+  local chunk, err
+  if loadstring then
+    chunk, err = loadstring(code, "untrusted")
+    if chunk then setfenv(chunk, sandbox_env) end
+  else
+    chunk, err = load(code, "untrusted", "t", sandbox_env)
+  end
   if not chunk then
     return nil, "parse error: " .. err
   end
@@ -179,6 +204,8 @@ local function run_untrusted(code, sandbox_env, limits)
   return result
 end
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ---
 
@@ -255,7 +282,7 @@ end
 
 ## 版本升级策略
 
-### 兼容性测试语料库
+### 兼容性测试语料库（5.3+）
 
 ```lua
 -- tests/compat/5_1.lua
@@ -275,7 +302,7 @@ function tests.test_integers()
 end
 ```
 
-### 特性门控
+### 特性门控（5.3+）
 
 ```lua
 -- 门控版本特定特性
@@ -480,14 +507,32 @@ end)
 
 ```lua
 -- 危险：完全访问权限
-local chunk = load(user_code)
+local user_code = "print('hello from untrusted code')"
+-- 字符串版本的 load(string) 从 5.2 起才有；在 5.1 上请用 loadstring() 编译字符串。
+local chunk
+if loadstring then
+  chunk = loadstring(user_code)
+else
+  chunk = load(user_code)
+end
 chunk()  -- 可以做任何事！
 
 -- 安全：沙箱化
 local env = create_sandbox()
-local chunk = load(user_code, "user", "t", env)
+-- 四参数的 load(chunk, chunkname, mode, env) 从 5.2 起才有；在
+-- 5.1（以及作为 5.1 衍生物的 LuaJIT）上，等价写法是
+-- loadstring() 配合 setfenv()。
+local chunk
+if loadstring then
+  chunk = loadstring(user_code, "user")
+  if chunk then setfenv(chunk, env) end
+else
+  chunk = load(user_code, "user", "t", env)
+end
 chunk()
 ```
+
+> **Lua 5.2 说明**：四参数的 load() 是 Lua 5.2 引入的；在 Lua 5.1 上请用 loadstring() 配合 setfenv()。
 
 ### 2. 忽略错误上下文
 
@@ -529,7 +574,7 @@ local r = make_resource()
 r:close()  -- 确定性清理
 ```
 
-### 5. 硬编码 Lua 版本假设
+### 5. 硬编码 Lua 版本假设（5.3+）
 
 ```lua
 -- 不好的做法：假设 5.3+ 特性

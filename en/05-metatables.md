@@ -818,7 +818,7 @@ It returns the value of `__metatable` instead of the actual metatable. This hide
 
 2. **String Metatable**: Create a `String` wrapper with `__add` for concatenation, `__len` for length, and `__tostring` for display.
 
-3. **Clamp Function**: Overload `math.clamp` to work with both numbers and a custom `Clamped` type using metamethods.
+3. **Clamp Function**: Write a `clamp(x, lo, hi)` that works for both numbers and a custom `Clamped` type, using metamethods to give the custom type the comparison operators.
 
 ### Intermediate (1–2 hours)
 

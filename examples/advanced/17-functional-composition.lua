@@ -1,9 +1,12 @@
--- Example 17: Functional Composition
+-- Example 49: Functional Composition
 -- Chapter: 03-functions
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
 
 -- Demonstrates: function composition, currying, higher-order functions
+
+-- table.unpack arrived in Lua 5.2; on 5.1 the global unpack() does the job.
+local unpack_values = table.unpack or unpack
 
 local function main()
   print("=== Functional Composition ===\n")
@@ -27,9 +30,9 @@ local function main()
     return function(...)
       local result = {...}
       for i = #funcs, 1, -1 do
-        result = {funcs[i](table.unpack(result))}
+        result = {funcs[i](unpack_values(result))}
       end
-      return table.unpack(result)
+      return unpack_values(result)
     end
   end
 

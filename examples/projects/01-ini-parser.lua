@@ -1,4 +1,4 @@
--- Example 01: INI Parser
+-- Example 60: INI Parser
 -- Project: 01-ini-parser
 -- Chapter: 09-standard-library
 -- Difficulty: Beginner

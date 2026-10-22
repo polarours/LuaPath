@@ -28,6 +28,7 @@ assert_eq(c:get(), 10, "Counter initial value")
 
 -- __call = inc, so c() increments
 local ok, res = pcall(function() return c(5) end)
+assert(ok, "c(5) should not raise: " .. tostring(res))
 assert_eq(res, 15, "Counter after inc(5)")
 
 -- :inc() also works explicitly
@@ -40,7 +41,7 @@ assert(s:match("Counter%(%d+%)"), "Counter __tostring format")
 
 -- type error for non-numeric init
 local ok2, err2 = pcall(host.Counter, "not a number")
-assert(not ok2, "Counter should reject non-numeric init")
+assert(not ok2, "Counter should reject non-numeric init: " .. tostring(err2))
 
 host.log("INFO", "Counter API: all assertions passed")
 

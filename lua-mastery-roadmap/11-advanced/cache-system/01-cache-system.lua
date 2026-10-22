@@ -2,7 +2,7 @@
   Example: Cache System
   Chapter: 11 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.3+
+  Lua Version: 5.1+
   Demonstrates: LRU eviction, TTL expiration, metatables, doubly linked list, eviction callbacks
 ]]
 
@@ -109,7 +109,7 @@ function LRUCache:stats()
 end
 
 -- Main demo
-function main()
+local function main()
     print("=== LRU Cache System ===\n")
 
     local evicted = {}

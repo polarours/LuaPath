@@ -115,7 +115,7 @@ local function main()
 
     -- Attempt 1-3: failures accumulate
     for i = 1, 3 do
-        local ok, val = pcall(function()
+        local _, val = pcall(function()
             return cb:execute(unreliable_service)
         end)
         print(string.format("Attempt %d: state=%s result=%s",

@@ -1,4 +1,4 @@
--- Example 14: Coroutine Channels
+-- Example 46: Coroutine Channels
 -- Chapter: 08-coroutines
 -- Difficulty: Advanced
 -- Lua Version: 5.1+
@@ -7,35 +7,48 @@
 
 --- Basic unbuffered channel: send blocks until receiver is ready
 local function demo_unbuffered_channel()
-  print("=== Unbuffered Channel ===")
+  print("\n=== Unbuffered Channel ===")
 
+  -- A rendezvous channel: exactly one value is in flight at a time, and the
+  -- sender stays blocked until a receiver takes it.
+  --
+  -- The value cannot travel through the yield itself -- resuming a blocked
+  -- sender with a value would hand *that* value back to it, not to the
+  -- receiver -- so it is parked in `pending` until a receiver collects it.
   local function channel()
     local sender, receiver = nil, nil
+    local pending = nil
 
     local ch = {
       send = function(self, value)
-        sender = coroutine.running()
-        -- Wake up receiver if waiting
         if receiver then
+          -- A receiver is already waiting: hand the value over directly.
           local co = receiver
           receiver = nil
           coroutine.resume(co, value)
         else
-          coroutine.yield(value) -- Block until receiver
+          -- No receiver: park the value and block.
+          sender = coroutine.running()
+          pending = value
+          coroutine.yield()
         end
       end,
       receive = function(self)
-        receiver = coroutine.running()
-        -- Wake up sender if waiting
         if sender then
+          -- A sender is blocked with a value in hand: take it and release
+          -- the sender.
           local co = sender
           sender = nil
-          local val = select(2, coroutine.resume(co))
-          return val
+          local value = pending
+          pending = nil
+          coroutine.resume(co)
+          return value
         else
-          return coroutine.yield() -- Block until sender
+          -- No sender: block until one arrives.
+          receiver = coroutine.running()
+          return coroutine.yield()
         end
-      end
+      end,
     }
 
     return setmetatable(ch, {__index = ch})
@@ -50,11 +63,18 @@ local function demo_unbuffered_channel()
     ch:send("done")
   end)
 
-  -- Drive the channel manually
-  coroutine.resume(producer) -- Producer sends 1, blocks
-  local val
-  val = ch:receive() -- Actually gets the yielded value
-  -- For a clean demo, let's simplify with direct yield/resume
+  local consumer = coroutine.create(function()
+    for _ = 1, 4 do
+      local val = ch:receive()
+      print("  Consumer: received " .. tostring(val))
+    end
+  end)
+
+  -- Drive both sides by hand: each resume moves one value across.
+  coroutine.resume(consumer)  -- consumer waits first
+  for _ = 1, 4 do
+    coroutine.resume(producer) -- producer sends one value
+  end
 end
 
 --- Buffered channel: sender never blocks until buffer is full
@@ -340,10 +360,11 @@ local function demo_select()
   print("  ch2 empty, result: " .. tostring(idx) .. " / " .. tostring(val))
 end
 
-function main()
+local function main()
   print("Coroutine Channels Examples")
   print("==========================")
 
+  demo_unbuffered_channel()
   demo_buffered_channel()
   demo_fan_out()
   demo_fan_in()

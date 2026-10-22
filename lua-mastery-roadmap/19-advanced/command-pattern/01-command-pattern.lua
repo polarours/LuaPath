@@ -2,7 +2,7 @@
   Example: Command Pattern
   Chapter: Stage 19 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: Command encapsulation, undo/redo stack, macro recording and playback
 ]]
 
@@ -134,7 +134,7 @@ local function main()
     executor:execute(InsertCommand:new(buffer, "alpha", #buffer + 1))
     executor:execute(InsertCommand:new(buffer, "beta", #buffer + 1))
     executor:execute(InsertCommand:new(buffer, "gamma", #buffer + 1))
-    local macro = executor:stopMacro()
+    executor:stopMacro()
     print("  Buffer:", table.concat(buffer, ", "))
     print("\n--- History ---")
     executor:history()

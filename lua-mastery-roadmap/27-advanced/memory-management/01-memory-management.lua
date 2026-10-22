@@ -2,7 +2,7 @@
   Example: Memory Management
   Chapter: Stage 27 — Advanced
   Difficulty: Advanced
-  Lua Version: 5.4
+  Lua Version: 5.1+
   Demonstrates: GC tuning, weak tables, finalizers, memory profiling, allocation tracking
 ]]
 
@@ -100,15 +100,28 @@ end
 ------------------------------------------------------------
 -- 4. MEMORY PROFILING
 ------------------------------------------------------------
+-- collectgarbage("count", "count") returns a second counter (the live object
+-- count) only from Lua 5.5 on; earlier versions reject the extra argument,
+-- so fall back to the single-counter form.
+local function memoryCounters()
+    local ok, bytes, objects = pcall(collectgarbage, "count", "count")
+    if ok then
+        return bytes, objects
+    end
+    return collectgarbage("count"), nil
+end
+
 local function profileAllocations(label, fn)
     collectgarbage("collect")
-    local before = collectgarbage("count")
-    local beforeObjects = collectgarbage("count", "count")
+    local before, beforeObjects = memoryCounters()
     fn()
-    local after = collectgarbage("count")
-    local afterObjects = collectgarbage("count", "count")
+    local after, afterObjects = memoryCounters()
     print(string.format("  [%s] Memory: %.1f -> %.1f KB (%+.1f KB)",
         label, before, after, after - before))
+    if beforeObjects then
+        print(string.format("        Objects: %d -> %d (%+d)",
+            beforeObjects, afterObjects, afterObjects - beforeObjects))
+    end
 end
 
 local function demo_memory_profiling()
@@ -122,7 +135,7 @@ local function demo_memory_profiling()
 
     profileAllocations("string concat", function()
         local s = ""
-        for i = 1, 1000 do
+        for _ = 1, 1000 do
             s = s .. "x"
         end
     end)
