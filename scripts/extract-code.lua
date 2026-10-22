@@ -86,8 +86,11 @@ local function extract_code_blocks(content, output_path, source_file)
       if current_block and current_block.lang == "lua" then
         local code = table.concat(current_block.lines, "\n")
 
-        -- Skip empty blocks or obvious fragments
-        if #code > 0 and not code:match("<FILL>") and not code:match("%.%.%.") then
+        -- Skip empty blocks and the templates that are meant to be filled
+        -- in. A block that used `...` as a placeholder for a function body
+        -- was skipped as well, and those were exactly the ones that did not
+        -- compile; the placeholder is a comment now, so they extract.
+        if #code > 0 and not code:match("<FILL>") then
           local filename = string.format("%s_block_%03d.lua",
             source_file:gsub("[/\\]", "_"),
             current_block.block_num)

@@ -10,8 +10,11 @@ if not has_lfs then
 end
 
 local config = {
+  -- A block is only skipped when it is a template that is meant to be
+  -- filled in. The `...` placeholder used to be skipped as well, which
+  -- also skipped the blocks that used it as a placeholder for a function
+  -- body -- and those were exactly the ones that did not compile.
   skip_patterns = {
-    ".*%.%.%.",
     "<FILL>",
     "<TODO>",
   },

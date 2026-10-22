@@ -218,7 +218,7 @@ ci-matrix: ci test-lua51 test-luajit
 # Clean generated files
 clean:
 	@echo "==> Cleaning..."
-	@rm -rf $(EXAMPLES_DIR)/extracted
+	@rm -rf $(EXAMPLES_DIR)/extracted en/extracted zh/extracted
 	@rm -f luac.out
 	@rm -f *.out
 	@find . -name "*.luac" -delete
