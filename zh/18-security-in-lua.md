@@ -109,23 +109,24 @@ end
 ### 整数溢出
 
 ```lua
--- 危险：假设整数边界
+-- 危险：完全没有上限
+-- 在 Lua 5.3 及之后，这次乘法是整数运算，到 2^63 时会静默回绕；
+-- 在 Lua 5.1 上则是 double，会静默丢失精度。两种情况下哈希都是垃脆的。
 local function calculate_hash(data)
   local hash = 0
   for i = 1, #data do
-    hash = (hash * 31 + data:byte(i)) % 2^32
+    hash = hash * 31 + data:byte(i)
   end
   return hash
 end
 
--- 安全：使用显式边界检查
+-- 安全：把值限在已知的范围内
+-- 除数 2^32 是浮点数，因此取模的结果也是浮点数，
+-- 乘法不会再碰到 int64 的上限。
 local function safe_hash(data)
   local hash = 0
   for i = 1, #data do
-    hash = (hash * 31 + data:byte(i))
-    if hash > 2^52 then
-      hash = hash % 2^52  -- 防止精度损失
-    end
+    hash = (hash * 31 + data:byte(i)) % 2^32
   end
   return hash
 end

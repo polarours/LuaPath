@@ -109,23 +109,25 @@ end
 ### Integer Overflow
 
 ```lua
--- DANGEROUS: Assuming integer bounds
+-- DANGEROUS: no bound at all
+-- On Lua 5.3 and later the multiplication is integer arithmetic and wraps
+-- silently at 2^63; on Lua 5.1 it is a double and quietly loses precision.
+-- Either way the hash is garbage by the end of the input.
 local function calculate_hash(data)
   local hash = 0
   for i = 1, #data do
-    hash = (hash * 31 + data:byte(i)) % 2^32
+    hash = hash * 31 + data:byte(i)
   end
   return hash
 end
 
--- SAFE: Use explicit bounds checking
+-- SAFE: keep the value inside a known range
+-- The divisor 2^32 is a float, so the modulo turns the result into a float
+-- as well and the multiplication can never reach the int64 limit.
 local function safe_hash(data)
   local hash = 0
   for i = 1, #data do
-    hash = (hash * 31 + data:byte(i))
-    if hash > 2^52 then
-      hash = hash % 2^52  -- Prevent precision loss
-    end
+    hash = (hash * 31 + data:byte(i)) % 2^32
   end
   return hash
 end
