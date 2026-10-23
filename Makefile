@@ -19,6 +19,13 @@ ROADMAP_DIR := lua-mastery-roadmap
 LINT_PATHS := $(EXAMPLES_DIR) $(SCRIPTS_DIR) tests $(ROADMAP_DIR)
 # Directories whose markdown is scanned for links and anchors.
 LINK_DIRS := en zh $(ROADMAP_DIR) pitfalls/en pitfalls/中文版 references
+# Directories whose markdown code blocks are compiled by `make validate`.
+#
+# These are the documents a reader actually copies code out of. Validating
+# only en/ and zh/ left the reference sheets, the pitfall articles and the
+# stage READMEs unchecked -- which is how a `goto` sample that no
+# interpreter could parse stayed in references/VERSION_DIFFERENCES.md.
+SNIPPET_DIRS := references pitfalls $(ROADMAP_DIR)
 
 # Default target
 help:
@@ -59,7 +66,7 @@ help:
 # Validate all Lua code snippets in markdown files
 validate:
 	@echo "==> Validating code snippets..."
-	@$(LUA) $(SCRIPTS_DIR)/validate.lua --all
+	@$(LUA) $(SCRIPTS_DIR)/validate.lua --all $(SNIPPET_DIRS)
 	@echo "==> Validation complete"
 
 # Validate the snippets against the oldest supported baseline. A snippet that
@@ -67,7 +74,7 @@ validate:
 # labelled blocks and fails on the ones that quietly need more than 5.1.
 validate-51:
 	@echo "==> Validating code snippets against Lua 5.1..."
-	@$(LUA51) $(SCRIPTS_DIR)/validate.lua --all
+	@$(LUA51) $(SCRIPTS_DIR)/validate.lua --all $(SNIPPET_DIRS)
 	@echo "==> 5.1 validation complete"
 
 # Run linting on Lua code
@@ -228,7 +235,7 @@ clean:
 watch:
 	@echo "==> Watching for changes..."
 	@if command -v entr >/dev/null 2>&1; then \
-		find en/ zh/ -name "*.md" | entr -r make validate; \
+		find en/ zh/ $(SNIPPET_DIRS)/ -name "*.md" | entr -r make validate; \
 	else \
 		echo "  Install entr: sudo pacman -S entr (Arch)"; \
 	fi

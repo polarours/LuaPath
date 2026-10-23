@@ -31,6 +31,9 @@ Options:
   --file FILE  Validate a specific markdown file
   --help       Show this help
 
+Directories given as arguments are added to the selection, so
+`--all references` checks the chapters and the reference sheets.
+
 Examples:
   lua scripts/validate.lua --all
   lua scripts/validate.lua --en
@@ -385,15 +388,18 @@ if #options.files > 0 then
   end
 else
   local directories = {}
-  if #options.directories > 0 then
-    directories = options.directories
-  else
-    if options.all or options.en then
-      table.insert(directories, "en")
-    end
-    if options.all or options.zh then
-      table.insert(directories, "zh")
-    end
+  if options.all or options.en then
+    table.insert(directories, "en")
+  end
+  if options.all or options.zh then
+    table.insert(directories, "zh")
+  end
+  -- Positional directories extend the selection instead of replacing it.
+  -- Before this, `validate.lua --all references` silently dropped en/ and
+  -- zh/ and only checked the reference sheets, so a reader-facing snippet
+  -- in a chapter could go unchecked while the run still reported success.
+  for _, directory in ipairs(options.directories) do
+    table.insert(directories, directory)
   end
 
   for _, directory in ipairs(directories) do
