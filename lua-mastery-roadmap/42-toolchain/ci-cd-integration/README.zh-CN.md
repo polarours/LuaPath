@@ -76,7 +76,7 @@ return TAP
 ```lua
 local TAP = require("src.tap")
 
-local tap = TAP():plan(5)
+local tap = TAP.new():plan(5)
 
 tap:test("语法验证")
 -- 运行所有 Lua 文件的语法检查
@@ -84,11 +84,11 @@ assert(io.popen("lua -c src/*.lua"):read("*a") == "")
 
 tap:test("单元测试")
 -- 运行测试套件
-assert(io.popen("lua tests/*.lua"):true):close()
+assert(io.popen("lua tests/*.lua"):close())
 
 tap:test("依赖解析")
 -- 检查所有所需的模块都能加载
-require("src.build")
+require("src.tap")
 
 tap:test("格式检查")
 -- 验证代码格式

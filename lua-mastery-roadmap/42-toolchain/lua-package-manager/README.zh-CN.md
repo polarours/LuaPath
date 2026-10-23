@@ -32,20 +32,20 @@
 ### 包解析器 (`src/pkg_manager.lua`)
 
 ```lua
-local Package = {}
-Package.__index = Package
+local PackageManager = {}
+PackageManager.__index = PackageManager
 
 --- 创建一个新的包解析器。
-function Package.new()
+function PackageManager.new()
   return setmetatable({
     registry = {},     -- 包名 -> 版本列表
     resolved = {},     -- 已解析的包
     conflicts = {},    -- 检测到的冲突
-  }, Package)
+  }, PackageManager)
 end
 
 --- 在本地注册一个包。
-function Package:register(name, version, dependencies)
+function PackageManager:register(name, version, dependencies)
   if not self.registry[name] then
     self.registry[name] = {}
   end
@@ -59,17 +59,17 @@ end
 
 --- 解析一组请求的包及其约束。
 -- 返回已解析的包表，冲突时返回 nil。
-function Package:resolve(roots)
+function PackageManager:resolve(roots)
   local visiting = {}
   local function visit(name, version)
     if visiting[name] then
-      table.insert(conflicts, "Cycle: " .. name)
+      table.insert(self.conflicts, "Cycle: " .. name)
       return nil
     end
     visiting[name] = true
     local pkg = self.registry[name][version]
     if not pkg then
-      table.insert(conflicts, "Unknown package: " .. name .. "@" .. version)
+      table.insert(self.conflicts, "Unknown package: " .. name .. "@" .. version)
       return nil
     end
     for dep_name, dep_ver in pairs(pkg.dependencies) do
@@ -89,7 +89,7 @@ function Package:resolve(roots)
 end
 
 --- 获取所有已安装的包。
-function Package:list()
+function PackageManager:list()
   local names = {}
   for name in pairs(self.resolved) do
     table.insert(names, name)
@@ -98,16 +98,16 @@ function Package:list()
   return names
 end
 
-return Package
+return PackageManager
 ```
 
 ### 示例 (`examples/demo.lua`)
 
 ```lua
-local Package = require("package")
+local PackageManager = require("src.pkg_manager")
 
-local pm = Package.new()
-pm:register("lua-http-server", "1.0.0", { "lua-build-system": ">=1.0" })
+local pm = PackageManager.new()
+pm:register("lua-http-server", "1.0.0", { ["lua-build-system"] = "1.0.0" })
 pm:register("lua-build-system", "1.0.0", {})
 pm:register("lua-build-system", "1.1.0", {})
 

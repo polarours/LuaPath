@@ -76,7 +76,7 @@ return TAP
 ```lua
 local TAP = require("src.tap")
 
-local tap = TAP():plan(5)
+local tap = TAP.new():plan(5)
 
 tap:test("Syntax validation")
 -- Run syntax checks on all Lua files
@@ -84,11 +84,11 @@ assert(io.popen("lua -c src/*.lua"):read("*a") == "")
 
 tap:test("Unit tests")
 -- Run the test suite
-assert(io.popen("lua tests/*.lua"):true):close()
+assert(io.popen("lua tests/*.lua"):close())
 
 tap:test("Dependency resolution")
 -- Check all required modules load
-require("src.build")
+require("src.tap")
 
 tap:test("Format checking")
 -- Verify code formatting

@@ -220,12 +220,12 @@ string.format("%X", 255)     -- "FF"
 
 ```lua
 -- Well-defined for sequences (no holes)
-local t = {1, 2, 3}
-print(#t)  -- 3
+local t1 = {1, 2, 3}
+print(#t1)  -- 3
 
 -- Undefined behavior with holes
-local t = {1, nil, 3}
-print(#t)  -- Could be 1, 2, or 3 (implementation-dependent!)
+local t2 = {1, nil, 3}
+print(#t2)  -- Could be 1, 2, or 3 (implementation-dependent!)
 ```
 
 ### Lua 5.2+ (Ephemeron Tables)
@@ -251,7 +251,9 @@ module("mymodule", package.seeall)
 function hello()
   print("Hello")
 end
+```
 
+```lua
 -- Usage
 local m = require("mymodule")
 m.hello()
@@ -268,7 +270,9 @@ function M.hello()
 end
 
 return M
+```
 
+```lua
 -- Usage
 local m = require("mymodule")
 m.hello()
@@ -375,16 +379,22 @@ end
 
 ```lua
 -- Lua 5.2+ and LuaJIT 2.1
+-- Two rules bite when writing `goto`:
+--   * `return` must be the last statement of a block, so the "not found"
+--     case cannot return before the label;
+--   * the loop variable is out of scope at the label, so the position has
+--     to be carried out of the loop by hand.
 local function find_needle(haystack)
+  local found_i
   for i = 1, #haystack do
     if haystack[i] == "needle" then
+      found_i = i
       goto found
     end
   end
-  return nil
-  
+
   ::found::
-  return i
+  return found_i
 end
 ```
 
@@ -473,13 +483,12 @@ print(bit.rshift(5, 1)) -- 2
 -- Detect version
 local LUA_VERSION = _VERSION:match("%d+%.%d+")
 
--- Version-specific code
+-- Version-specific API: math.type arrived in 5.3.
+local kind
 if LUA_VERSION >= "5.3" then
-  -- Use integer division
-  local result = 5 // 2
+  kind = math.type(5)      -- "integer"
 else
-  -- Fallback
-  local result = math.floor(5 / 2)
+  kind = type(5)           -- "number"
 end
 
 -- Detect LuaJIT
@@ -488,6 +497,14 @@ if is_luajit then
   local ffi = require("ffi")
   -- Use FFI
 end
+```
+
+```lua
+-- Lua 5.3+ only.
+-- The `//` operator cannot appear in a cross-version chunk: a 5.1
+-- interpreter fails to parse the whole file, even in the branch it never
+-- takes. Keep new syntax in a separate, version-labelled file.
+local result = 5 // 2
 ```
 
 ### Recommended Baseline

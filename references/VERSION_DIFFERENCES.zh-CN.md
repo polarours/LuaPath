@@ -220,12 +220,12 @@ string.format("%X", 255)     -- "FF"
 
 ```lua
 -- 序列（无空洞）时行为有明确定义
-local t = {1, 2, 3}
-print(#t)  -- 3
+local t1 = {1, 2, 3}
+print(#t1)  -- 3
 
 -- 存在空洞时行为未定义
-local t = {1, nil, 3}
-print(#t)  -- 可能是 1、2 或 3（取决于实现！）
+local t2 = {1, nil, 3}
+print(#t2)  -- 可能是 1、2 或 3（取决于实现！）
 ```
 
 ### Lua 5.2+（Ephemeron 表）
@@ -251,7 +251,9 @@ module("mymodule", package.seeall)
 function hello()
   print("Hello")
 end
+```
 
+```lua
 -- 使用
 local m = require("mymodule")
 m.hello()
@@ -268,7 +270,9 @@ function M.hello()
 end
 
 return M
+```
 
+```lua
 -- 使用
 local m = require("mymodule")
 m.hello()
@@ -375,16 +379,21 @@ end
 
 ```lua
 -- Lua 5.2+ 以及 LuaJIT 2.1
+-- 写 `goto` 时有两条规则容易踩坑：
+--   * `return` 必须是块内最后一句，所以「没找到」的分支不能在标签之前
+--     写 return；
+--   * 循环变量在标签处已经出了作用域，所以位置必须自己带出循环。
 local function find_needle(haystack)
+  local found_i
   for i = 1, #haystack do
     if haystack[i] == "needle" then
+      found_i = i
       goto found
     end
   end
-  return nil
-  
+
   ::found::
-  return i
+  return found_i
 end
 ```
 
@@ -473,13 +482,12 @@ print(bit.rshift(5, 1)) -- 2
 -- 检测版本
 local LUA_VERSION = _VERSION:match("%d+%.%d+")
 
--- 针对特定版本的代码
+-- 版本相关的 API：math.type 是 5.3 才有的。
+local kind
 if LUA_VERSION >= "5.3" then
-  -- 使用整数除法
-  local result = 5 // 2
+  kind = math.type(5)      -- "integer"
 else
-  -- 回退方案
-  local result = math.floor(5 / 2)
+  kind = type(5)           -- "number"
 end
 
 -- 检测 LuaJIT
@@ -488,6 +496,13 @@ if is_luajit then
   local ffi = require("ffi")
   -- 使用 FFI
 end
+```
+
+```lua
+-- 仅 Lua 5.3+ 可用。
+-- `//` 运算符不能出现在跨版本代码块里：5.1 的解释器会直接解析失败，
+-- 哪怕那个分支根本不会执行。新语法要放进单独标注版本的文件。
+local result = 5 // 2
 ```
 
 ### 推荐基线版本

@@ -166,11 +166,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   4 TODO placeholders in both EN and ZH)
 - `README.md` / `README_zh-CN.md`: updated chapter count to 22, added
   entry points for Testing Strategies and Interoperability Patterns
+- `make validate` and `make validate-51` now compile the code blocks in
+  `references/`, `pitfalls/` and the roadmap's stage READMEs, not only the
+  chapters in `en/` and `zh/`. The reference sheets and the stage READMEs are
+  where a reader copies a snippet from, and the gap was hiding real breakage:
+  a `goto` sample that no interpreter could parse, and a stage README that
+  called a method which does not exist. `scripts/validate.lua` grew a fix of
+  its own: `--all` used to be ignored as soon as a directory was passed, so
+  `validate.lua --all references` silently checked only the reference sheets
+  and still reported success
 - CI/CD pipeline for validation
 
 ### Fixed
 
-- **The Chinese chapters used two names for the same concept.**
+- **`references/VERSION_DIFFERENCES.md` shipped a `goto` sample that no
+  interpreter could parse.** A `return nil` sat in front of the `::found::`
+  label, and `return` has to be the last statement of a block, so Lua 5.2 and
+  later rejected the chunk with "'end' expected ... near '::'". The label also
+  could not see the `for` variable, so the `return i` behind it was a global
+  lookup and returned nil. The sample now carries the position out of the loop
+  in a local and reaches the label without a `return` in front of it; it was
+  checked on 5.3, 5.4, 5.5 and LuaJIT
+- **The "writing cross-version code" sample could not run on Lua 5.1.** It put
+  the 5.3-only `//` operator inside the very block that promises to work on
+  every version, and a 5.1 interpreter rejects the whole chunk at parse time
+  even when the branch is never taken. The API difference (`math.type`) is
+  now branched on at runtime, and the `//` sample lives in its own
+  version-labelled block, which the validator skips on 5.1
+- **The quick reference card carried code that does not compile.** The table
+  section listed `t.key` and `#t` as statements, which Lua does not accept, and
+  the module section put `return M` in front of the usage code, which makes
+  everything after it unreachable. Both tracks now show the same compiling code
+- **Two stage READMEs showed code that could not run.** The CI/CD stage called
+  `TAP()` where the module only offers `TAP.new()`, and reached for a method
+  named `:true`; the package manager stage wrote
+  `{ "lua-build-system": ">=1.0" }`, which is not a table constructor, and the
+  resolver it documents matches versions exactly, so the `">=1.0"` constraint
+  it advertised never resolved. Both READMEs, in both tracks, now show code
+  that runs against the modules they document
+- **The integer overflow sample in Chapter 18 had its labels the wrong way
+  round.** The unbounded version was labelled SAFE and the bounded one
+  DANGEROUS, which is the opposite of what the runtimes do: on 5.3 and later
+  the unbounded multiplication is integer arithmetic and wraps silently, and
+  on 5.1 it is a double that quietly loses precision. The `//` in the
+  quick reference's `divmod` sample, which is 5.3 syntax, was also replaced
+  with `math.floor` so the card stays valid on the 5.1 baseline
+
   CONTRIBUTING fixes the terms -- metatable is 元表, metamethod is 元方法,
   upvalue is 上值, userdata is 用户数据, coroutine is 协程 -- but the prose
   mixed the English and the Chinese spelling from paragraph to paragraph.

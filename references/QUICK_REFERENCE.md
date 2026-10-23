@@ -46,7 +46,9 @@ for i = 1, 10 do end           -- Numeric for
 for k, v in pairs(t) do end    -- Generic for (all keys)
 for i, v in ipairs(t) do end   -- Generic for (array indices)
 while condition do end         -- While loop
-repeat ... until condition     -- Do-while equivalent
+repeat
+  -- ...
+until condition     -- Do-while equivalent
 ```
 
 ### Functions
@@ -70,7 +72,8 @@ end
 
 -- Multiple returns
 function divmod(a, b)
-  return a // b, a % b
+  -- `//` arrived in 5.3; math.floor keeps the snippet valid on 5.1 too.
+  return math.floor(a / b), a % b
 end
 ```
 
@@ -79,17 +82,17 @@ end
 ```lua
 -- Construction
 local t = {}
-local t = {1, 2, 3}           -- Array part
-local t = {x = 1, y = 2}      -- Record
-local t = {[1] = "a"}         -- Explicit key
+local t2 = {1, 2, 3}           -- Array part
+local t3 = {x = 1, y = 2}      -- Record
+local t4 = {[1] = "a"}         -- Explicit key
 
 -- Access
-t.key          -- Same as t["key"]
-t[key]         -- Dynamic key
-t[1]           -- Array index
+local v1 = t.key          -- Same as t["key"]
+local v2 = t[key]         -- Dynamic key
+local v3 = t[1]           -- Array index
 
 -- Length (only reliable for sequences!)
-#t             -- Length of array part
+local n = #t              -- Length of array part
 
 -- Iteration
 for k, v in pairs(t) do end    -- All keys
@@ -119,7 +122,9 @@ local M = {}
 function M.func() end
 
 return M
+```
 
+```lua
 -- Usage
 local mod = require("module")
 mod.func()
@@ -304,7 +309,9 @@ for i = 1, 1000000 do
 end
 
 -- Pre-allocate tables when size is known
-local t = {}
+-- table.create arrived in Lua 5.5; on 5.1 to 5.4 the array part grows as
+-- the table fills, and the constructor form below reserves the slots.
+local t = table.create and table.create(n) or {}
 for i = 1, n do
   t[i] = i * 2
 end

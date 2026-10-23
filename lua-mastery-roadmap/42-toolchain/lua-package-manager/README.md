@@ -32,20 +32,20 @@ Package managers like luarocks, npm, and pip solve the "dependency hell" problem
 ### Package Resolver (`src/pkg_manager.lua`)
 
 ```lua
-local Package = {}
-Package.__index = Package
+local PackageManager = {}
+PackageManager.__index = PackageManager
 
 --- Create a new package resolver.
-function Package.new()
+function PackageManager.new()
   return setmetatable({
     registry = {},     -- package name -> version list
     resolved = {},     -- resolved packages
     conflicts = {},    -- detected conflicts
-  }, Package)
+  }, PackageManager)
 end
 
 --- Register a package in the local registry.
-function Package:register(name, version, dependencies)
+function PackageManager:register(name, version, dependencies)
   if not self.registry[name] then
     self.registry[name] = {}
   end
@@ -59,17 +59,17 @@ end
 
 --- Resolve a set of requested packages and their constraints.
 -- Returns a table of resolved packages or nil on conflict.
-function Package:resolve(roots)
+function PackageManager:resolve(roots)
   local visiting = {}
   local function visit(name, version)
     if visiting[name] then
-      table.insert(conflicts, "Cycle: " .. name)
+      table.insert(self.conflicts, "Cycle: " .. name)
       return nil
     end
     visiting[name] = true
     local pkg = self.registry[name][version]
     if not pkg then
-      table.insert(conflicts, "Unknown package: " .. name .. "@" .. version)
+      table.insert(self.conflicts, "Unknown package: " .. name .. "@" .. version)
       return nil
     end
     for dep_name, dep_ver in pairs(pkg.dependencies) do
@@ -89,7 +89,7 @@ function Package:resolve(roots)
 end
 
 --- Get all installed packages.
-function Package:list()
+function PackageManager:list()
   local names = {}
   for name in pairs(self.resolved) do
     table.insert(names, name)
@@ -98,16 +98,16 @@ function Package:list()
   return names
 end
 
-return Package
+return PackageManager
 ```
 
 ### Example (`examples/demo.lua`)
 
 ```lua
-local Package = require("package")
+local PackageManager = require("src.pkg_manager")
 
-local pm = Package.new()
-pm:register("lua-http-server", "1.0.0", { "lua-build-system": ">=1.0" })
+local pm = PackageManager.new()
+pm:register("lua-http-server", "1.0.0", { ["lua-build-system"] = "1.0.0" })
 pm:register("lua-build-system", "1.0.0", {})
 pm:register("lua-build-system", "1.1.0", {})
 

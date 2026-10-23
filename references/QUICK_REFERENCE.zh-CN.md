@@ -46,7 +46,9 @@ for i = 1, 10 do end           -- 数值 for
 for k, v in pairs(t) do end    -- 泛型 for（所有键）
 for i, v in ipairs(t) do end   -- 泛型 for（数组索引）
 while condition do end         -- while 循环
-repeat ... until condition     -- do-while 等价
+repeat
+  -- ...
+until condition     -- do-while 等价
 ```
 
 ### 函数
@@ -70,7 +72,8 @@ end
 
 -- 多返回值
 function divmod(a, b)
-  return a // b, a % b
+  -- `//` 是 5.3 才有的语法；用 math.floor 可以让这段在 5.1 上也成立。
+  return math.floor(a / b), a % b
 end
 ```
 
@@ -79,17 +82,17 @@ end
 ```lua
 -- 构造
 local t = {}
-local t = {1, 2, 3}           -- 数组部分
-local t = {x = 1, y = 2}      -- 记录
-local t = {[1] = "a"}         -- 显式键
+local t2 = {1, 2, 3}           -- 数组部分
+local t3 = {x = 1, y = 2}      -- 记录
+local t4 = {[1] = "a"}         -- 显式键
 
 -- 访问
-t.key          -- 同 t["key"]
-t[key]         -- 动态键
-t[1]           -- 数组索引
+local v1 = t.key          -- 同 t["key"]
+local v2 = t[key]         -- 动态键
+local v3 = t[1]           -- 数组索引
 
 -- 长度（仅对序列可靠！）
-#t             -- 数组部分长度
+local n = #t              -- 数组部分长度
 
 -- 遍历
 for k, v in pairs(t) do end    -- 所有键
@@ -119,7 +122,9 @@ local M = {}
 function M.func() end
 
 return M
+```
 
+```lua
 -- 使用
 local mod = require("module")
 mod.func()
@@ -304,7 +309,9 @@ for i = 1, 1000000 do
 end
 
 -- 已知大小时预分配表格
-local t = {}
+-- table.create 是 Lua 5.5 才加的；在 5.1 到 5.4 上数组部会随着填充增长，
+-- 而下面的构造器写法则预留了位置。
+local t = table.create and table.create(n) or {}
 for i = 1, n do
   t[i] = i * 2
 end
