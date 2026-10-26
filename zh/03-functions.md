@@ -863,6 +863,6 @@ print(f())  -- 42
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 3 节](https://www.lua.org/manual/5.4/manual.html#3)
+- [Lua 5.5 参考手册 — 第 3 节](https://www.lua.org/manual/5.5/manual.html#3)
 - [Lua 程序设计（第 4 版）— 第 5–6 章](https://www.lua.org/pil/)
 - [下一章：04 — Table](04-tables.md)

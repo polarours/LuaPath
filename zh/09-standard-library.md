@@ -628,6 +628,6 @@ local result = table.concat(parts)
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 6 节](https://www.lua.org/manual/5.4/manual.html#6)
+- [Lua 5.5 参考手册 — 第 6 节](https://www.lua.org/manual/5.5/manual.html#6)
 - [Programming in Lua（第 4 版）— 第 10–12 章](https://www.lua.org/pil/)
 - [下一章：10 — Lua 内部机制](10-lua-internals.md)

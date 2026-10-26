@@ -616,7 +616,8 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 11](https://www.lua.org/manual/5.4/manual.html#11)
+- [Lua 5.5 Reference Manual — Section 2.5 (Garbage Collection)](https://www.lua.org/manual/5.5/manual.html#2.5)
 - [Programming in Lua (4th ed.) — Chapter 24–25](https://www.lua.org/pil/)
-- [LuaJIT Performance Guide](https://luajit.org/perf.html)
+- [LuaJIT Profiler](https://luajit.org/ext_profiler.html)
+- [LuaJIT Extensions](https://luajit.org/extensions.html)
 - [Next Chapter: 13 — Patterns](13-patterns.md)

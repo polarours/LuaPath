@@ -209,13 +209,13 @@ stylua --check src/
 ### Official Resources
 
 - [Lua.org](https://www.lua.org/) — Official website
-- [Lua Reference Manual](https://www.lua.org/manual/5.4/) — Official docs
+- [Lua Reference Manual](https://www.lua.org/manual/5.5/) — Official docs
 - [Lua Programming Book](https://www.lua.org/pil/) — Definitive guide
 - [Lua Users Wiki](https://lua-users.org/) — Community wiki
 
 ### Community
 
-- [Lua Discourse](https://discuss.lua.org/) — Official forum
+- [Lua Mailing List](https://www.lua.org/lua-l.html) — Official discussion list
 - [Reddit r/lua](https://reddit.com/r/lua) — Community discussions
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/lua) — Q&A
 
@@ -484,7 +484,7 @@ Runnable examples for this chapter:
 ## Further Reading
 
 - [LuaRocks Documentation](https://luarocks.org/)
-- [Busted Documentation](https://olivinelabs.com/busted/)
+- [Busted Documentation](https://lunarmodules.github.io/busted/)
 - [Lua Users Wiki](https://lua-users.org/)
 
 ---

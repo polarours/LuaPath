@@ -857,6 +857,6 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 3.4.8](https://www.lua.org/manual/5.4/manual.html#3.4.8)
+- [Lua 5.5 Reference Manual — Section 3.4.8](https://www.lua.org/manual/5.5/manual.html#3.4.8)
 - [Programming in Lua (4th ed.) — Chapter 13, 16](https://www.lua.org/pil/)
 - [Next Chapter: 06 — Modules](06-modules.md)

@@ -598,7 +598,7 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 1](https://www.lua.org/manual/5.4/manual.html#1)
-- [The Evolution of Lua (PDF)](https://www.lua.org/doc/record.pdf)
+- [Lua 5.5 Reference Manual — Section 1](https://www.lua.org/manual/5.5/manual.html#1)
+- [The Evolution of Lua](https://www.lua.org/versions.html)
 - [Programming in Lua (4th ed.) — Chapter 30](https://www.lua.org/pil/)
 - [Next Chapter: 11 — Lua C API](11-lua-c-api.md)

@@ -506,7 +506,7 @@ end
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 2 节](https://www.lua.org/manual/5.4/manual.html#2)
+- [Lua 5.5 参考手册 — 第 2 节](https://www.lua.org/manual/5.5/manual.html#2)
 - [Lua 5.1 参考手册 — 第 2 节](https://www.lua.org/manual/5.1/manual.html#2)
 - [Lua 程序设计（第 4 版） — 第 1–3 章](https://www.lua.org/pil/)
 - [下一章：02 — 控制流](02-control-flow.md)

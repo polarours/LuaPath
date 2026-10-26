@@ -209,13 +209,13 @@ stylua --check src/
 ### 官方资源
 
 - [Lua.org](https://www.lua.org/) — 官方网站
-- [Lua 参考手册](https://www.lua.org/manual/5.4/) — 官方文档
+- [Lua 参考手册](https://www.lua.org/manual/5.5/) — 官方文档
 - [Lua 编程书籍](https://www.lua.org/pil/) — 权威指南
 - [Lua 用户 Wiki](https://lua-users.org/) — 社区 Wiki
 
 ### 社区
 
-- [Lua Discourse](https://discuss.lua.org/) — 官方论坛
+- [Lua 邮件列表](https://www.lua.org/lua-l.html) — 官方讨论列表
 - [Reddit r/lua](https://reddit.com/r/lua) — 社区讨论
 - [Stack Overflow](https://stackoverflow.com/questions/tagged/lua) — 问答
 
@@ -479,7 +479,7 @@ LUA_PATH="/path/to/modules/?.lua;;" lua examples/advanced/24-ecosystem-probe.lua
 ## 延伸阅读
 
 - [LuaRocks 文档](https://luarocks.org/)
-- [Busted 文档](https://olivinelabs.com/busted/)
+- [Busted 文档](https://lunarmodules.github.io/busted/)
 - [Lua 用户 Wiki](https://lua-users.org/)
 
 ---

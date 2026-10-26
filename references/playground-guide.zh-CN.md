@@ -26,22 +26,26 @@ print("Table example:", table.concat({1, 2, 3, 4, 5}, ", "))
 
 ## 推荐演练场
 
-### 1. Lua 5.4（官方）
+lua.org 和 luajit.org 都不再提供在线演练场了。它们当年链接的 `try.html`
+现在都返回 404，而 lua.org 首页也完全没有演练场入口。下面每个 URL 都实测可达。
 
-**URL**：https://www.lua.org/try.html
+### 1. OneCompiler
 
-- 运行 Lua 5.4（最新稳定版）
-- 来自 lua.org 的官方沙箱
-- 功能有限，不支持文件 I/O
+**URL**：https://onecompiler.com/lua/
+
+- 运行 Lua 5.4
+- 在浏览器里运行，无需注册账号
+- 支持从标准输入读入数据
 - 适合快速测试语法
 
-### 2. LuaJIT 演练场
+### 2. Tutorialspoint 在线编译器
 
-**URL**：https://luajit.org/try.html
+**URL**：https://www.tutorialspoint.com/compilers/online-lua-compiler.htm
 
-- 运行 LuaJIT（兼容 Lua 5.1，并带有扩展）
-- 支持 FFI
-- 适合测试 JIT 特有行为
+- 运行 Lua 5.3.5
+- 带调试器的在线 IDE，无需安装
+- 可分享代码链接
+- 适合单步调试一段代码
 
 ### 3. Replit（完整 IDE）
 
@@ -68,17 +72,23 @@ print("Table example:", table.concat({1, 2, 3, 4, 5}, ", "))
 - 可分享代码链接
 - 适合代码分享与讨论
 
+**没有在线的 LuaJIT 演练场。** luajit.org 上没有任何演练场入口，它当年的
+`try.html` 现在返回 404。改为本地安装——下面的「本地快速上手」一节有说明——
+因为 FFI 和 JIT 特有行为在标准 Lua 上都试不出来。
+
 ## 演练场对比
 
-| 特性 | Lua 5.4 | LuaJIT | Replit | Paiza.IO | Ideone |
-|---------|---------|--------|--------|----------|--------|
-| Lua 版本 | 5.4 | 5.1+ext | 5.3/5.4 | 多个 | 多个 |
-| 文件 I/O | ✗ | ✗ | ✓ | ✗ | ✗ |
-| C API/FFI | ✗ | ✓ | ✗ | ✗ | ✗ |
-| 保存项目 | ✗ | ✗ | ✓ | ✗ | ✗ |
-| stdin 支持 | ✗ | ✗ | ✓ | ✓ | ✓ |
-| 分享链接 | ✗ | ✗ | ✓ | ✓ | ✓ |
-| 完整 IDE | ✗ | ✗ | ✓ | ✗ | ✗ |
+`—` 表示该站点在首页没有说明这一项。
+
+| 特性 | OneCompiler | Tutorialspoint | Replit | Paiza.IO | Ideone |
+|---------|-------------|----------------|--------|----------|--------|
+| Lua 版本 | 5.4 | 5.3.5 | 5.3/5.4 | 多个 | 多个 |
+| 文件 I/O | — | — | ✓ | ✗ | ✗ |
+| C API/FFI | — | — | ✗ | ✗ | ✗ |
+| 保存项目 | — | — | ✓ | ✗ | ✗ |
+| stdin 支持 | ✓ | — | ✓ | ✓ | ✓ |
+| 分享链接 | ✓ | ✓ | ✓ | ✓ | ✓ |
+| 完整 IDE | — | ✓ | ✓ | ✗ | ✗ |
 
 ## 交互式示例
 
@@ -251,7 +261,7 @@ let g:loaded_lua = 1
 ## 在线演练场的限制
 
 - 不支持文件 I/O（多数沙箱）
-- 不支持 C API / FFI（LuaJIT 演练场除外）
+- 不支持 C API / FFI
 - 无法访问网络
 - 运行时资源受限（内存、CPU）
 - 没有持久化存储

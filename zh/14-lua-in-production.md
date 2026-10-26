@@ -782,7 +782,6 @@ GC 时机是非确定性的。对象可能立即被回收、很久之后才被�
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册](https://www.lua.org/manual/5.4/)
+- [Lua 5.5 参考手册](https://www.lua.org/manual/5.5/)
 - [Programming in Lua（第4版）](https://www.lua.org/pil/)
-- [Lua in Practice](https://www.amazon.com/Lua-Practice-Ricardo-Fabricio-Ordines/dp/1784394594)
 - [Game AI Pro — Lua Scripting](https://www.gameaipro.com/)

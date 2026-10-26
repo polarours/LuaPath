@@ -657,6 +657,6 @@ end
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 2.3 节](https://www.lua.org/manual/5.4/manual.html#2.3)
+- [Lua 5.5 参考手册 — 第 2.3 节](https://www.lua.org/manual/5.5/manual.html#2.3)
 - [Lua 程序设计（第 4 版）— 第 8 章](https://www.lua.org/pil/)
 - [下一章：08 — 协程](08-coroutines.md)

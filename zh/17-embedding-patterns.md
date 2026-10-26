@@ -674,7 +674,7 @@ hardened : 4/4 escape attempts blocked
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第4节](https://www.lua.org/manual/5.4/manual.html#4)
+- [Lua 5.5 参考手册 — 第4节](https://www.lua.org/manual/5.5/manual.html#4)
 - [Lua 程序设计 — 第28章：扩展 Lua](https://www.lua.org/pil/)
 
 ---

@@ -40,4 +40,4 @@ t.data[t.length] = "new item"
 ## 相关概念
 
 - [04-tables.md](../../zh/04-tables.md) — Table 基础
-- [Lua 参考手册](https://www.lua.org/manual/5.4/manual.html#3.4.7) — 长度运算符
+- [Lua 参考手册](https://www.lua.org/manual/5.5/manual.html#3.4.7) — 长度运算符

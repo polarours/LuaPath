@@ -782,7 +782,6 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual](https://www.lua.org/manual/5.4/)
+- [Lua 5.5 Reference Manual](https://www.lua.org/manual/5.5/)
 - [Programming in Lua (4th ed.)](https://www.lua.org/pil/)
-- [Lua in Practice](https://www.amazon.com/Lua-Practice-Ricardo-Fabricio-Ordines/dp/1784394594)
 - [Game AI Pro — Lua Scripting](https://www.gameaipro.com/)

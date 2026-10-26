@@ -655,6 +655,6 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 2.6](https://www.lua.org/manual/5.4/manual.html#2.6)
+- [Lua 5.5 Reference Manual — Section 2.6](https://www.lua.org/manual/5.5/manual.html#2.6)
 - [Programming in Lua (4th ed.) — Chapter 9, 24](https://www.lua.org/pil/)
 - [Next Chapter: 09 — Standard Library](09-standard-library.md)

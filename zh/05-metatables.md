@@ -857,6 +857,6 @@ print(getmetatable(t).__name)  -- "MyCustomType"
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 3.4.8 节](https://www.lua.org/manual/5.4/manual.html#3.4.8)
+- [Lua 5.5 参考手册 — 第 3.4.8 节](https://www.lua.org/manual/5.5/manual.html#3.4.8)
 - [Programming in Lua（第 4 版）— 第 13、16 章](https://www.lua.org/pil/)
 - [下一章：06 — 模块](06-modules.md)

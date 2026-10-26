@@ -680,7 +680,7 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 4](https://www.lua.org/manual/5.4/manual.html#4)
+- [Lua 5.5 Reference Manual — Section 4](https://www.lua.org/manual/5.5/manual.html#4)
 - [Programming in Lua — Chapter 28: Extending Lua](https://www.lua.org/pil/)
 
 ---

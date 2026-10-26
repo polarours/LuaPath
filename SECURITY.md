@@ -85,7 +85,7 @@ Based on content in this repository:
 ## External Resources
 
 - [Lua Security Guidelines](https://www.lua.org/manual/)
-- [LuaJIT Security Notes](https://luajit.org/security.html)
+- [LuaJIT FFI extension — the documented way out of the sandbox](https://luajit.org/ext_ffi.html)
 - [CVE Database](https://cve.mitre.org/) - Search for "Lua"
 
 ## Credits

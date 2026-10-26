@@ -657,6 +657,6 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 2.3](https://www.lua.org/manual/5.4/manual.html#2.3)
+- [Lua 5.5 Reference Manual — Section 2.3](https://www.lua.org/manual/5.5/manual.html#2.3)
 - [Programming in Lua (4th ed.) — Chapter 8](https://www.lua.org/pil/)
 - [Next Chapter: 08 — Coroutines](08-coroutines.md)

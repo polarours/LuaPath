@@ -573,7 +573,7 @@ lua examples/advanced/23-schema-codegen.lua
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第6节](https://www.lua.org/manual/5.4/manual.html#6)
+- [Lua 5.5 参考手册 — 第6节](https://www.lua.org/manual/5.5/manual.html#6)
 - [Lua 程序设计 — 第8章：与 C 接口](https://www.lua.org/pil/)
 
 ---

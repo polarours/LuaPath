@@ -71,7 +71,7 @@ body:
     attributes:
       label: Reference
       description: Link to Lua changelog, manual, or source code
-      placeholder: "https://www.lua.org/manual/5.4/readme.html#changes"
+      placeholder: "https://www.lua.org/manual/5.5/readme.html#changes"
       
   - type: checkboxes
     id: terms

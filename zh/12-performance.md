@@ -614,7 +614,8 @@ print("p99: " .. samples[99])
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 11 节](https://www.lua.org/manual/5.4/manual.html#11)
+- [Lua 5.5 参考手册 — 第 2.5 节（垃圾回收）](https://www.lua.org/manual/5.5/manual.html#2.5)
 - [Programming in Lua（第 4 版）— 第 24–25 章](https://www.lua.org/pil/)
-- [LuaJIT 性能指南](https://luajit.org/perf.html)
+- [LuaJIT Profiler](https://luajit.org/ext_profiler.html)
+- [LuaJIT 扩展列表](https://luajit.org/extensions.html)
 - [下一章：13 — 模式匹配](13-patterns.md)

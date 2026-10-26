@@ -807,6 +807,6 @@ Lua 参考手册明确说明排序不是稳定的。相等元素的相对顺序�
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 3.4 节](https://www.lua.org/manual/5.4/manual.html#3.4)
+- [Lua 5.5 参考手册 — 第 3.4 节](https://www.lua.org/manual/5.5/manual.html#3.4)
 - [Lua 编程（第 4 版）— 第 7 章](https://www.lua.org/pil/)
 - [下一章: 05 — 元表](05-metatables.md)

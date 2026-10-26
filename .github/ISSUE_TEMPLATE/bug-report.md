@@ -80,7 +80,7 @@ body:
     attributes:
       label: Reference Source
       description: Link to Lua manual, source code, or other reference (if available)
-      placeholder: "https://www.lua.org/manual/5.4/manual.html#..."
+      placeholder: "https://www.lua.org/manual/5.5/manual.html#..."
       
   - type: checkboxes
     id: terms

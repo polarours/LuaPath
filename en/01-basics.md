@@ -506,7 +506,7 @@ If `value` is `false` but meaningful, the condition still passes and `use(false)
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 2](https://www.lua.org/manual/5.4/manual.html#2)
+- [Lua 5.5 Reference Manual — Section 2](https://www.lua.org/manual/5.5/manual.html#2)
 - [Lua 5.1 Reference Manual — Section 2](https://www.lua.org/manual/5.1/manual.html#2)
 - [Programming in Lua (4th ed.) — Chapter 1–3](https://www.lua.org/pil/)
 - [Next Chapter: 02 — Control Flow](02-control-flow.md)

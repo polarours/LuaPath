@@ -575,7 +575,7 @@ Runnable examples for this chapter:
 
 ## Further Reading
 
-- [Lua 5.4 Reference Manual — Section 6](https://www.lua.org/manual/5.4/manual.html#6)
+- [Lua 5.5 Reference Manual — Section 6](https://www.lua.org/manual/5.5/manual.html#6)
 - [Programming in Lua — Chapter 8: Interfacing with C](https://www.lua.org/pil/)
 
 ---

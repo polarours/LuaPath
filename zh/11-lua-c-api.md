@@ -641,6 +641,6 @@ static int risky_func(lua_State *L) {
 
 ## 扩展阅读
 
-- [Lua 5.4 参考手册 — 第 4 节](https://www.lua.org/manual/5.4/manual.html#4)
+- [Lua 5.5 参考手册 — 第 4 节](https://www.lua.org/manual/5.5/manual.html#4)
 - [Programming in Lua（第 4 版）— 第 28–29 章](https://www.lua.org/pil/)
 - [下一章: 12 — 性能](12-performance.md)

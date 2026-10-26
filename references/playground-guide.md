@@ -26,22 +26,28 @@ print("Table example:", table.concat({1, 2, 3, 4, 5}, ", "))
 
 ## Recommended Playgrounds
 
-### 1. Lua 5.4 (Official)
+Neither lua.org nor luajit.org offers an online playground any more. The
+`try.html` pages both used to link to now answer 404, and the lua.org home
+page links to no playground at all. Every URL below was checked to be
+reachable.
 
-**URL**: https://www.lua.org/try.html
+### 1. OneCompiler
 
-- Runs Lua 5.4 (latest stable)
-- Official sandbox from lua.org
-- Limited features, no file I/O
+**URL**: https://onecompiler.com/lua/
+
+- Runs Lua 5.4
+- Runs in the browser, no account needed
+- Accepts input on standard input
 - Good for quick syntax testing
 
-### 2. LuaJIT Playground
+### 2. Tutorialspoint Online Compiler
 
-**URL**: https://luajit.org/try.html
+**URL**: https://www.tutorialspoint.com/compilers/online-lua-compiler.htm
 
-- Runs LuaJIT (Lua 5.1 compatible with extensions)
-- Includes FFI support
-- Good for testing JIT-specific behavior
+- Runs Lua 5.3.5
+- Online IDE with a debugger, no installation required
+- Can share code links
+- Good for stepping through a snippet
 
 ### 3. Replit (Full IDE)
 
@@ -68,17 +74,24 @@ print("Table example:", table.concat({1, 2, 3, 4, 5}, ", "))
 - Can share code links
 - Good for code sharing and discussion
 
+**There is no online LuaJIT.** luajit.org links to no playground, and the
+`try.html` it used to have now answers 404. Install LuaJIT locally instead --
+the *Local Quick Start* section below covers it -- because neither the FFI
+nor the JIT behaviour can be tried on a stock Lua.
+
 ## Playground Comparison
 
-| Feature | Lua 5.4 | LuaJIT | Replit | Paiza.IO | Ideone |
-|---------|---------|--------|--------|----------|--------|
-| Lua Version | 5.4 | 5.1+ext | 5.3/5.4 | Multiple | Multiple |
-| File I/O | ✗ | ✗ | ✓ | ✗ | ✗ |
-| C API/FFI | ✗ | ✓ | ✗ | ✗ | ✗ |
-| Save Projects | ✗ | ✗ | ✓ | ✗ | ✗ |
-| Stdin Support | ✗ | ✗ | ✓ | ✓ | ✓ |
-| Share Links | ✗ | ✗ | ✓ | ✓ | ✓ |
-| Full IDE | ✗ | ✗ | ✓ | ✗ | ✗ |
+`—` means the site does not state it on its landing page.
+
+| Feature | OneCompiler | Tutorialspoint | Replit | Paiza.IO | Ideone |
+|---------|-------------|----------------|--------|----------|--------|
+| Lua Version | 5.4 | 5.3.5 | 5.3/5.4 | Multiple | Multiple |
+| File I/O | — | — | ✓ | ✗ | ✗ |
+| C API/FFI | — | — | ✗ | ✗ | ✗ |
+| Save Projects | — | — | ✓ | ✗ | ✗ |
+| Stdin Support | ✓ | — | ✓ | ✓ | ✓ |
+| Share Links | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Full IDE | — | ✓ | ✓ | ✗ | ✗ |
 
 ## Interactive Examples
 
@@ -251,7 +264,7 @@ let g:loaded_lua = 1
 ## Limitations of Online Playgrounds
 
 - No file I/O (most sandboxes)
-- No C API / FFI (except LuaJIT playground)
+- No C API / FFI
 - No network access
 - Limited runtime (memory, CPU)
 - No persistent storage

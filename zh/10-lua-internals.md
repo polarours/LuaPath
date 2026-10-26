@@ -598,7 +598,7 @@ Lua 会对相同字符串进行去重。这节省了内存，但也意味着创�
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 1 节](https://www.lua.org/manual/5.4/manual.html#1)
-- [Lua 的演进（PDF）](https://www.lua.org/doc/record.pdf)
+- [Lua 5.5 参考手册 — 第 1 节](https://www.lua.org/manual/5.5/manual.html#1)
+- [Lua 的演进](https://www.lua.org/versions.html)
 - [Lua 编程（第 4 版）— 第 30 章](https://www.lua.org/pil/)
 - [下一章：11 — Lua C API](11-lua-c-api.md)

@@ -781,6 +781,6 @@ end
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 3.3 节](https://www.lua.org/manual/5.4/manual.html#3.3)
+- [Lua 5.5 参考手册 — 第 3.3 节](https://www.lua.org/manual/5.5/manual.html#3.3)
 - [Programming in Lua（第 4 版）— 第 4 章](https://www.lua.org/pil/)
 - [下一章：03 — 函数](03-functions.md)

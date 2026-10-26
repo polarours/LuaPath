@@ -653,6 +653,6 @@ C 函数没有可以被挂起的 Lua 栈。Lua 只能在 Lua 层级的调用边�
 
 ## 延伸阅读
 
-- [Lua 5.4 参考手册 — 第 2.6 节](https://www.lua.org/manual/5.4/manual.html#2.6)
+- [Lua 5.5 参考手册 — 第 2.6 节](https://www.lua.org/manual/5.5/manual.html#2.6)
 - [Lua 程序设计（第 4 版）— 第 9、24 章](https://www.lua.org/pil/)
 - [下一章：09 — 标准库](09-standard-library.md)

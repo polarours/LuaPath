@@ -40,4 +40,4 @@ t.data[t.length] = "new item"
 ## Related Concepts
 
 - [04-tables.md](../../en/04-tables.md) — Table fundamentals
-- [Lua Reference Manual](https://www.lua.org/manual/5.4/manual.html#3.4.7) — Length operator
+- [Lua Reference Manual](https://www.lua.org/manual/5.5/manual.html#3.4.7) — Length operator
