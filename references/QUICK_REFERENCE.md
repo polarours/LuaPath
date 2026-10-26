@@ -362,16 +362,17 @@ end
 
 ## Version Differences
 
-| Feature | 5.1 | 5.3 | 5.4 | LuaJIT |
-|---------|-----|-----|-----|--------|
-| Integers | ✗ | ✓ | ✓ | ✓ (LL) |
-| Bitwise ops | ✗ | ✓ | ✓ | ✓ |
-| `_ENV` | ✗ | ✓ | ✓ | Partial |
-| `setfenv` | ✓ | ✗ | ✗ | ✓ |
-| Generational GC | ✗ | ✗ | ✓ | ✗ |
-| To-be-closed | ✗ | ✗ | ✓ | ✗ |
-| FFI | ✗ | ✗ | ✗ | ✓ |
-| Trace JIT | ✗ | ✗ | ✗ | ✓ |
+| Feature | 5.1 | 5.2 | 5.3 | 5.4 | 5.5 | LuaJIT |
+|---------|-----|-----|-----|-----|-----|--------|
+| **Number Types** | float | float | int + float | int + float | int + float | float + FFI |
+| **Integer Division** | ✗ | ✗ | `//` | `//` | `//` | ✗ |
+| **Bitwise Operators** | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ (ext) |
+| **`_ENV`** | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ |
+| **`setfenv`/`getfenv`** | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ |
+| **Generational GC** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
+| **To-Be-Closed Vars** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
+| **FFI** | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
+| **JIT Compilation** | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ |
 
 ---
 

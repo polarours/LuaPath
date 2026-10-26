@@ -15,7 +15,7 @@
 | **`setfenv`/`getfenv`** | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ |
 | **分代 GC** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
 | **to-be-closed 变量** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
-| **Ephemeron 表** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Ephemeron 表** | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ |
 | **`goto` 语句** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **位运算库** | ✗ | `bit32` | `bit32` | ✗ | ✗ | `bit.*` |
 | **`__len` 元方法** | ✗ | ✓（表格） | ✓ | ✓ | ✓ | ✗ |
@@ -541,6 +541,8 @@ local result = 5 // 2
 - [Lua 5.1 手册](https://www.lua.org/manual/5.1/)
 - [Lua 5.3 手册](https://www.lua.org/manual/5.3/)
 - [Lua 5.4 手册](https://www.lua.org/manual/5.4/)
+- [Lua 5.5 手册](https://www.lua.org/manual/5.5/)
 - [LuaJIT 文档](https://luajit.org/)
 - [Lua 5.3 变更说明](https://www.lua.org/manual/5.3/readme.html#changes)
 - [Lua 5.4 变更说明](https://www.lua.org/manual/5.4/readme.html#changes)
+- [Lua 5.5 变更说明](https://www.lua.org/manual/5.5/readme.html#changes)

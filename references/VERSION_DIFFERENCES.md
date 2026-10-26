@@ -15,7 +15,7 @@ Comprehensive comparison of behavior across Lua versions.
 | **`setfenv`/`getfenv`** | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ |
 | **Generational GC** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
 | **To-Be-Closed Vars** | ✗ | ✗ | ✗ | ✓ | ✓ | ✗ |
-| **Ephemeron Tables** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **Ephemeron Tables** | ✗ | ✓ | ✓ | ✓ | ✓ | ✗ |
 | **`goto` Statement** | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Bitwise Library** | ✗ | `bit32` | `bit32` | ✗ | ✗ | `bit.*` |
 | **`__len` Metamethod** | ✗ | ✓ (tables) | ✓ | ✓ | ✓ | ✗ |
@@ -543,6 +543,8 @@ local result = 5 // 2
 - [Lua 5.1 Manual](https://www.lua.org/manual/5.1/)
 - [Lua 5.3 Manual](https://www.lua.org/manual/5.3/)
 - [Lua 5.4 Manual](https://www.lua.org/manual/5.4/)
+- [Lua 5.5 Manual](https://www.lua.org/manual/5.5/)
 - [LuaJIT Documentation](https://luajit.org/)
 - [Lua 5.3 Changes](https://www.lua.org/manual/5.3/readme.html#changes)
 - [Lua 5.4 Changes](https://www.lua.org/manual/5.4/readme.html#changes)
+- [Lua 5.5 Changes](https://www.lua.org/manual/5.5/readme.html#changes)
