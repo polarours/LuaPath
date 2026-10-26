@@ -175,10 +175,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   its own: `--all` used to be ignored as soon as a directory was passed, so
   `validate.lua --all references` silently checked only the reference sheets
   and still reported success
+- **The version comparison tables are now checked as a whole.** The old
+  `tests/test-version-facts.lua` read one table out of one document and
+  probed the running runtime for the rows it knew. It now reads every version
+  table in the repository, in both language tracks -- the long one in
+  `references/VERSION_DIFFERENCES.md` and the short one on the quick
+  reference card -- and it is stricter about what it accepts:
+  - every row has to be settled by a probe, so a new row cannot be added
+    without somebody deciding how the runtimes would answer it
+  - a table without a column for the runtime running the test is a failure,
+    not the "nothing to check" it used to report
+  - the two copies of the table have to say the same thing, and so do the two
+    language tracks
+  The `Ephemeron Tables` row, which used to sit on a skip list, is now
+  probed: a weak-keyed entry whose value refers back to its own key survives
+  on 5.1 and LuaJIT and disappears from 5.2 on. The gate was verified against
+  six deliberate breakages -- a wrong cell, a wrong cell in the other
+  language, a row with no probe, a missing version column, and the two copies
+  disagreeing -- and it caught all six
+- `scripts/check-external-links.sh` (`make check-external-links`): the external
+  links in the documentation have to still resolve. The internal link checker
+  cannot see a page that has been taken down, and the documentation pointed at
+  eight such pages: the two "try" playgrounds that lua.org and luajit.org used
+  to have, a performance guide and a security page that LuaJIT has removed, the
+  site that hosted the Busted documentation, the PDF of the Lua history, the
+  official forum -- whose domain no longer resolves -- and a book that is no
+  longer listed anywhere. The check runs in its own CI job, because it needs
+  the network and a link that rots is not a broken build
 - CI/CD pipeline for validation
 
 ### Fixed
 
+- **The comparison table credited LuaJIT with ephemerons it does not have.**
+  LuaJIT keeps a weak-keyed entry alive when the value refers back to its
+  own key, exactly like Lua 5.1 does, so the entry survives where 5.2 and
+  later drop it. Measured on 5.1, 5.3, 5.4, 5.5 and LuaJIT: the entry is
+  still there on 5.1 and LuaJIT and gone on the other three. The cell now
+  reads ✗ for LuaJIT, in both language tracks
+- **The quick reference card carried a second copy of the comparison table,
+  and it had drifted.** It had no 5.5 column, it called LuaJIT's `_ENV`
+  support "partial" when LuaJIT has no `_ENV` at all -- `_ENV` is not even
+  defined there, and assigning it changes no scope -- and it credited
+  LuaJIT with integer types it does not have, since `math.type` is absent and
+  every number is a double. The table now uses the same columns, the same
+  row names and the same cells as the long one, so the gate can check both
+- **The documentation linked to seven pages that are gone.** `lua.org/try.html`
+  and `luajit.org/try.html` both answer 404 -- neither lua.org nor luajit.org
+  offers an online playground any more, and the lua.org home page links to
+  none -- yet the playground guide recommended both as the first two
+  options, and it called Lua 5.4 "the latest stable" while the project's own
+  README says 5.5 is the current release. `luajit.org/perf.html`,
+  `luajit.org/security.html`, `olivinelabs.com/busted/`,
+  `www.lua.org/doc/record.pdf` and the `discuss.lua.org` forum were dead as
+  well; every URL in the repository was checked, and the ones that survived
+  are the ones the documents point at now
+- **A link pointed at a section of the Lua manual that does not exist.** The
+  performance chapter linked to "Section 11" of the reference manual, which
+  has nine sections; it now points at section 2.5, the garbage collection
+  chapter, which is what the chapter's GC tuning section is about
+- **Every chapter linked to the Lua 5.4 manual** while the README declares
+  Lua 5.5 the current release and every chapter declares 5.5 support. The
+  links now point at the 5.5 manual. All fourteen section anchors the
+  documents use were checked to exist in it, and the per-version list in
+  `references/VERSION_DIFFERENCES.md` keeps the 5.1, 5.3 and 5.4 manuals
+  and gained the 5.5 one
 - **`references/VERSION_DIFFERENCES.md` shipped a `goto` sample that no
   interpreter could parse.** A `return nil` sat in front of the `::found::`
   label, and `return` has to be the last statement of a block, so Lua 5.2 and

@@ -45,6 +45,16 @@ jobs:
       - name: Check stage README file references
         run: make check-stage-files
 
+  check-external-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # A link that rots is not a broken build, so this runs in its own job:
+      # it needs the network and it is slower than the other checks.
+      - name: Check external links
+        run: make check-external-links
+
   test-examples:
     runs-on: ubuntu-latest
     strategy:

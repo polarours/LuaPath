@@ -1,7 +1,7 @@
 # LuaPath Makefile
 # Common tasks for content development, validation, and testing
 
-.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
+.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-external-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
 
 # Configuration
 LUA ?= lua5.4
@@ -47,6 +47,7 @@ help:
 	@echo "  make examples-dir          - Create examples directory structure"
 	@echo "  make extract-code          - Extract code blocks from markdown files"
 	@echo "  make check-links           - Validate internal links"
+	@echo "  make check-external-links  - Validate that external links still resolve"
 	@echo "  make check-chapters        - Verify example Chapter: headers resolve"
 	@echo "  make check-stage-refs      - Verify Stage/Chapter references resolve"
 	@echo "  make check-code-mirror     - Verify EN/ZH code samples are the same code"
@@ -177,6 +178,14 @@ check-links:
 	@echo "==> Checking link anchors..."
 	@$(LUA) $(SCRIPTS_DIR)/check-anchors.lua
 	@echo "==> Link check complete"
+
+# Verify that the external links still point at something. This one is not
+# part of `make ci` because it needs the network: a host that is down would
+# fail it, and a link that rots is not a broken build.
+check-external-links:
+	@echo "==> Checking external links..."
+	@bash $(SCRIPTS_DIR)/check-external-links.sh
+	@echo "==> External link check complete"
 
 # Verify every example's `-- Chapter:` header names a real chapter
 check-chapters:
