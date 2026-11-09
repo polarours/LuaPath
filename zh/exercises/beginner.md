@@ -167,12 +167,13 @@ coroutine.resume(co)  --> 错误：无法 resume 已终止的 coroutine
 ### 3.4 — 元表共享状态 [中等]
 ```lua
 local User = {}; User.__index = User
+User.scores = {}                     -- 一张表，所有实例共享
 function User.new(name) return setmetatable({name=name}, User) end
 local u1, u2 = User.new("Alice"), User.new("Bob")
-u1.scores = {100}
+u1.scores[1] = 100                   -- 改的是两个实例共享的那张表
 print(#u2.scores)  --> 1 — 应该是 0
 ```
-**任务**：解释这个行为。如果是 bug，请修复。如果不是，请记录为什么 `__index` 在这里不会导致共享可变状态。
+**任务**：解释这个行为，然后修好它，让每个实例各自保存自己的 scores。
 
 ### 3.5 — 迭代期间的修改 [中等]
 ```lua

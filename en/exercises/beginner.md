@@ -168,12 +168,13 @@ coroutine.resume(co)  --> ERROR: cannot resume dead coroutine
 ### 3.4 — Metatable Shared State [Medium]
 ```lua
 local User = {}; User.__index = User
+User.scores = {}                     -- one table, shared by every instance
 function User.new(name) return setmetatable({name=name}, User) end
 local u1, u2 = User.new("Alice"), User.new("Bob")
-u1.scores = {100}
+u1.scores[1] = 100                   -- mutates the table both instances share
 print(#u2.scores)  --> 1 — should be 0
 ```
-**Task**: Explain the behavior. If it's a bug, fix it. If not, document why `__index` doesn't cause shared mutable state here.
+**Task**: Explain the behavior, then fix it so that each instance keeps its own scores.
 
 ### 3.5 — Mutation During Iteration [Medium]
 ```lua
