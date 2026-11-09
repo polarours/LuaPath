@@ -1,7 +1,7 @@
 # LuaPath Makefile
 # Common tasks for content development, validation, and testing
 
-.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-external-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
+.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-external-links check-gates-are-live check-exercise-solutions check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
 
 # Configuration
 LUA ?= lua5.4
@@ -53,6 +53,8 @@ help:
 	@echo "  make check-code-mirror     - Verify EN/ZH code samples are the same code"
 	@echo "  make check-stage-files     - Verify stage READMEs name files that exist"
 	@echo "  make check-pitfall-examples - Run the code samples in the pitfall articles"
+	@echo "  make check-exercise-solutions - Run the reference solutions in the exercises"
+	@echo "  make check-gates-are-live - Prove that every gate can fail"
 	@echo "  make check-stdlib-names  - Verify the stdlib members the docs name exist"
 	@echo "  make check-capi-names    - Verify the C API functions the docs name exist"
 	@echo ""
@@ -179,6 +181,21 @@ check-links:
 	@$(LUA) $(SCRIPTS_DIR)/check-anchors.lua
 	@echo "==> Link check complete"
 
+# Run the reference solutions in the exercise files. A solution is the part of
+# an exercise a reader trusts most: they copy it and run it.
+check-exercise-solutions:
+	@echo "==> Running the exercise reference solutions..."
+	@$(LUA) $(SCRIPTS_DIR)/check-exercise-solutions.lua --interpreter $(LUA)
+	@echo "==> Exercise solution check complete"
+
+# Prove that every gate can fail. A gate that cannot fail is worse than no
+# gate: it reports PASSED while checking nothing. This one is not part of
+# `make ci` because it copies the repository once per gate.
+check-gates-are-live:
+	@echo "==> Auditing the gates..."
+	@bash $(SCRIPTS_DIR)/check-gates-are-live.sh LUA=$(LUA) LUA51=$(LUA51) LUACHECK=$(LUACHECK)
+	@echo "==> Gate liveness audit complete"
+
 # Verify that the external links still point at something. This one is not
 # part of `make ci` because it needs the network: a host that is down would
 # fail it, and a link that rots is not a broken build.
@@ -224,7 +241,7 @@ toc:
 	@echo "==> TOC generated"
 
 # Run all validation and tests
-ci: validate validate-51 lint check-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names parity test-examples test-roadmap-stages test-version-facts
+ci: validate validate-51 lint check-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-exercise-solutions check-stdlib-names check-capi-names parity test-examples test-roadmap-stages test-version-facts
 	@echo "==> CI checks complete"
 
 # Run the full version matrix: 5.4 baseline plus the 5.1 and LuaJIT baselines

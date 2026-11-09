@@ -59,9 +59,19 @@ local function list_files(dir, pattern)
   local out = {}
   local ok, pipe = pcall(io.popen, string.format(
     "find %s -type f -name '%s' | sort", "'" .. dir:gsub("'", "'\\''") .. "'", pattern))
-  if not ok or not pipe then return out end
+  if not ok or not pipe then
+    io.stderr:write("cannot list " .. dir .. "\n")
+    os.exit(1)
+  end
   for path in pipe:lines() do out[#out + 1] = path end
   pipe:close()
+  if #out == 0 then
+    -- A directory that yields nothing is missing or empty, and a gate that
+    -- checks nothing still reports PASSED. Either way the reader is
+    -- misled, so this is an error rather than a silent zero.
+    io.stderr:write("no files found in " .. dir .. "\n")
+    os.exit(1)
+  end
   return out
 end
 

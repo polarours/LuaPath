@@ -93,9 +93,18 @@ local function list_markdown(dir)
   local files = {}
   local ok, pipe = pcall(io.popen, string.format("find %s -type f -name '*.md' | sort",
     "'" .. dir:gsub("'", "'\\''") .. "'"))
-  if not ok or not pipe then return files end
+  if not ok or not pipe then
+    io.stderr:write("cannot list " .. dir .. "\n")
+    os.exit(1)
+  end
   for line in pipe:lines() do files[#files + 1] = line end
   pipe:close()
+  if #files == 0 then
+    -- See the note in the other gates: finding nothing must not look like
+    -- finding everything.
+    io.stderr:write("no files found in " .. dir .. "\n")
+    os.exit(1)
+  end
   return files
 end
 

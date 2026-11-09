@@ -98,6 +98,9 @@ jobs:
       - name: Run the pitfall article samples
         run: make check-pitfall-examples LUA=${{ matrix.interpreter }}
 
+      - name: Run the exercise reference solutions
+        run: make check-exercise-solutions LUA=${{ matrix.interpreter }}
+
       - name: Check the standard library names in the documents
         run: make check-stdlib-names
 
@@ -140,6 +143,37 @@ jobs:
 
       - name: Test roadmap stages
         run: make test-roadmap-stages LUA=${{ matrix.interpreter }} LUA_RUNTIME=${{ matrix.runtime }}
+
+  gate-liveness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua 5.4
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.4.9'
+
+      - name: Install Lua 5.1
+        uses: leafo/gh-actions-lua@v10
+        with:
+          luaVersion: '5.1.5'
+
+      - name: Install luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          luarocks install luacheck || true
+          command -v luacheck
+          luacheck --version
+
+      # Every gate has to be able to fail. A gate that cannot fail reports
+      # PASSED while checking nothing, and the pitfall example check was in
+      # that state for months: it created a file where it meant to create a
+      # directory, so the sample was never written out and a sample that did
+      # nothing but raise an error still passed.
+      - name: Prove that every gate can fail
+        run: make check-gates-are-live LUA=lua5.4 LUA51=lua5.1 LUACHECK=luacheck
 
   lint:
     runs-on: ubuntu-latest

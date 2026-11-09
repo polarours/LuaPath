@@ -202,10 +202,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   official forum -- whose domain no longer resolves -- and a book that is no
   longer listed anywhere. The check runs in its own CI job, because it needs
   the network and a link that rots is not a broken build
+- `scripts/check-exercise-solutions.lua` (`make check-exercise-solutions`): the
+  reference solutions in the exercise files are run, in both language tracks. A
+  solution is the part of an exercise a reader trusts most -- they copy it and
+  run it -- and most of them carry their own assertions, so a solution whose
+  logic is wrong teaches the wrong thing. The exercise *statements* are not
+  checked: they are prompts to write a function, so their samples call
+  something that does not exist yet
+- `scripts/check-gates-are-live.sh` (`make check-gates-are-live`): proves that
+  every gate in the repository can actually fail. For each gate the script
+  copies the repository, breaks exactly one thing that the gate is supposed to
+  watch, runs the gate, and insists that the gate says no. A gate that cannot
+  fail reports PASSED while checking nothing, and the pitfall example check
+  was in that state for months
 - CI/CD pipeline for validation
 
 ### Fixed
 
+- **The pitfall example check never ran a single sample.** It asked
+  `os.tmpname()` for the directory it wanted to run a sample in, but
+  `os.tmpname()` hands back the name of a file it has already created, so the
+  `mkdir` failed, the sample was never written out, and the `if fh then` guard
+  around it quietly skipped the whole thing. The gate reported "Samples run:
+  101" while running nothing, and a sample that did nothing but raise an error
+  still passed. The name is now given back before the directory is made, and a
+  sample that cannot be written out is reported instead of skipped
+- **The pitfall example check judged the wrong runtime.** Its "only on these
+  runtimes" list was matched against the runtime the *gate* runs on, not the
+  one that runs the samples. The CI runs the gate on 5.4 and the samples on 5.1
+  and LuaJIT, so the fragments that are supposed to be skipped on the older
+  runtimes were run there -- and the `rawlen` sample, which is *about* not
+  existing before 5.2, was reported as broken on exactly the runtimes it was
+  written for
+- **The samples ran without a timeout.** The gate asked `os.execute` whether
+  `timeout` was installed and compared the answer with 0. `os.execute` returns
+  the exit code on Lua 5.1 and true on 5.2 and later, so on every modern
+  interpreter the comparison was false and the samples were run with no
+  protection at all -- a sample that waits for input would have hung the
+  build
+- **`scripts/extract-code.lua` read its own `os.execute` answers wrong.** Its
+  fallback for a missing luafilesystem asked `test -d` and used the answer
+  directly. Every exit code is truthy in Lua, so on 5.1 the answer said "yes,
+  it is a directory" whether the test passed or failed, the "directory not
+  found" report never fired, and a failed `mkdir` was reported as a success.
+  The answers are normalised into plain booleans now
+- **A gate that listed no files still reported PASSED.** Eight of the gates
+  list the files they are supposed to look at with `find`, and threw away the
+  exit status of the command. A directory that had been renamed or removed
+  therefore reduced the coverage to zero without a word: the gate checked
+  nothing and said everything was fine. A listing that finds nothing is now
+  an error, and the gate says which directory came up empty
+- **The C API name check only knew the auxiliary library.** Its inventory held
+  the 86 `luaL_*` functions, and the pattern it matched, `^lua[A-Z]`, never
+  matched a core function whose name has an underscore in it, so
+  `lua_pushnumber` and its relatives were never checked at all. The inventory
+  now carries the core API as well, taken from the headers of the runtimes the
+  project supports, and the check covers 492 names instead of 144. It found
+  the quick reference's C API card listing `lua_pushfunction`, which is a Lua
+  5.0 spelling that exists in no supported version; the card now lists the
+  modern one
+- **An exercise promised an output it could not produce.** The metatable
+  shared state exercise showed a snippet whose comment said it printed 1, but
+  with no table on the prototype the snippet raised "attempt to get length of a
+  nil value" instead. It now shows the classic shared prototype bug and prints
+  the 1 the comment describes
 - **The comparison table credited LuaJIT with ephemerons it does not have.**
   LuaJIT keeps a weak-keyed entry alive when the value refers back to its
   own key, exactly like Lua 5.1 does, so the entry survives where 5.2 and
