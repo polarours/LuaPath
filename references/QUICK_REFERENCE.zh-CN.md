@@ -243,7 +243,6 @@ lua_pushinteger(L, lua_Integer);
 lua_pushnumber(L, lua_Number);
 lua_pushstring(L, const char*);
 lua_pushlstring(L, const char*, size_t);
-lua_pushfunction(L, lua_CFunction);
 lua_pushcclosure(L, lua_CFunction, int n);
 
 lua_pop(L, int n);
