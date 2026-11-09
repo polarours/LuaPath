@@ -49,14 +49,6 @@ local ALLOWED = {
   },
 }
 
--- Which runtime is running the samples?
-local RUNTIME
-if type(jit) == "table" then
-  RUNTIME = "LuaJIT"
-else
-  RUNTIME = _VERSION:match("(%d+%.%d+)")
-end
-
 local function read_file(path)
   local fh = io.open(path, "r")
   if not fh then return nil end
@@ -69,9 +61,19 @@ local function list_files(dir, pattern)
   local out = {}
   local ok, pipe = pcall(io.popen, string.format(
     "find %s -type f -name '%s' | sort", "'" .. dir:gsub("'", "'\\''") .. "'", pattern))
-  if not ok or not pipe then return out end
+  if not ok or not pipe then
+    io.stderr:write("cannot list " .. dir .. "\n")
+    os.exit(1)
+  end
   for path in pipe:lines() do out[#out + 1] = path end
   pipe:close()
+  if #out == 0 then
+    -- A directory that yields nothing is missing or empty, and a gate that
+    -- checks nothing still reports PASSED. Either way the reader is
+    -- misled, so this is an error rather than a silent zero.
+    io.stderr:write("no files found in " .. dir .. "\n")
+    os.exit(1)
+  end
   return out
 end
 
@@ -104,12 +106,41 @@ local function shell_quote(s)
   return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
+-- Which runtime is the *sample* interpreter? The one that runs the samples
+-- decides what a sample does, not the one that runs this script: the CI
+-- runs this script on 5.4 and the samples on 5.1 and LuaJIT, and a fragment
+-- that only works on 5.2 and later has to be judged by the sample
+-- interpreter.
+--
+-- Lua 5.1 prints its version banner on stderr, the newer ones on stdout.
+local function runtime_of(binary)
+  local pipe = io.popen(string.format("%s -v 2>&1", shell_quote(binary)))
+  local banner = ""
+  if pipe then
+    banner = pipe:read("*l") or ""
+    pipe:close()
+  end
+  if banner:match("LuaJIT") then return "LuaJIT" end
+  return banner:match("Lua (%d+%.%d+)") or ""
+end
+
+local SAMPLE_RUNTIME = runtime_of(INTERPRETER)
+if SAMPLE_RUNTIME == "" then
+  -- The interpreter could not be asked; fall back to the runtime this
+  -- script is running on.
+  if type(jit) == "table" then
+    SAMPLE_RUNTIME = "LuaJIT"
+  else
+    SAMPLE_RUNTIME = _VERSION:match("(%d+%.%d+)") or ""
+  end
+end
+
 -- Is this block one of the known fragments?
 local function allowed_for(file_name, block)
   local entries = ALLOWED[file_name]
   if not entries then return nil end
   for _, entry in ipairs(entries) do
-    if not entry.only or entry.only[RUNTIME] then
+    if not entry.only or entry.only[SAMPLE_RUNTIME] then
       for _, line in ipairs(block.lines) do
         local stripped = line:gsub("^%s+", "")
         if stripped:sub(1, #entry.prefix) == entry.prefix then
@@ -127,7 +158,12 @@ local skipped = 0
 
 -- `timeout` is not everywhere, but where it is, it keeps a sample that
 -- waits for input from hanging the build.
-local has_timeout = os.execute("command -v timeout >/dev/null 2>&1") == 0
+--
+-- os.execute returns the exit code on Lua 5.1 and true on 5.2 and later, so
+-- "== 0" is false on every modern interpreter and the samples ran without
+-- a timeout at all.
+local timeout_probe = os.execute("command -v timeout >/dev/null 2>&1")
+local has_timeout = timeout_probe == true or timeout_probe == 0
 
 for _, dir in ipairs({ "pitfalls/en", "pitfalls/中文版" }) do
   for _, path in ipairs(list_files(dir, "*.md")) do
@@ -143,12 +179,24 @@ for _, dir in ipairs({ "pitfalls/en", "pitfalls/中文版" }) do
             checked = checked + 1
             -- The sample runs in its own directory: a sample that writes a
             -- file must not leave it in the repository.
+            --
+            -- os.tmpname() hands back the name of a file it has already
+            -- created, so the name has to be given back before it can be
+            -- used for a directory. Without this the mkdir fails, the file
+            -- below it cannot be created, and the sample is silently never
+            -- run -- which is what happened until this was noticed.
             local workdir = os.tmpname()
+            os.remove(workdir)
             os.execute(string.format("mkdir -p %s", shell_quote(workdir)))
             local temp = workdir .. "/sample.lua"
             local output = workdir .. "/output.txt"
             local fh = io.open(temp, "w")
-            if fh then
+            if not fh then
+              -- A sample that cannot be written out cannot be checked, and a
+              -- check that quietly checks nothing is worse than no check.
+              errors = errors + 1
+              print(string.format("  %s: code block %d could not be written out", path, index))
+            else
               fh:write(table.concat(block.lines, "\n"))
               fh:close()
               local command

@@ -30,10 +30,19 @@ else
       end
     end,
     attributes = function(path)
-      return os.execute('test -d "' .. path .. '"')
+      -- os.execute returns the exit code on Lua 5.1 and true on 5.2 and
+      -- later. Every exit code is truthy in Lua, so on 5.1 the raw answer
+      -- says "yes, it is a directory" whether the test passed or failed,
+      -- and the "directory not found" report never fires. The result is
+      -- normalised into a plain boolean here.
+      local ok = os.execute('test -d "' .. path .. '"')
+      return ok == true or ok == 0
     end,
     mkdir = function(path)
-      return os.execute('mkdir -p "' .. path .. '"') ~= nil
+      -- Same trap: a failed mkdir answers a non-zero code on 5.1, which is
+      -- not nil, so "~= nil" would report a failure as a success.
+      local ok = os.execute('mkdir -p "' .. path .. '"')
+      return ok == true or ok == 0
     end,
   }
 end
