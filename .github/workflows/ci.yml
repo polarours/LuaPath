@@ -33,6 +33,9 @@ jobs:
       - name: Check internal links
         run: make check-links
 
+      - name: Check the numbers the README states
+        run: make check-readme-stats
+
       - name: Check EN/ZH parity
         run: make parity
 

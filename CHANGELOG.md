@@ -214,7 +214,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   copies the repository, breaks exactly one thing that the gate is supposed to
   watch, runs the gate, and insists that the gate says no. A gate that cannot
   fail reports PASSED while checking nothing, and the pitfall example check
-  was in that state for months
+  was in that state for months. A case whose defect did not apply says nothing
+  about the gate at all, so it is reported on its own rather than counted
+  against the gate
+- `scripts/check-readme-stats.lua` (`make check-readme-stats`): the numbers the
+  two README files state are checked against the repository. The quick stats
+  table is the first thing a reader sees, and every number in it -- the
+  chapter count, the pitfall article count, the number of runnable examples,
+  the size of the glossary in both languages, the number of roadmap stages,
+  the number of cross-cutting chapters -- is a claim about the repository
+  that nothing else in the build looked at. The repository layout tree
+  repeats the counts in prose and is checked as well, and a line that no
+  longer states a number is reported rather than passed over
 - CI/CD pipeline for validation
 
 ### Fixed

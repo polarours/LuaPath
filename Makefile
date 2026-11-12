@@ -1,7 +1,7 @@
 # LuaPath Makefile
 # Common tasks for content development, validation, and testing
 
-.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-external-links check-gates-are-live check-exercise-solutions check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
+.PHONY: help validate validate-51 lint test-examples test-roadmap-stages test-version-facts test-lua51 test-luajit parity check-links check-external-links check-gates-are-live check-exercise-solutions check-readme-stats check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-stdlib-names check-capi-names ci ci-matrix clean examples-dir extract-code toc watch version
 
 # Configuration
 LUA ?= lua5.4
@@ -55,6 +55,7 @@ help:
 	@echo "  make check-pitfall-examples - Run the code samples in the pitfall articles"
 	@echo "  make check-exercise-solutions - Run the reference solutions in the exercises"
 	@echo "  make check-gates-are-live - Prove that every gate can fail"
+	@echo "  make check-readme-stats - Check the numbers the README states"
 	@echo "  make check-stdlib-names  - Verify the stdlib members the docs name exist"
 	@echo "  make check-capi-names    - Verify the C API functions the docs name exist"
 	@echo ""
@@ -188,6 +189,14 @@ check-exercise-solutions:
 	@$(LUA) $(SCRIPTS_DIR)/check-exercise-solutions.lua --interpreter $(LUA)
 	@echo "==> Exercise solution check complete"
 
+# Check the numbers the README states against the repository. The quick stats
+# table is the first thing a reader sees, and every number in it is a claim
+# about the repository that nothing else in the build looks at.
+check-readme-stats:
+	@echo "==> Checking the numbers in the README..."
+	@$(LUA) $(SCRIPTS_DIR)/check-readme-stats.lua
+	@echo "==> README stat check complete"
+
 # Prove that every gate can fail. A gate that cannot fail is worse than no
 # gate: it reports PASSED while checking nothing. This one is not part of
 # `make ci` because it copies the repository once per gate.
@@ -241,7 +250,7 @@ toc:
 	@echo "==> TOC generated"
 
 # Run all validation and tests
-ci: validate validate-51 lint check-links check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-exercise-solutions check-stdlib-names check-capi-names parity test-examples test-roadmap-stages test-version-facts
+ci: validate validate-51 lint check-links check-readme-stats check-chapters check-stage-refs check-code-mirror check-stage-files check-pitfall-examples check-exercise-solutions check-stdlib-names check-capi-names parity test-examples test-roadmap-stages test-version-facts
 	@echo "==> CI checks complete"
 
 # Run the full version matrix: 5.4 baseline plus the 5.1 and LuaJIT baselines
