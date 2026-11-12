@@ -32,6 +32,7 @@ LUACHECK="${LUACHECK:-luacheck}"
 LIVE=0
 DEAD=0
 SKIPPED=0
+BROKEN=0
 
 cleanup() {
   rm -rf "$WORK"
@@ -73,14 +74,27 @@ runtime_of() {
 # gate   -- a command that runs the gate; it has to fail
 run_case() {
   local name="$1" setup="$2" defect="$3" gate="$4"
-  local repo="$WORK/case"
 
-  rm -rf "$repo"
-  mkdir -p "$repo"
+  # Every case gets a copy of its own. Reusing one copy means that a failed
+  # cleanup leaves the previous case's damage behind, and the next defect
+  # then does not apply -- which used to look like a dead gate.
+  local repo
+  repo="$(mktemp -d "$WORK/case.XXXXXX")"
   (cd "$ROOT" && tar --exclude=./.git -cf - .) | (cd "$repo" && tar -xf -)
 
   ( cd "$repo" && eval "$setup" ) >/dev/null 2>&1
+
+  # The defect has to be applied before the gate is blamed. If the command
+  # that breaks the repository did not do its job -- a leftover directory
+  # makes "mv" fail, for instance -- the gate is right to pass and the case
+  # says nothing about the gate at all.
   ( cd "$repo" && eval "$defect" ) >/dev/null 2>&1
+  local defect_status=$?
+  if [ "$defect_status" -ne 0 ]; then
+    echo "  BROKEN  $name -- the defect did not apply, the case says nothing"
+    BROKEN=$((BROKEN + 1))
+    return
+  fi
 
   ( cd "$repo" && eval "$gate" ) >/dev/null 2>&1
   local status=$?
@@ -131,6 +145,16 @@ run_case "check-example-chapters: an example pointing at a chapter that does not
   ":" \
   "sed -i 's|^-- Chapter: .*|-- Chapter: no-such-chapter|' examples/beginner/01-moving-average.lua" \
   "$LUA scripts/check-example-chapters.lua"
+
+run_case "check-readme-stats: the README states a number that is wrong" \
+  ":" \
+  "sed -i 's/| Documentation | 22 chapters/| Documentation | 23 chapters/' README.md" \
+  "$LUA scripts/check-readme-stats.lua"
+
+run_case "check-readme-stats: the README drops a number altogether" \
+  ":" \
+  "sed -i '/| Glossary | 151 terms (EN + ZH) |/d' README.md" \
+  "$LUA scripts/check-readme-stats.lua"
 
 run_case "check-stage-refs: a reference to a stage that does not exist" \
   ":" \
@@ -218,9 +242,10 @@ echo "-------"
 echo "Gates proven live: $LIVE"
 echo "Gates that passed a broken repository: $DEAD"
 echo "Cases skipped: $SKIPPED"
+echo "Cases whose defect did not apply: $BROKEN"
 echo ""
 
-if [ "$DEAD" -gt 0 ]; then
+if [ "$DEAD" -gt 0 ] || [ "$BROKEN" -gt 0 ]; then
   echo "GATE LIVENESS AUDIT FAILED"
   exit 1
 fi
