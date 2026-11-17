@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Case study for Chapter 12 (EN + ZH), "Measuring Memory Without Fooling
+  Yourself", backed by a corrected `examples/advanced/22-memory-optimization.lua`.
+  The old example measured post-GC residue, and `tostring(i)`'s interned number
+  strings made `table.concat` appear to use 22x MORE memory than the O(n^2)
+  loop. It now guards that both builders return the identical 100,000-char
+  string, keeps times above 0.1 s, and reports the metrics that answer each
+  question: peak transient allocation for table reuse (6.0 vs 0.2 KB on 5.4)
+  and time for string building (130x on 5.4, 149x on 5.1, 274x on LuaJIT).
+  All 7 checks pass on three runtimes
 - Case studies for Chapters 10 and 18 (EN + ZH), each backed by the example
   already linked from that chapter. Chapter 10 itemises the allocation bill:
   string interning (~4.9x for 60,000 newly built strings), array vs hash parts

@@ -437,6 +437,95 @@ print(os.clock() - start)
 
 ---
 
+## Case Study: Measuring Memory Without Fooling Yourself
+
+A service builds a daily digest by appending one string per record with `s = s
+.. piece`, and creates a short-lived `{x=..., y=...}` table in the inner loop of
+its parser. Profiling says the service is slow and uses too much memory, so the
+team rewrites the string builder with `table.concat` and reuses the table. The
+first measurement after the change appears to show the opposite: the "good"
+string builder uses *more* memory than the old one. Chapter 12 is full of
+advice about allocation; this case study asks what a number has to measure
+before it can support that advice at all.
+
+### What Was Measured Wrong
+
+The original benchmark let each builder discard its result, collected the
+garbage, and reported `collectgarbage("count")` after the collection. That is a
+measure of **post-GC residue** — what is still reachable — not of what the
+workload cost while it ran. It produced this on Lua 5.4:
+
+```
+Bad concat:  2.69 KB
+Good concat: 60.24 KB
+```
+
+The "good" path looked 22x worse. The cause is not `table.concat`: it is
+`tostring(i)`, called 10,000 times by both builders. Numeric-to-string
+conversions are kept in Lua's interned string table, which the collector does
+not clear, so whichever path leaves more of them behind is charged. The number
+was answering "how many interned strings survived?", not "how much allocation
+pressure did this create?".
+
+### Two Questions, Two Metrics
+
+`examples/advanced/22-memory-optimization.lua` separates the questions and puts
+a correctness guard before every timing, because a faster function that
+returns a different string is not an optimisation:
+
+- **Peak transient allocation** (heap sampled *during* the workload, with no
+  intermediate collection) answers "how hard does this push the allocator?".
+  This is the metric for the table-reuse question.
+- **Elapsed time** (with a fixed `"x"` piece instead of `tostring(i)`, so no
+  interned strings distort the run) answers the string-building question.
+  O(n^2) concatenation versus O(n) joining is primarily a time difference.
+
+```lua
+-- peak allocation while the workload runs, never collecting inside it
+collectgarbage("collect")
+local base = collectgarbage("count")
+local peak = base
+local result = workload(function()
+  local now = collectgarbage("count")
+  if now > peak then peak = now end
+end)
+-- report peak - base, i.e. what the loop held or dirtied along the way
+```
+
+### Measured Results
+
+Both builders were first asserted to return the identical 100,000-character
+string, and both measured times were checked to be above 0.1 s (below that,
+`os.clock()` resolution is noise). Then the same run on the development machine:
+
+```
+table reuse, 100000 iterations:  fresh tables 6.0 KB vs reused 0.2 KB peak
+string, 100000 pieces:  s.."x" 0.307 s vs table.concat 0.002 s
+ratio: 130x on Lua 5.4, 149x on Lua 5.1, 274x on LuaJIT
+weak-key cache: 100 live entries -> 50 after dropping half the keys
+```
+
+All 7 checks passed on Lua 5.4, 5.1 and LuaJIT. Absolute seconds and KB are
+machine-dependent; the ratios and the identical-output guard are the portable
+claims. Note that the two string builders do NOT have the same peak allocation
+on every runtime — a parts array costs memory too. The time ratio, not a memory
+delta, is what makes `table.concat` the right choice.
+
+### What This Changes
+
+- Decide which question the number answers *before* running the benchmark.
+  "Did it leak?" (post-GC residue) and "did it allocate a lot?" (peak
+  transient) are different questions; one number cannot answer both.
+- Put the correctness guard before the timer. The example refuses to report
+  any timing if the two builders return different strings.
+- Avoid measurement artefacts in the workload itself. `tostring(i)` filled the
+  interned string table; using a fixed piece removes that confound without
+  changing what is being compared.
+- Keep times above the clock's resolution and report ratios, not absolute
+  seconds, so the claim survives a different machine or interpreter.
+
+---
+
 ## Best Practices
 
 ### 1. Profile Before Optimizing
