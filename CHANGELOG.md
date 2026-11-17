@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Case studies for Chapters 10 and 18 (EN + ZH), each backed by the example
+  already linked from that chapter. Chapter 10 itemises the allocation bill:
+  string interning (~4.9x for 60,000 newly built strings), array vs hash parts
+  (~4.4x for 50,000 keys), the `for`/`while` upvalue difference (1,2,3 vs 4,4,4
+  on all three runtimes) and ~97% of peak heap reclaimed after collection.
+  Chapter 18 audits five real boundary controls: bytecode rejection (byte 1 =
+  27; `load` mode only helps on 5.2+), a read-only `_ENV` with no dangerous
+  globals, size and repetition limits before parsing/allocation, and an xpcall
+  handler that does not leak a path a bare pcall does reveal. All figures come
+  from `examples/advanced/26-internals-probe.lua` and
+  `examples/advanced/27-security-audit.lua`, run on Lua 5.4, 5.1 and LuaJIT
 - `tests/test-version-facts.lua` (`make test-version-facts`): the quick
   comparison table in `references/VERSION_DIFFERENCES.md` is checked against
   the runtime that is running it. The table is what a reader trusts when

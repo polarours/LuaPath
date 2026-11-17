@@ -421,6 +421,108 @@ error("Service unavailable")
 
 ---
 
+## Case Study: Auditing the Plugin Boundary
+
+A plugin loader accepts Lua source from users and runs it inside the process.
+Its "sandbox" is a table of allowed globals. This case study does not ask
+whether that idea is sound in theory; it asks whether the controls a reviewer
+would look for actually fire when something hostile is sent through them.
+`examples/advanced/27-security-audit.lua` drives five real attempts at the
+boundary and prints what happened.
+
+### The Five Controls
+
+1. **Reject precompiled bytecode** before the loader sees it — source is what
+   the plugin contract accepts, and bytecode can hide a different program.
+2. **Isolate the environment** so `os`, `io`, `debug` and `require` are absent,
+   and make it read-only so a plugin cannot install its own globals.
+3. **Limit the payload size** before parsing, so an attacker cannot make the
+   loader do unbounded work just decoding the input.
+4. **Limit repetition** before it allocates, so a small source cannot expand
+   into a huge string.
+5. **Sanitise errors** so a stack trace cannot leak server paths or user data
+   back to the caller.
+
+### What the Audit Runs
+
+The portable bytecode guard checks the first byte, because `load(..., "t")` only
+rejects binary chunks on Lua 5.2 and newer:
+
+```lua
+local HAS_LOADSTRING = loadstring ~= nil
+
+local function is_bytecode(src)
+  return type(src) == "string" and src:byte(1) == 27
+end
+
+local function guarded_load(src, name)
+  if is_bytecode(src) then
+    return nil, "bytecode rejected: precompiled chunks are not accepted"
+  end
+  if HAS_LOADSTRING then return loadstring(src, name) end
+  return load(src, name, "t", nil)
+end
+```
+
+The environment is an ordinary table with a write guard; the dangerous globals
+are simply never put into it:
+
+```lua
+local guard = {
+  __newindex = function(_, key)
+    error("sandbox is read-only: " .. tostring(key), 2)
+  end,
+}
+local env = setmetatable({ print = print }, { __index = guard })
+-- env.os, env.io, env.debug and env.require are all nil
+```
+
+The error handler returns a generic message and keeps the original one for the
+server log:
+
+```lua
+local function handler(err)
+  -- log err on the server; never return it to an untrusted caller
+  return "internal error: an unexpected condition occurred"
+end
+
+local ok, visible = xpcall(function()
+  error("/home/user/private/config.lua: nil value (field 'secret_key')")
+end, handler)
+```
+
+### Measured Results
+
+```
+first byte of string.dump(...) = 27 (ESC)
+mode="t" on 5.4 rejected it: attempt to load a binary chunk (mode is 't')
+byte guard: bytecode refused, ordinary source still accepted
+sandbox: os / io / debug / require all type() == "nil"
+         writes to new globals refused; _G is nil inside
+payload limits: under-limit source loads, over-limit refused before parsing
+resource limit: repetition bomb refused without allocating
+error hygiene: xpcall surfaced a generic message;
+               bare pcall leaked "/home/user/private/config.lua"
+checks: 20/20 on Lua 5.4, Lua 5.1 and LuaJIT
+```
+
+### What This Changes
+
+- A mode argument is a guard only on runtimes that honour it. On Lua 5.1 the
+  extra argument is ignored and a binary chunk loads happily, so the byte check
+  has to carry the guarantee across all supported versions.
+- Hiding a global is not the same as blocking a write. A sandbox without
+  `__newindex` lets a plugin create `os` on its own environment; the audit
+  checks writes as well as reads.
+- Limits belong before the expensive operation. The payload and repetition
+  guards reject before parsing and before allocation respectively, which is
+  what makes them limits rather than polite suggestions.
+- An error message is output too. The audit shows a bare `pcall` returning the
+  full path, while the `xpcall` handler returns a message a caller may safely
+  see — the raw text belongs in a server-side log.
+
+---
+
 ## Best Practices
 
 1. **Validate all input** at system boundaries

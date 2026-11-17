@@ -415,6 +415,93 @@ local s = table.concat(parts)
 
 ---
 
+## Case Study: The Allocation Bill, Itemized
+
+A service keeps parsed records in a table keyed by string IDs and builds one
+closure per record in a loop. Memory climbs, somebody says "the GC is leaking",
+and the team starts rewriting code before knowing which allocation actually
+costs anything. Chapter 10 describes the array part, string interning, upvalues
+and the collector separately; this case study asks what each one contributes
+when they run together.
+
+### The Question
+
+Four explanations are on the table: the table itself, the string keys, the
+closures, or a collector that has not run yet. Guessing between them costs a
+rewrite; measuring them on the interpreter you actually deploy costs one run.
+
+### What the Probe Measures
+
+`examples/advanced/26-internals-probe.lua` isolates each candidate. The string
+test holds 60,000 references to one shared string, then builds 60,000 new ones:
+
+```lua
+local N = 60000
+local shared = string.rep("k", 16)
+
+local refs = {}
+for i = 1, N do refs[i] = shared end
+
+local distinct = {}
+for i = 1, N do distinct[i] = "k" .. i end
+```
+
+The closure test compares a `for` loop with a `while` loop that mutates the same
+local, and the table test fills integer keys and string keys separately. Last,
+the probe allocates 20,000 tables, drops the reference and collects:
+
+```lua
+local fs, gs = {}, {}
+for i = 1, 3 do
+  fs[i] = function() return i end
+end
+
+local j = 0
+while j < 3 do
+  j = j + 1
+  gs[j] = function() return j end
+end
+```
+
+### Measured Results
+
+These are the values printed by Lua 5.4 on the development machine. Absolute
+kilobytes depend on the machine; the *ratios* and the closure values are the
+portable part, and the probe was also run on Lua 5.1 and LuaJIT.
+
+```
+60000 refs to one string:   +1024.1 KB   (table overhead only)
+60000 distinct strings:     +4998.9 KB   (~4.9x)
+50000 integer keys:         +1024.1 KB   (array part)
+50000 string keys:          +4535.7 KB   (~4.4x)
+for  closures -> 1,2,3      while closures -> 4,4,4   (all three runtimes)
+20000 tables: peak 3681.4 KB -> after collect 95.2 KB
+              freed 3586.2 KB (~97% of the peak)
+```
+
+The probe reports 18 checks on Lua 5.4, 13 on 5.1 and 14 on LuaJIT. The counts
+differ because version-specific sections are skipped, not because a check
+failed — every reported check passed on all three.
+
+### What This Changes
+
+- Reusing one string value is not the same as rebuilding equal strings. The VM
+  interns string *contents*; `"k" .. i` still allocates 60,000 distinct values
+  and cost about 4.9x the memory in this run. Interning them yourself adds work
+  without removing the table overhead.
+- Contiguous integer keys reach the array part, which cost about 4.4x less per
+  entry than string keys here. A key schema change can matter more than a
+  micro-optimisation in the loop.
+- `for` and `while` closures capture differently. The `for` form gave 1,2,3 on
+  every runtime; the `while` form gave 4,4,4 because all closures shared the
+  final value of `j`. Copy the loop variable into a fresh local if you use the
+  latter.
+- A growing heap is not a leak if dropping the reference returns it: the
+  collector gave back about 97% of the peak. Measure after a `collectgarbage`
+  cycle before concluding anything.
+
+---
+
 ## Best Practices
 
 ### 1. Measure Before Optimizing

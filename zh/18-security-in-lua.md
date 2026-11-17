@@ -419,6 +419,98 @@ error("服务不可用")
 
 ---
 
+## 实战案例：审计插件边界
+
+某个插件加载器接受用户提交的 Lua 源码，并在进程内运行它。它的"沙箱"就是一张
+允许使用的全局变量表。本案例不问这个思路在理论上是否成立，而是问：审查者会
+看的那些控制措施，在真正有恶意输入打过来时是否真的生效。
+`examples/advanced/27-security-audit.lua` 向边界发起五次真实尝试，并打印结果。
+
+### 五项控制
+
+1. **拒绝预编译字节码**，不让加载器看到它——插件协议接受的是源码，字节码里
+   可以藏着另一个程序。
+2. **隔离环境**：`os`、`io`、`debug`、`require` 都不存在，且环境只读，插件无法
+   自行安装全局量。
+3. **在解析前限制载荷大小**，这样攻击者没法仅靠让加载器解码输入就迫使它做
+   无界的工作。
+4. **在分配前限制重复次数**，一小段源码就不能膨胀成一个巨大的字符串。
+5. **净化错误信息**，栈回溯不能把服务器路径或用户数据带回给调用方。
+
+### 审计实际跑了什么
+
+可移植的字节码守卫检查首字节，因为 `load(..., "t")` 只在 Lua 5.2 及以上才拒绝
+二进制块：
+
+```lua
+local HAS_LOADSTRING = loadstring ~= nil
+
+local function is_bytecode(src)
+  return type(src) == "string" and src:byte(1) == 27
+end
+
+local function guarded_load(src, name)
+  if is_bytecode(src) then
+    return nil, "bytecode rejected: precompiled chunks are not accepted"
+  end
+  if HAS_LOADSTRING then return loadstring(src, name) end
+  return load(src, name, "t", nil)
+end
+```
+
+环境是一张带写入守卫的普通表；危险全局量压根没放进去：
+
+```lua
+local guard = {
+  __newindex = function(_, key)
+    error("sandbox is read-only: " .. tostring(key), 2)
+  end,
+}
+local env = setmetatable({ print = print }, { __index = guard })
+-- env.os、env.io、env.debug、env.require 全为 nil
+```
+
+错误处理器返回通用消息，原始消息只留给服务器日志：
+
+```lua
+local function handler(err)
+  -- 在服务端记录 err；绝不返回给不可信的调用方
+  return "internal error: an unexpected condition occurred"
+end
+
+local ok, visible = xpcall(function()
+  error("/home/user/private/config.lua: nil value (field 'secret_key')")
+end, handler)
+```
+
+### 实测结果
+
+```
+string.dump(...) 的首字节 = 27 (ESC)
+5.4 上 mode="t" 拒绝：attempt to load a binary chunk (mode is 't')
+字节守卫：字节码被拒，普通源码仍可接受
+沙箱：os / io / debug / require 的 type() 全部为 "nil"
+      向新全局量写入被拒；沙箱内 _G 为 nil
+载荷限制：低于上限的源码可加载，超限的在解析前被拒
+资源限制：重复炸弹在未分配内存前被拒
+错误净化：xpcall 返回通用消息；
+          裸 pcall 泄露了 "/home/user/private/config.lua"
+检查数：Lua 5.4、Lua 5.1、LuaJIT 均为 20/20
+```
+
+### 这意味着什么
+
+- mode 参数只有在支持它的运行时上才是守卫。Lua 5.1 会忽略多余的参数，二进制块
+  照样加载，所以字节检查必须承担跨全部受支持版本的保证。
+- 隐藏全局量不等于阻止写入。没有 `__newindex` 的沙箱允许插件在自己的环境里
+  造出一个 `os`；审计既要查读，也要查写。
+- 限制要放在昂贵操作之前。载荷守卫在解析前拒绝，重复守卫在分配前拒绝，这正是
+  它们成为硬限制而不是礼貌建议的原因。
+- 错误信息也是输出。审计展示了裸 `pcall` 会返回完整路径，而 `xpcall` 处理器
+  只返回调用方可以安全看到的消息——原始文本属于服务端日志。
+
+---
+
 ## 最佳实践
 
 1. **验证所有输入**在系统边界
