@@ -409,6 +409,81 @@ end
 
 ---
 
+## Case Study: Auditing the Boundary Contract
+
+A C extension and its Lua host disagree about a table that crossed between
+them: the C side read 3 elements, the Lua side sent a list with a hole in it.
+Neither program is buggy in isolation — the *boundary* has no written contract,
+so both sides guessed. This case study takes the five clauses a real boundary
+contract needs and checks each one against the running interpreter, in
+`examples/intermediate/20-interop-boundary.lua`.
+
+### The Question
+
+Every embedding eventually hits the same five questions: which C constructor
+does a Lua value map to; is an explicitly-stored `nil` the same as an absent
+key; which table walk may a converter use; how does a C function signal
+failure to Lua callers; and can a coroutine yield from underneath a
+`pcall`. Answering them from the manual is possible; answering them from the
+running system is checkable.
+
+### What the Audit Checks
+
+The dangerous clause is the third. A holed table exposes the disagreement
+between the three ways to measure a table:
+
+```
+holed = {"a", nil, "c"}
+#holed  -> 3   (a border, unspecified in general)
+ipairs -> 1   (stops at the hole)
+pairs  -> 2   (sees "a" and "c", not the nil)
+```
+
+A naive converter that walks `1..#t` returns a three-element list and signals
+nothing, because the walk length is exactly what `#` reported — it never checks
+further. The audited converter refuses the table *before it crosses*:
+
+```lua
+for i = 1, #t do
+  if t[i] == nil then
+    return nil, ("hole at index %d"):format(i)
+  end
+end
+```
+
+The other clauses are smaller but each has bitten someone: `42` and `42.0` push
+different constructors yet compare equal; a stored nil is indistinguishable from
+an absent key; a C function that returns its result first and `nil, message` on
+failure is fine until a caller drops the trailing results.
+
+### Measured Results
+
+```
+1. value mapping     42 vs 42.0 push integer/number; tostring(2.0) = "2.0"
+2. nil vs absent     t[k]=nil is indistinguishable from k never stored
+3. table conversion  dense: converted 3/3; holed: naive walk silently
+                    loses, guard rejects with "hole at index 2";
+                    hash key also rejected
+4. out-params        value-first on success, nil+message on failure,
+                    dropping trailing results hides the error
+5. yield in pcall    works on 5.2+/LuaJIT; measured per runtime, not assumed
+All checks passed: 25 on Lua 5.4, 23 on Lua 5.1, 23 on LuaJIT.
+```
+
+### What This Changes
+
+- Validate at the boundary, not after the crash. A guard that rejects a holed
+  table with "hole at index 2" turns an incoherent read into a named error at
+  a known call site.
+- `#t` is a border, not a promise. Any converter that trusts it as a length
+  inherits its unspecified behaviour — this is the single most portable lesson
+  of the audit, because it bites on PUC Lua and LuaJIT alike.
+- Version-dependent behaviour gets measured, not asserted: the yield-across-
+  `pcall` result differs by Lua version, and the example reports what the
+  running interpreter actually did.
+
+---
+
 ## Best Practices
 
 ### Error Conventions

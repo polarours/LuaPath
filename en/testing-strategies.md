@@ -393,6 +393,77 @@ jobs:
 
 ---
 
+## Case Study: A Runner That Has to Prove It Can Fail
+
+This project's own CI is the situation the chapter describes: the development
+box has `lua5.4`, `lua5.1` and `luajit` but **no luarocks, no busted** — the
+usual "just install a framework" answer does not apply. The question is whether
+a stdlib-only runner earns its place in CI, and how you would ever know if the
+runner itself was broken.
+
+### The Question
+
+A test runner has one job in CI: turn a broken test into a red build. A runner
+that always reports green is worse than no runner — it manufactures confidence.
+So the runner's own suite has to include *deliberately failing* tests, and the
+runner must be shown to count them, carry their reasons, and exit non-zero.
+
+### What the Runner Proves
+
+`examples/intermediate/19-test-runner.lua` builds the runner and then attacks
+it. The deliberately red suite is the centrepiece:
+
+```lua
+-- a suite that MUST fail: one real pass, two planted failures
+local results = runner.run({ "genuine", "wrong_assert", "raises" })
+
+checks.eq(#results, 3, "runner recorded every test")
+checks.eq(runner.failed(results), 2, "runner counted the two deliberate failures")
+```
+
+Each failure has to keep its reason, because that is what a CI log shows:
+
+```
+[FAIL] deliberately wrong assertion
+       19-test-runner.lua:263: must fail
+         expected: 2
+         actual:   1
+```
+
+The same suite exercises the three test doubles (spy counts calls and records
+arguments; stub returns canned values and can be reprogrammed; mock enforces
+an expectation and raises when it is violated), and the property-based section
+runs four properties over 400 generated inputs each with a fixed seed.
+
+### Measured Results
+
+```
+1. unit suite                ran 12 tests: 12 passed, 0 failed
+2. planted-red suite         ran 3 tests: 1 passed, 2 failed,
+                             each failure carries expected/actual
+3. doubles                   spy/stub/mock: 7 checks
+4. properties                4 properties x 400 cases, all held;
+                             same seed => identical generated input
+5. CI contract               green suite exits 0, red suite exits 1
+All 16 checks passed on Lua 5.4, Lua 5.1 and LuaJIT.
+```
+
+The reproducibility check is what makes the property section debuggable: when a
+seeded input finds a bug, re-running with the same seed replays the exact
+failure instead of rolling a new one.
+
+### What This Changes
+
+- The runner is a ~40-line table of functions, and the contract it enforces
+  (count, reason, exit code) is the entire CI integration. Everything busted
+  adds on top of that is convenience, not correctness.
+- Plant failures in the runner's own suite once, and the "always green" failure
+  mode is permanently covered.
+- Fixed-seed generation turns "random tests failed once on CI" into a
+  replayable defect instead of a heisenbug you cannot investigate.
+
+---
+
 ## Exercises
 
 1. **Unit test a module**: Pick a module from this roadmap and write comprehensive unit tests covering normal cases, edge cases, and error conditions.

@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Case studies for the two cross-cutting chapters (EN + ZH), each backed by
+  the example already linked from that chapter. `testing-strategies` gets "A
+  Runner That Has to Prove It Can Fail": no luarocks/busted on the box, so a
+  stdlib-only runner must demonstrate the CI contract itself — a planted-red
+  suite counted 2 failures with expected/actual reasons, green exits 0 / red
+  exits 1, 4 properties over 400 seeded inputs, all 16 checks on 5.4, 5.1
+  and LuaJIT. `interoperability-patterns` gets "Auditing the Boundary
+  Contract": the five clauses measured on the running interpreter, centred on
+  the holed table where `#` reports 3, ipairs stops at 1 and pairs sees 2 —
+  the naive `1..#t` walk silently loses data while the guard rejects with
+  "hole at index 2" before the table crosses; 25/23/23 checks
 - Case study for Chapter 12 (EN + ZH), "Measuring Memory Without Fooling
   Yourself", backed by a corrected `examples/advanced/22-memory-optimization.lua`.
   The old example measured post-GC residue, and `tostring(i)`'s interned number
